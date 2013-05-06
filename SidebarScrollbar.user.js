@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Chat Mods
-// @description  Modifications to SE's chat rooms
+// @description  Makes the lower starred messages in SE chat rooms accessible.
 // @include      http://chat.meta.stackoverflow.com/rooms/*
 // @include      http://chat.stackexchange.com/rooms/*
 // @include      http://chat.stackoverflow.com/rooms/*
