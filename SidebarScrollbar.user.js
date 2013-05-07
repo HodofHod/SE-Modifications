@@ -23,7 +23,7 @@ function sidebar(){
     var sidebar = document.querySelector('#sidebar');
     sidebar.style.height = "auto";
     sidebar.style.bottom = "88px";
-    sidebar.style.overflowY = "scroll";
+    sidebar.style.overflowY = "auto";
 };
 
 inject(sidebar);
