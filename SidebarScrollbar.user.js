@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Chat Mods
+// @name         Sidebar Scrollbar
 // @description  Makes the lower starred messages in SE chat rooms accessible.
 // @include      http://chat.meta.stackoverflow.com/rooms/*
 // @include      http://chat.stackexchange.com/rooms/*
