@@ -139,7 +139,7 @@ inject(function ($) {
             'Ovadiah': [16182, 1]
         };
 
-        var reg = /(\(|\s|^)\[ref:([a-zA-Z]{2,} ?[12|i{1,2}]?)-(\d{1,2})-?(\d{1,3})?(-[tr]{0,2})?\](\)|\s|$)/mig,
+        var reg = /(\(|\s|^)\[ref:([\w ]{2,})-(\d{1,2})-?(\d{1,3})?(-[tr]{0,2})?\](\)|\s|$)/mig,
             match;
 
         while ((match = reg.exec(t.value)) !== null) {
