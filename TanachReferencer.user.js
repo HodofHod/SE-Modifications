@@ -19,14 +19,14 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       0.8.7.1
+// @version       1.0
 // ==/UserScript==
 
 
 /* 
 Credits:        
 @TimStone for the inject() function and some stray bits
-@Menachem for the Chabad.org links, and for all the debugging help
+@Menachem for the Chabad.org and Mechon Mamre links, and for all the debugging help
 Joel Nothman and bibref.hebtools.com's spellings, which I pruned and modded.
 */
 
@@ -47,7 +47,7 @@ inject(function ($) {
         var textarea = t.addClass('ref-hijacked')[0],
             form = t.closest('form');
 
-        form.focusout(function (e) {
+        form.focusout(function () {
             console.log('stopped');
             link(textarea);
             StackExchange.MarkdownEditor.refreshAllPreviews();
@@ -97,7 +97,122 @@ inject(function ($) {
             ['Ezra', 'ezra', 'esr', 'esra', 'ezr'],
             ['Nechemiah', 'nehemiah', 'ne', 'nechemiah', 'neh', 'nehemia', 'nehemija', 'nehemyah']
         ];
-        var map = {
+
+        var reg = /(\(|\s|^)\[(?:ref|t)[;,. :-]([\w ]{2,}?)[;., :-](\d{1,2})([;., :-]\d{1,3})?([;., :-][trm]{0,3})?\](\)|\s|$)/mig,
+            match;
+
+        while ((match = reg.exec(t.value)) !== null) {
+            var book = match[2].toLowerCase(),
+                chpt = match[3],
+                vrs = match[4] || '',
+                flags = match[5] || '',
+                pre = match[1] || '',
+                suf = match[6] || '',
+                replacement = false;
+            found = null;
+
+            book = book.replace(/ /g, '');
+            vrs = vrs.replace(/[;., :-]/g, '');
+            flags = flags.toLowerCase();
+
+            for (var i = 0; i < spellings.length; i++) {
+                if ($.inArray(book, spellings[i]) > -1) {
+                    book = spellings[i][0];
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                continue;
+            }
+
+            if (flags.indexOf('m') !== -1) {
+                console.log('mechon');
+                replacement = mechonMamre(book, chpt, vrs, flags);
+            } else {
+                console.log('chabad');
+                replacement = chabad(book, chpt, vrs, flags);
+            }
+            if (replacement) {
+                t.value = t.value.replace(match[0], match[1] + replacement + match[6]);
+            }
+        }
+        return;
+    }
+
+    function mechonMamre(book, chpt, vrs, flags) {
+        var mmap = {
+            'Nachum': ['19', 3],
+            'Shoftim': ['07', 21],
+            'Melachim II': ['09b', 25],
+            'Nechemiah': ['35b', 13],
+            'Divrei Hayamim II': ['25b', 36],
+            'Kohelet': ['31', 12],
+            'Iyov': ['27', 42],
+            'Yirmiyahu': ['11', 52],
+            'Daniel': ['34', 12],
+            'Malachi': ['24', 3],
+            'Yeshayahu': ['10', 66],
+            'Shmuel II': ['08b', 24],
+            'Yonah': ['17', 4],
+            'Esther': ['33', 10],
+            'Yehoshua': ['06', 24],
+            'Devarim': ['05', 34],
+            'Yoel': ['14', 4],
+            'Chavakuk': ['20', 3],
+            'Rus': ['29', 4],
+            'Tzefaniah': ['21', 3],
+            'Bamidbar': ['04', 36],
+            'Michah': ['18', 7],
+            'Vayikra': ['03', 27],
+            'Zechariah': ['23', 14],
+            'Melachim I': ['09a', 22],
+            'Shemot': ['02', 40],
+            'Shmuel I': ['08a', 31],
+            'Amos': ['15', 9],
+            'Shir HaShirim': ['30', 8],
+            'Mishlei': ['28', 31],
+            'Ezra': ['35a', 10],
+            'Chaggai': ['22', 2],
+            'Bereshit': ['01', 50],
+            'Eichah': ['32', 5],
+            'Hoshea': ['13', 14],
+            'Yechezkel': ['12', 48],
+            'Divrei Hayamim I': ['25a', 29],
+            'Tehillim': ['26', 150],
+            'Ovadiah': ['16', 1]
+        };
+        var url = null,
+            cid = null;
+
+        chpt = parseInt(chpt, 10);
+        if (chpt > mmap[book][1]) {
+            return false;
+        }
+        if (chpt < 10) {
+            cid = '0' + chpt;
+        } else if (chpt > 99) {
+            cid = String.fromCharCode(97 + parseInt(chpt.toString().charAt(1))) + chpt.toString().charAt(2);
+        } else {
+            cid = chpt;
+        }
+        url = 'http://www.mechon-mamre.org/p/pt/pt' + mmap[book][0] + cid + '.htm';
+        if (vrs) {
+            url += '#' + vrs;
+        }
+        if (flags.indexOf('t') !== -1) {
+            if (vrs) {
+                vrs = ':' + vrs;
+            }
+            var title = '[' + book + ' ' + chpt + vrs + ']';
+            return title + '(' + url + ')';
+        } else {
+            return url;
+        }
+    }
+
+    function chabad(book, chpt, vrs, flags) {
+        var cmap = {
             'Tzefaniah': [16200, 3],
             'Chaggai': [16203, 2],
             'Tehillim': [16222, 150],
@@ -138,58 +253,35 @@ inject(function ($) {
             'Nachum': [16194, 3],
             'Ovadiah': [16182, 1]
         };
+        var cid = null,
+            url = null;
 
-        var reg = /(\(|\s|^)\[(?:ref|t)[;,. :-]([\w ]{2,}?)[;.,:-](\d{1,2})([;., :-]\d{1,3})?([;., :-][tr]{0,2})?\](\)|\s|$)/mig,
-            match;
-
-        while ((match = reg.exec(t.value)) !== null) {
-            var book = match[2].toLowerCase(),
-                chpt = match[3],
-                vrs = match[4] || '',
-                flags = match[5] || '',
-                pre = match[1] || '',
-                suf = match[6] || '',
-                cid = null,
-                url = null;
-                
-            book = book.replace(/ /g, '');
-            vrs = vrs.replace(/[;., :-]/g, '');
-            flags = flags.toLowerCase();
-            for (var i = 0; i < spellings.length; i++) {
-                if ($.inArray(book, spellings[i]) > -1) {
-                    book = spellings[i][0];
-                    if (book == "Bereshit") {
-                        cid = map[book][chpt - 1];
-                    } else {
-                        chpt = parseInt(chpt, 10);
-                        cid = map[book][0] + chpt - 1;
-                        if (chpt > map[book][1]) {
-                            break;
-                        }
-                    }
-                    url = 'http://www.chabad.org/library/bible_cdo/aid/' + cid;
-                    if (flags.indexOf('r') !== -1) {
-                        url += "/showrashi/true";
-                    }
-                    if (vrs) {
-                        url += '#v' + vrs;
-                    }
-                    break;
-                }
+        if (book == "Bereshit") {
+            if (chpt > cmap[book].length) {
+                return false;
             }
-            if (url) {
-                if (flags.indexOf('t') !== -1) {
-                    if (vrs) {
-                        vrs = ':' + vrs;
-                    }
-                    var title = '[' + book + ' ' + chpt + vrs + ']';
-                    t.value = t.value.replace(match[0], match[1] + title + '(' + url + ')' + match[6]);
-                } else {
-                    t.value = t.value.replace(match[0], match[1] + url + match[6]);
-                }
+            cid = cmap[book][chpt - 1];
+        } else {
+            chpt = parseInt(chpt, 10);
+            if (chpt > cmap[book][1]) {
+                return false;
             }
+            cid = cmap[book][0] + chpt - 1;
         }
-        return;
+        url = 'http://www.chabad.org/library/bible_cdo/aid/' + cid;
+
+        if (vrs) {
+            url += '#v' + vrs;
+        }
+        if (flags.indexOf('t') !== -1) {
+            if (vrs) {
+                vrs = ':' + vrs;
+            }
+            var title = '[' + book + ' ' + chpt + vrs + ']';
+            return title + '(' + url + ')';
+        } else {
+            return url;
+        }
     }
     $('textarea[name="comment"]:not(.ref-hijacked)').live('focus', function () {
         new refhijack($(this));
