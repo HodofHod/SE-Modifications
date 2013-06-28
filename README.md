@@ -12,9 +12,6 @@ This script adds a quick syntax for linking to online Tanach resources. Right no
 
 * The reference should be of the form [t book:chapter verse]. `verse` is optional.
   * Example: `[t div1:4 2]` is interpreted as Divrei HaYamim I 4:2 and is replaced with `http://www.chabad.org/library/bible_cdo/aid/16524#v2`
-  * Breaks between sections can be `:` `;` `,` `.` `-` or a space (` `). The only exception is between the book name and the chapter number; **it will not accept a space, so you must use another break.** (This is so that it will recognize book names that have a space, i.e., `Divrei Hayamim I`.
-* The only non-whitespace characters that are allowed directly outside of the brackets are parentheses.
-  * This is so that the you can add your own link text in SE Markdown syntax, i.e., `[Why don't you check out this pasuk]([t Bereishis-3-7])`
 * The script will recognize many different spellings and abbreviations for book names, but it will not accept less than 2 characters.
   * It only accepts common 2 or 3 letter abbreviations, so "gn", or "gen", but no "gene", or "genes".
   * Beware shared beginnings like "sh" and "ye". Could be shemot, shoftim or shmuel; yechezkel or yeshayahu. When in doubt, add a third character.
@@ -24,6 +21,9 @@ This script adds a quick syntax for linking to online Tanach resources. Right no
   * shmuel 1, shm 2, sam 1, chr 1, div 2, mel 1, kings 2 etc., are now also valid
   * Hopefully, adding the number or numerals *before* the name will also work.
 When in doubt about a spelling, just click outside the box to see whether it works.
+
+####Advanceed Syntax:
+
 
 ###Flags:
 
