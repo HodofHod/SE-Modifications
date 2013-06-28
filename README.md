@@ -1,4 +1,4 @@
-                                                                                                                     B"H
+B"H
 ##SidebarScrollbar 
 
 This script adds a scrollbar to the right sidebar in StackExchange chat rooms.
