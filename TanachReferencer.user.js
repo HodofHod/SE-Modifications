@@ -19,7 +19,7 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       0.8.0
+// @version       0.8.1
 // ==/UserScript==
 
 
@@ -159,8 +159,11 @@ inject(function ($) {
                     if (book == "Bereshit") {
                         cid = map[book][chpt - 1];
                     } else {
-                        cid = map[book][0], +parseInt(chpt, 10) - 1;
-                        if (cid > map[book][1]) {}
+                        chpt = parseInt(chpt, 10);
+                        cid = map[book][0] + chpt - 1;
+                        if (chpt > map[book][1]) {
+                            break;
+                        }
                     }
                     url = 'http://www.chabad.org/library/bible_cdo/aid/' + cid;
                     if (flags.indexOf('r') !== -1) {
