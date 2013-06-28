@@ -19,7 +19,7 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       0.7
+// @version       0.7.1
 // ==/UserScript==
 
 
@@ -183,7 +183,7 @@ inject(function ($) {
     $('textarea[name="comment"]:not(.ref-hijacked)').live('focus', function () {
         new refhijack($(this));
     });
-    $('textarea[id="wmd-input"]:not(.ref-hijacked)').live('focus', function () {
+    $('textarea[name="post-text"]:not(.ref-hijacked)').live('focus', function () {
         new refhijack($(this));
     });
 });
