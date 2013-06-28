@@ -19,15 +19,15 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       0.8.2
+// @version       0.8.5
 // ==/UserScript==
 
 
 /* 
 Credits:        
 @TimStone for the inject() function and some stray bits
-@Menachem for the Chabad.org links
-bibref.hebtools.com's spellings, which I pruned and modded.
+@Menachem for the Chabad.org links, and for all the debugging help
+Joel Nothman and bibref.hebtools.com's spellings, which I pruned and modded.
 */
 
 
@@ -139,7 +139,7 @@ inject(function ($) {
             'Ovadiah': [16182, 1]
         };
 
-        var reg = /(\(|\s|^)\[ref:([\w ]{2,})-(\d{1,2})-?(\d{1,3})?(-[tr]{0,2})?\](\)|\s|$)/mig,
+        var reg = /(\(|\s|^)\[(?:ref|t)[ :-]([\w ]{2,}?)[ :-](\d{1,2})([ :-]\d{1,3})?([ :-][tr]{0,2})?\](\)|\s|$)/mig,
             match;
 
         while ((match = reg.exec(t.value)) !== null) {
@@ -151,7 +151,7 @@ inject(function ($) {
                 suf = match[6] || '',
                 cid = null,
                 url = null;
-
+            vrs = vrs.replace(/[: -]/g, '');
             flags = flags.toLowerCase();
             for (var i = 0; i < spellings.length; i++) {
                 if ($.inArray(book, spellings[i]) > -1) {
