@@ -19,7 +19,7 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       0.7.1
+// @version       0.7.2
 // ==/UserScript==
 
 
@@ -144,10 +144,10 @@ inject(function ($) {
 			
         while ((match = reg.exec(t.value)) !== null) {
             console.log(match);
-            var book = match[2],
+            var book = match[2].toLowerCase(),
                 chpt = match[3],
                 vrs = match[4],
-                flags = match[5],
+                flags = match[5].toLowerCase(),
                 pre = '' || match[1],
                 suf = '' || match[6];
 
