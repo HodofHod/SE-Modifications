@@ -19,7 +19,7 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       0.7.2
+// @version       0.7.5
 // ==/UserScript==
 
 
@@ -139,30 +139,35 @@ inject(function ($) {
                 'Ovadiah': ['16182']
         }
 
-        var reg = /(\(|\s|^)\[ref:(\w{2,}[1-2]?)-(\d{1,2})-(\d{1,3})-?([tr]{0,2}?\])(\)|\s|$)/ig,
+        var reg = /(\(|\s|^)\[ref:([a-zA-Z]{2,} ?[12|i{1,2}]?)-(\d{1,2})-?(\d{1,3})?(-[tr]{0,2})?\](\)|\s|$)/mig,
             url, match;
 
         while ((match = reg.exec(t.value)) !== null) {
-            console.log(match);
-            var book = match[2].toLowerCase(),
-                chpt = match[3],
-                vrs = match[4],
-                flags = match[5].toLowerCase(),
-                pre = '' || match[1],
-                suf = '' || match[6];
-
+            var book  = match[2].toLowerCase(),
+                chpt  = match[3],
+                vrs   = match[4] || '',
+                flags = match[5] || '',
+                pre   = match[1] || '',
+                suf   = match[6] || '';
+            
+            flags = flags.toLowerCase();
             for (var i = 0; i < spellings.length; i++) {
                 if ($.inArray(book, spellings[i]) > -1) {
                     book = spellings[i][0];
-                    url = 'http://www.chabad.org/library/bible_cdo/aid/' + map[book][chpt - 1];
+                    var cid = map[book][chpt - 1];
+                    if (!cid){
+                        break;
+                    }
+                    url = 'http://www.chabad.org/library/bible_cdo/aid/' + cid;
                     if (flags.indexOf('r') !== -1) {
                         url += "/showrashi/true";
                     }
-                    url += '#v' + vrs;
+                    if (vrs){
+                        url += '#v' + vrs;
+                    }
                     break;
                 }
             }
-            console.log(flags);
             if (url) {
                 if (flags.indexOf('t') !== -1) {
                     var title = '[' + book + ' ' + chpt + ':' + vrs + ']';
