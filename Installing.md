@@ -13,3 +13,7 @@
 3. Drag the saved file (TanachReferencer.user.js) into any Firefox tab
 4. Click Install
 5. Reload the Stack Exchange page, if necessary
+
+##Internet Explorer
+
+1. Who knows?
