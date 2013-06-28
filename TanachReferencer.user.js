@@ -19,7 +19,7 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       0.8.5
+// @version       0.8.7
 // ==/UserScript==
 
 
@@ -57,10 +57,10 @@ inject(function ($) {
     function link(t) {
         console.log("links!");
         var spellings = [
-            ['Divrei Hayamim I', 'div1', '1 chronicles', '1 ch', '1 chr', '1 chron', '1ch', '1chr', '1chron', '1chronicles', '1st chronicles', 'ch1', 'chr 1', 'chr1', 'chronicles 1', 'chronicles i', 'cr 1', 'cr1', 'div 1', 'divrei hayamim 1', 'first chronicles', 'i ch', 'i chr', 'i chron', 'i chronicles', 'divrei hayamim i'],
-            ['Melachim I', 'mel1', '1 kings', '1 kgs', '1 ki', '1k', '1kg', '1kgs', '1ki', '1kin', '1kings', '1st kgs', '1st kings', '3 regn', '3 rg', 'first kgs', 'first kings', 'i kgs', 'i ki', 'i kings', 'ki1', 'kings 1', 'kings i', 'kings1', 'melachim 1', 'mlachim 1', 'mlachim a', 'melachim i'],
-            ['Divrei Hayamim II', 'div2', '2 chronicles', '2 ch', '2 chr', '2 chron', '2ch', '2chr', '2chron', '2chronicles', '2nd chronicles', 'ch2', 'chr 2', 'chr2', 'chronicles 2', 'chronicles ii', 'cr 2', 'cr2', 'div 2', 'divrei hayamim 2', 'ii ch', 'ii chr', 'ii chron', 'ii chronicles', 'second chronicles', 'divrei hayamim ii'],
-            ['Melachim II', 'mel2', '2 kings', '2 erg', '2 kgs', '2 ki', '2k', '2kg', '2kgs', '2ki', '2kin', '2kings', '2nd kgs', '2nd kings', '4 regn', '4 rg', 'ii kgs', 'ii ki', 'ii kings', 'ki2', 'kings 2', 'kings ii', 'kings2', 'melachim 2', 'mlachim 2', 'mlachim b', 'second kgs', 'second kings', 'melachim ii'],
+            ['Divrei Hayamim I', 'div1', '1chronicles', '1ch', '1chr', '1chron', '1ch', '1chr', '1chron', '1chronicles', '1stchronicles', 'ch1', 'chr1', 'chr1', 'chronicles1', 'chroniclesi', 'cr1', 'cr1', 'div1', 'divreihayamim1', 'firstchronicles', 'ich', 'ichr', 'ichron', 'ichronicles', 'divreihayamimi'],
+            ['Melachim I', 'mel1', '1kings', '1kgs', '1ki', '1k', '1kg', '1kgs', '1ki', '1kin', '1kings', '1stkgs', '1stkings', 'firstkgs', 'firstkings', 'ikgs', 'iki', 'ikings', 'ki1', 'kings1', 'kingsi', 'kings1', 'melachim1', 'mlachim1', 'mlachima', 'melachimi'],
+            ['Divrei Hayamim II', 'div2', '2chronicles', '2ch', '2chr', '2chron', '2ch', '2chr', '2chron', '2chronicles', '2ndchronicles', 'ch2', 'chr2', 'chr2', 'chronicles2', 'chroniclesii', 'cr2', 'cr2', 'div2', 'divreihayamim2', 'iich', 'iichr', 'iichron', 'iichronicles', 'secondchronicles', 'divreihayamimii'],
+            ['Melachim II', 'mel2', '2kings', '2kgs', '2ki', '2k', '2kg', '2kgs', '2ki', '2kin', '2kings', '2ndkgs', '2ndkings', 'iikgs', 'iiki', 'iikings', 'ki2', 'kings2', 'kingsii', 'kings2', 'melachim2', 'mlachim2', 'mlachimb', 'secondkgs', 'secondkings', 'melachimii'],
             ['Bereshit', 'genesis', 'ber', 'beraishis', 'beraishit', 'berayshis', 'bereishis', 'bereishit', 'braishis', 'braishit', 'brayshis', 'brayshit', 'breishis', 'breishit', 'ge', 'gen', 'geneza', 'gn', 'bre', 'bereshit'],
             ['Yirmiyahu', 'jeremiah', 'je', 'jer', 'jeremia', 'jeremija', 'jr', 'yeremiya', 'yeremiyah', 'yeremiyahu', 'yirmiyahu'],
             ['Michah', 'micah', 'mch', 'mi', 'mic', 'mich', 'micha', 'mih', 'miha', 'miq', 'michah'],
@@ -69,10 +69,10 @@ inject(function ($) {
             ['Vayikra', 'leviticus', 'lb', 'le', 'leu', 'lev', 'lv', 'vay', 'vayikra', 'vayiqra', 'vayyikra', 'vayyiqra'],
             ['Bamidbar', 'numbers', 'bamidbar', 'bmidbar', 'br', 'nb', 'nm', 'nomb', 'nu', 'num'],
             ['Devarim', 'deuteronomy', 'de', 'deu', 'deut', 'deuteronomio', 'deuteronomium', 'dev', 'devarim', 'dt'],
-            ['Yehoshua', 'joshua', 'ios', 'jos', 'josh', 'josua', 'joz', 'jozua', 'jozue', 'jsh', 'yehoshua', 'yoshua'],
+            ['Yehoshua', 'joshua', 'ios', 'jos', 'josh', 'josua', 'joz', 'jsh', 'yehoshua', 'yoshua'],
             ['Shoftim', 'judges', 'jud', 'jdg', 'jdgs', 'jg', 'jt', 'judg', 'jue', 'jug', 'juges', 'shofetim', 'shoftim'],
-            ['Shmuel I', 'shm1', '1 samuel', '1 s', '1 sa', '1 sam', '1 shmuel', '1 sm', '1s', '1sa', '1sam', '1samuel', '1sm', '1st samuel', 'first samuel', 'i sa', 'i sam', 'i samuel', 'sa 1', 'sa1', 'sam 1', 'sam1', 'samuel 1', 'samuel i', 'samuel1', 'shmuel 1', 'shmuel a', 'shmuel i'],
-            ['Shmuel II', 'shm2', '2 samuel', '2 s', '2 sa', '2 sam', '2 shmuel', '2 sm', '2nd samuel', '2s', '2sa', '2sam', '2samuel', '2sm', 'ii sa', 'ii sam', 'ii samuel', 'sa 2', 'sa2', 'sam 2', 'sam2', 'samuel 2', 'samuel ii', 'samuel2', 'second samuel', 'shmuel 2', 'shmuel b', 'shmuel ii'],
+            ['Shmuel I', 'shm1', '1samuel', '1s', '1sa', '1sam', '1shmuel', '1sm', '1s', '1sa', '1sam', '1samuel', '1sm', '1stsamuel', 'firstsamuel', 'isa', 'isam', 'isamuel', 'sa1', 'sa1', 'sam1', 'sam1', 'samuel1', 'samueli', 'samuel1', 'shmuel1', 'shmuela', 'shmueli'],
+            ['Shmuel II', 'shm2', '2samuel', '2s', '2sa', '2sam', '2shmuel', '2sm', '2ndsamuel', '2s', '2sa', '2sam', '2samuel', '2sm', 'iisa', 'iisam', 'iisamuel', 'sa2', 'sa2', 'sam2', 'sam2', 'samuel2', 'samuelii', 'samuel2', 'secondsamuel', 'shmuel2', 'shmuelb', 'shmuelii'],
             ['Yeshayahu', 'isaiah', 'isiah', 'is', 'isa', 'yeshaya', 'yeshayah', 'yeshayahu'],
             ['Yechezkel', 'ezekiel', 'ez', 'eze', 'ezec', 'ezek', 'ezekial', 'ezk', 'hes', 'yechezkel', 'yecheskel', ''],
             ['Hoshea', 'hosea', 'ho', 'hos', 'hoshea', 'hosea'],
@@ -89,13 +89,13 @@ inject(function ($) {
             ['Tehillim', 'psalms', 'ps', 'psa', 'psalm', 'psalmen', 'psalmi', 'psg', 'pslm', 'psm', 'pss', 'sal', 'salmos', 'sl', 'tehilim', 'tehillim', 'thilim', 'thillim'],
             ['Mishlei', 'proverbs', 'mishlei', 'mishley', 'pr', 'pro', 'prou', 'prov', 'prv'],
             ['Iyov', 'job', 'hi', 'hiob', 'ijob', 'iob', 'iyov', 'iyyov', 'jb'],
-            ['Shir HaShirim', 'songs', 'song of solomon', 'sgs', 'sng', 'sol', 'song', 'song of songs', 'songofsolomon', 'sos', 'ss', 'so', 'songofsongs', 'shir', 'shir hashirim'],
+            ['Shir HaShirim', 'songs', 'songofsolomon', 'sgs', 'sng', 'sol', 'song', 'songofsongs', 'songofsolomon', 'sos', 'ss', 'so', 'songofsongs', 'shir', 'shirhashirim'],
             ['Eichah', 'lamentations', 'aicha', 'aichah', 'eicha', 'eichah', 'eikha', 'eikhah', 'la', 'lam', 'lamentaciones', 'lm'],
             ['Kohelet', 'ecclesiastes', 'ec', 'ecc', 'eccl', 'eccles', 'ecl', 'koh', 'koheles', 'kohelet', 'qo', 'qoh', 'qohelet', 'qoheleth', 'qohleth'],
             ['Esther', 'esther', 'est', 'ester', 'estera', 'esth'],
             ['Daniel', 'daniel', 'da', 'dan', 'dn'],
-            ['Ezra', 'ezra', '1 esr', '1 ezr', 'esr', 'esra', 'ezr'],
-            ['Nechemiah', 'nehemiah', '2 esr', '2 ezr', 'ne', 'nechemiah', 'neh', 'nehemia', 'nehemija', 'nehemyah']
+            ['Ezra', 'ezra', 'esr', 'esra', 'ezr'],
+            ['Nechemiah', 'nehemiah', 'ne', 'nechemiah', 'neh', 'nehemia', 'nehemija', 'nehemyah']
         ];
         var map = {
             'Tzefaniah': [16200, 3],
@@ -139,7 +139,7 @@ inject(function ($) {
             'Ovadiah': [16182, 1]
         };
 
-        var reg = /(\(|\s|^)\[(?:ref|t)[ :-]([\w ]{2,}?)[ :-](\d{1,2})([ :-]\d{1,3})?([ :-][tr]{0,2})?\](\)|\s|$)/mig,
+        var reg = /(\(|\s|^)\[(?:ref|t)[;,. :-]([\w ]{2,}?)[;.,:-](\d{1,2})([;., :-]\d{1,3})?([;., :-][tr]{0,2})?\](\)|\s|$)/mig,
             match;
 
         while ((match = reg.exec(t.value)) !== null) {
@@ -151,6 +151,8 @@ inject(function ($) {
                 suf = match[6] || '',
                 cid = null,
                 url = null;
+                
+            book = book.replace(/ /g, '');
             vrs = vrs.replace(/[: -]/g, '');
             flags = flags.toLowerCase();
             for (var i = 0; i < spellings.length; i++) {
