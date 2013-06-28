@@ -19,7 +19,7 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       0.7.5
+// @version       0.8.0
 // ==/UserScript==
 
 
