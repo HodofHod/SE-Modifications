@@ -19,7 +19,7 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       0.8.7
+// @version       0.8.7.1
 // ==/UserScript==
 
 
@@ -153,7 +153,7 @@ inject(function ($) {
                 url = null;
                 
             book = book.replace(/ /g, '');
-            vrs = vrs.replace(/[: -]/g, '');
+            vrs = vrs.replace(/[;., :-]/g, '');
             flags = flags.toLowerCase();
             for (var i = 0; i < spellings.length; i++) {
                 if ($.inArray(book, spellings[i]) > -1) {
