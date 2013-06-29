@@ -19,7 +19,7 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       1.0
+// @version       1.0.1
 // ==/UserScript==
 
 
@@ -269,7 +269,9 @@ inject(function ($) {
             cid = cmap[book][0] + chpt - 1;
         }
         url = 'http://www.chabad.org/library/bible_cdo/aid/' + cid;
-
+        if (flags.indexOf('r') !== -1) {
+                        url += "/showrashi/true";
+                    }
         if (vrs) {
             url += '#v' + vrs;
         }
