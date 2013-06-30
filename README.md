@@ -10,9 +10,9 @@ This script adds a quick syntax for linking to online Tanach and Talmud Bavli re
 By default the Tanach links to Chabad.org, but you can change it to Mechon Mamre with an optional flag (see below). Type a reference in a question, answer, or comment, and it'll replace it with a link to the source. To trigger the replacement, click anywhere outside of the textbox. This includes the submit key.
 Gemara links go to hebrewbooks.org
 
-###Syntax rules:
+###Tanach Syntax rules:
 
-* The tanach references should be of the form `[t book:chapter verse]`. `verse` is optional.
+* The Tanach references should be of the form `[t book:chapter verse]`. `verse` is optional.
   * Example: `[t div1 4 2]` is interpreted as Divrei HaYamim I 4:2 and is replaced with `http://www.chabad.org/library/bible_cdo/aid/16524#v2`
 * The script will recognize many different spellings and abbreviations for book names, but it will not accept less than 2 characters.
   * It's case-insenstive. (That means capitalization doesn't change anything.)
@@ -30,7 +30,7 @@ When in doubt about a spelling, just click outside the box to see whether it wor
   * This is so that the you can add your own link text in SE Markdown syntax, i.e., `[Why don't you check out this pasuk]([t Bereishis 3 7])`
 
 
-###Flags:
+###Tanach Flags:
 
 If you're feeling adventurous, you can try the `r` and `l` flags. These are optional, and are inserted just before the closing bracket. Separate them from the previous sections with any of the breaks mentioned above.
 
@@ -44,14 +44,27 @@ If you're feeling adventurous, you can try the `r` and `l` flags. These are opti
   * `[t ber 1 1 lr]` -> `[Bereshit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165/showrashi/true#v1)`
   * `[t ber 1 1 lm]` -> `[Bereshit 1:1](http://www.mechon-mamre.org/p/pt/pt0101.htm#1)`
 
-
 ###Other stuff
 
 There is no validation for verse numbers. They cannot exceed 3 digits, but they do not check to see if the chapter has that many verses. This does not break any links, and is unlikely to be fixed anytime soon.
+
+###Gemara Syntax Rules:
+* Gemara references should be of the form `[g mesechta page]`.
+  * Example: `[g berachot 34b]` (Don't forget your a's and b's)
+* Plenty of abbreviations. bk, bm, and bb for the Bavas. ndr and ned for nedarim, etc., etc.,
+  * Feel free to let me know if you want to add some.
+  * Some easy abbreviations have been left out, i.e., nd. Could be nedarim or niddah, so neither. Too bad, so sad.
+
+###Gemara flags
+* `l` has the same behavior as the Tanach flag.
+* `t` Coming soon. Will link to the text version rather than the pdf.
+
+
 
 ###Coming soon!
 
 (For some value of soon)
   
+Mesechtos Ktanos? Maybe? If I feel like it.
 More spellings!
 Other stuff!
