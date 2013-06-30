@@ -32,12 +32,12 @@ When in doubt about a spelling, just click outside the box to see whether it wor
 
 ###Flags:
 
-If you're feeling adventurous, you can try the `r` and `t` flags. These are optional, and are inserted just before the closing bracket. Separate them from the previous sections with any of the breaks mentioned above.
+If you're feeling adventurous, you can try the `r` and `l` flags. These are optional, and are inserted just before the closing bracket. Separate them from the previous sections with any of the breaks mentioned above.
 
 * `r` will modify the link to show Rashi's commentary.
   * `[t ber 1 1 r]` -> `http://www.chabad.org/library/bible_cdo/aid/8165/showrashi/true#v1`
 * `l` will insert SE's markdown link syntax with the reference as the title.
-  * `[t ber 1 1 t]` -> `[Bereshit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165#v1)`
+  * `[t ber 1 1 l]` -> `[Bereshit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165#v1)`
 * `m` will link to Mechon Mamre instead of Chabad.org. (Note: Mechon Mamre does not offer Rashi; the `r` flag will be ignored.
   * `[t ber 1 1 m]` - > `http://www.mechon-mamre.org/p/pt/pt0101.htm#1`
 * You can use them together, in any order you like.
