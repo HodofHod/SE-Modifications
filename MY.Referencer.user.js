@@ -19,7 +19,7 @@
 // @exclude       http://data.stackexchange.com/*
 // @exclude       http://*/reputation
 // @author        @HodofHod   
-// @version       1.5
+// @version       1.6
 // ==/UserScript==
 
 
@@ -84,7 +84,7 @@ inject(function ($) {
             ['Sanhedrin', 'sanhedrin', 'san', 'sa', 'sn', 'snh', 'snhd', 'snhdrn'],
             ['Makkos', 'makkos', 'makos', 'makkot', 'makot', 'ma', 'mak', 'mkt'],
             ['Shevuos', 'shevuos', 'shevuot', 'shavuot', 'shavuos', 'shv', 'shvt', 'shvs'],
-            ['Avoda Zarah', 'avodazarah', 'avodazara', 'avodahzara', 'avodahzarah', 'avoda', 'avodah', 'avd', 'avo', 'avod'],
+            ['Avoda Zarah', 'avodazarah', 'avodazara', 'avodahzara', 'avodahzarah', 'avoda', 'avodah', 'az', 'avd', 'avo', 'avod'],
             ['Horayos', 'horayos', 'horaiot', 'horaios', 'horayot', 'horaot', 'ho', 'hor', 'hrs', 'hrt'],
             ['Zevachim', 'zevachim', 'zevakhim', 'zev', 'zv', 'zvchm', 'zvkhm'],
             ['Menachos', 'menachos', 'menachot', 'menakhos', 'menakhot', 'men', 'mn', 'mncht', 'mnkht'],
@@ -161,11 +161,15 @@ inject(function ($) {
             if (!found) { //mesechta name not recognized
                 continue; //skip to the next gemara match
             }
-            if (parseInt(page, 10) > mesechtos[mes][1]){ //if mesechta doesn't have that page
+            if (parseInt(page, 10) > mesechtos[mes][1] || page == '1' || page == '0'){ //if mesechta doesn't have that page
                 continue; //skip to the next gemara match
             }
-            
-            var res = 'http://hebrewbooks.org/shas.aspx?mesechta=' + mesechtos[mes][0] + '&daf=' + page + side;
+            if (side == 'a'){//hebrewbooks is weird.
+                var res = 'http://hebrewbooks.org/shas.aspx?mesechta=' + mesechtos[mes][0] + '&daf=' + page;
+            }
+            else{
+                var res = 'http://hebrewbooks.org/shas.aspx?mesechta=' + mesechtos[mes][0] + '&daf=' + page + side;
+            }
             if (flags.indexOf('l') !== -1) { //link title flag is set
                 res = '[' + mes + ' ' + page + side + '](' + res + ')';
             }
@@ -233,7 +237,9 @@ inject(function ($) {
             book = book.replace(/ /g, '');//strip out spaces for matching purposes
             vrs = vrs.replace(/[;., :-]/g, '');//strip out leading punctuation
             flags = flags.toLowerCase();//more matching purposes
-
+            if (chpt == '0'){//Stop trying to sneak fake chapters in, aright?
+                return false;
+            }
             for (var i = 0; i < spellings.length; i++) { //iterate through all the spellings
                 if ($.inArray(book, spellings[i]) > -1) {//to check if the regexed book name is there
                     book = spellings[i][0]; //changes `book` to the full, capitalized, book title
@@ -375,16 +381,18 @@ inject(function ($) {
         };
         var cid = null,
             url = null;
-
-        if (book == "Bereshit") {//Chabad.org's chapter ids are sequential for each book besides Bereishis.
-            if (chpt > cmap[book].length) { //so it gets special treatment. As if it was the youngest child or something
+        
+        if (book == "Bereshit") {//Chabad.org's chapter ids are sequential for each book besides Bereishis. So it gets special treatment. As if it was the youngest child or something
+            if (chpt > cmap[book].length) { //I'm warning you!
                 return false;
             }
             cid = cmap[book][chpt - 1];
         } else {//Everybody else, eat your vegetables!
             chpt = parseInt(chpt, 10);
-            if (chpt > cmap[book][1]) {//Stop trying to sneak fake chapters in, aright?
-                return false;
+            if (chpt > cmap[book][1]) {//I'm telling you, for the last time....!
+                blowUp(computer);//because, why not?
+                return false;//for good measure.
+                
             }
             cid = cmap[book][0] + chpt - 1;
         }
