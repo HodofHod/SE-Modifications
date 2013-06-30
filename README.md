@@ -4,13 +4,15 @@ B"H
 
 This script adds a scrollbar to the right sidebar in StackExchange chat rooms. This allows one to scroll through all the starred messages even when they get hidden behind the footer.
 
-##TanachReferencer
+##Mi Yodeya Referencer
 
-This script adds a quick syntax for linking to online Tanach resources. By default it links to Chabad.org, but you can change it to Mechon Mamre with an optional flag (see below). Type a reference in a question, answer, or comment, and it'll replace it with a link to the source. To trigger the replacement, click anywhere outside of the textbox. This includes the submit key.
+This script adds a quick syntax for linking to online Tanach and Talmud Bavli resources.
+By default the Tanach links to Chabad.org, but you can change it to Mechon Mamre with an optional flag (see below). Type a reference in a question, answer, or comment, and it'll replace it with a link to the source. To trigger the replacement, click anywhere outside of the textbox. This includes the submit key.
+Gemara links go to hebrewbooks.org
 
 ###Syntax rules:
 
-* The reference should be of the form [t book:chapter verse]. `verse` is optional.
+* The tanach references should be of the form `[t book:chapter verse]`. `verse` is optional.
   * Example: `[t div1 4 2]` is interpreted as Divrei HaYamim I 4:2 and is replaced with `http://www.chabad.org/library/bible_cdo/aid/16524#v2`
 * The script will recognize many different spellings and abbreviations for book names, but it will not accept less than 2 characters.
   * It's case-insenstive. (That means capitalization doesn't change anything.)
@@ -24,7 +26,7 @@ When in doubt about a spelling, just click outside the box to see whether it wor
 
 ####Advanced Syntax:
 * Breaks between sections can be `:` `;` `,` `.` `-` or a space (` `).
-* The only non-whitespace characters that are allowed directly outside of the brackets are parentheses.
+* The only non-whitespace characters that are allowed directly outside of the brackets are `( ) , . ; :` .
   * This is so that the you can add your own link text in SE Markdown syntax, i.e., `[Why don't you check out this pasuk]([t Bereishis 3 7])`
 
 
@@ -34,13 +36,13 @@ If you're feeling adventurous, you can try the `r` and `t` flags. These are opti
 
 * `r` will modify the link to show Rashi's commentary.
   * `[t ber 1 1 r]` -> `http://www.chabad.org/library/bible_cdo/aid/8165/showrashi/true#v1`
-* `t` will insert SE's markdown syntax with the reference as the title.
+* `l` will insert SE's markdown link syntax with the reference as the title.
   * `[t ber 1 1 t]` -> `[Bereshit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165#v1)`
 * `m` will link to Mechon Mamre instead of Chabad.org. (Note: Mechon Mamre does not offer Rashi; the `r` flag will be ignored.
   * `[t ber 1 1 m]` - > `http://www.mechon-mamre.org/p/pt/pt0101.htm#1`
 * You can use them together, in any order you like.
-  * `[t ber 1 1 tr]` -> `[Bereshit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165/showrashi/true#v1)`
-  * `[t ber 1 1 tm]` -> `[Bereshit 1:1](http://www.mechon-mamre.org/p/pt/pt0101.htm#1)`
+  * `[t ber 1 1 lr]` -> `[Bereshit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165/showrashi/true#v1)`
+  * `[t ber 1 1 lm]` -> `[Bereshit 1:1](http://www.mechon-mamre.org/p/pt/pt0101.htm#1)`
 
 
 ###Other stuff
@@ -50,7 +52,6 @@ There is no validation for verse numbers. They cannot exceed 3 digits, but they 
 ###Coming soon!
 
 (For some value of soon)
-
-Gemara!  
+  
 More spellings!
 Other stuff!
