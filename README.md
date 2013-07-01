@@ -30,7 +30,7 @@ When in doubt about a spelling, just click outside the box to see whether it wor
   * This is so that the you can add your own link text in SE Markdown syntax, i.e., `[Why don't you check out this pasuk]([t Bereishis 3 7])`
 
 
-###Tanach Flags:
+####Tanach Flags:
 
 If you're feeling adventurous, you can try the `r` and `l` flags. These are optional, and are inserted just before the closing bracket. Separate them from the previous sections with any of the breaks mentioned above.
 
@@ -44,7 +44,7 @@ If you're feeling adventurous, you can try the `r` and `l` flags. These are opti
   * `[t ber 1 1 lr]` -> `[Bereshit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165/showrashi/true#v1)`
   * `[t ber 1 1 lm]` -> `[Bereshit 1:1](http://www.mechon-mamre.org/p/pt/pt0101.htm#1)`
 
-###Other stuff
+####Other stuff
 
 There is no validation for verse numbers. They cannot exceed 3 digits, but they do not check to see if the chapter has that many verses. This does not break any links, and is unlikely to be fixed anytime soon.
 
@@ -55,9 +55,11 @@ There is no validation for verse numbers. They cannot exceed 3 digits, but they 
   * Feel free to let me know if you want to add some.
   * Some easy abbreviations have been left out, i.e., nd. Could be nedarim or niddah, so neither. Too bad, so sad.
 
-###Gemara flags
-* `l` has the same behavior as the Tanach flag.
-* `t` Coming soon. Will link to the text version rather than the pdf.
+####Gemara flags
+* `l` has the same behavior as the Tanach `l` flag.
+* `t` links to the text version of the daf, rather than the pdf version
+  * With: `[g berachot 30b t]` -> `http://hebrewbooks.org/shas.aspx?mesechta=1&daf=30b&format=text`
+  * Without: `[g berachot 30b]` -> `http://hebrewbooks.org/shas.aspx?mesechta=1&daf=30b&format=pdf`
 
 
 
@@ -65,6 +67,8 @@ There is no validation for verse numbers. They cannot exceed 3 digits, but they 
 
 (For some value of soon)
   
-Mesechtos Ktanos? Maybe? If I feel like it.
-More spellings!
+Mesechtos Ktanos? Maybe? If I feel like it.  
+Even more spellings!  
+Shulchan Aruch!
+Rambam!
 Other stuff!
