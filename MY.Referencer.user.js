@@ -33,9 +33,7 @@ ABANDON ALL HOPE, YE WHO LIKE WELL-WRITTEN CODE. y'know. with standards 'n stuff
 Are there even standards for JavaScript? Oh well.)
 */
 
-var hodReferencer = hodReferencer || {};
-
-hodReferencer.inject = function() {//Inject the script into the document
+function inject () {//Inject the script into the document
     for (var i = 0; i < arguments.length; ++i) {
         if (typeof (arguments[i]) == 'function') {
             var script = document.createElement('script');
@@ -46,7 +44,7 @@ hodReferencer.inject = function() {//Inject the script into the document
     }
 };
 
-hodReferencer.inject(function ($) {
+inject(function ($) {
     function refhijack(t) {
         var textarea = t.addClass('ref-hijacked')[0],//add an extra class. Why? No idea. 
             form = t.closest('form');                //Ask @TimStone, it's his fault
