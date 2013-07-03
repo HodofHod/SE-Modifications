@@ -33,8 +33,7 @@ ABANDON ALL HOPE, YE WHO LIKE WELL-WRITTEN CODE. y'know. with standards 'n stuff
 Are there even standards for JavaScript? Oh well.)
 */
 
-
-function inject() {//Inject the script into the document
+function inject () {//Inject the script into the document
     for (var i = 0; i < arguments.length; ++i) {
         if (typeof (arguments[i]) == 'function') {
             var script = document.createElement('script');
@@ -43,7 +42,7 @@ function inject() {//Inject the script into the document
             document.body.appendChild(script);
         }
     }
-}
+};
 
 inject(function ($) {
     function refhijack(t) {
