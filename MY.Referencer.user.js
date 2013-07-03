@@ -42,7 +42,7 @@ function inject () {//Inject the script into the document
             document.body.appendChild(script);
         }
     }
-};
+}
 
 inject(function ($) {
     function refhijack(t) {
