@@ -12,7 +12,7 @@ Gemara links go to hebrewbooks.org
 
 ###Tanach Syntax rules:
 
-* The Tanach references should be of the form `[t book:chapter verse]`. `verse` is optional.
+* The Tanach references should be of the form `[t book chapter verse]`. `verse` is optional.
   * Example: `[t div1 4 2]` is interpreted as Divrei HaYamim I 4:2 and is replaced with `http://www.chabad.org/library/bible_cdo/aid/16524#v2`
 * The script will recognize many different spellings and abbreviations for book names, but it will not accept less than 2 characters.
   * It's case-insenstive. (That means capitalization doesn't change anything.)
