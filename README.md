@@ -58,7 +58,7 @@ There is no validation for verse numbers. They cannot exceed 3 digits, but they 
 ###Mishna Torah Syntax Rules:
 * Gemara references should be of the form `[mt topic chapter law]`. Chapter and law are both optional.
   * Example: `[mt De'ot 1]` (Omitting a chapter will link to the Rambams introduction for that section.)
-* Plenty of abbreviations. tt for Talmud Torah, re for Eruvin. ndr and ned for nedarim, etc., etc.,
+* Plenty of abbreviations. tt for Talmud Torah, er for Eruvin. ndr and ned for nedarim, etc., etc.,
   * There are many that could we didn't get to; feel free to let me know if you want to add some.
   * If your input matches multiple section names, you will get none of them. A popup will appear, with more information.
 
