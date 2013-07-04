@@ -56,7 +56,7 @@ There is no validation for verse numbers. They cannot exceed 3 digits, but they 
   * Without: `[g berachot 30b]` -> `http://hebrewbooks.org/shas.aspx?mesechta=1&daf=30b&format=pdf`
 
 ###Mishna Torah Syntax Rules:
-* Gemara references should be of the form `[mt topic chapter law]`. Chapter and law are both optional.
+* Mishna Torah references should be of the form `[mt topic chapter law]`. Chapter and law are both optional.
   * Example: `[mt De'ot 1]` (Omitting a chapter will link to the Rambams introduction for that section.)
 * Plenty of abbreviations. tt for Talmud Torah, er for Eruvin. ndr and ned for nedarim, etc., etc.,
   * There are many that could we didn't get to; feel free to let me know if you want to add some.
