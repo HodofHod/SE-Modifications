@@ -27,7 +27,7 @@ When in doubt about a spelling, just click outside the box to see whether it wor
 
 ####Tanach Flags:
 
-If you're feeling adventurous, you can try the `r` and `l` flags. These are optional, and are inserted just before the closing bracket. Separate them from the previous sections with any of the breaks mentioned above.
+If you're feeling adventurous, you can try the `r`, `l`, and `m` flags. These are optional, and are inserted just before the closing bracket. Separate them from the previous sections with any of the breaks mentioned above.
 
 * `r` will modify the link to show Rashi's commentary.
   * `[t ber 1 1 r]` -> `http://www.chabad.org/library/bible_cdo/aid/8165/showrashi/true#v1`
