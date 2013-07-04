@@ -382,14 +382,13 @@ inject(function ($) {
         return res;
 
     }
-    $('#input:not(.ref-hijacked)').live('focus', function () {
-		console.log('focus');
-        new refhijack($(this)); //And while I'm at it, I'll them questions and answers too!
-    });
     $('textarea[name="comment"]:not(.ref-hijacked)').live('focus', function () {
         new refhijack($(this)); //Alright, everybody keep calm! I'm hijackin' this 'ere comment box!
     });
     $('textarea[name="post-text"]:not(.ref-hijacked)').live('focus', function () {
         new refhijack($(this)); //And while I'm at it, I'll them questions and answers too!
+    });
+    $('#input:not(.ref-hijacked)').live('focus', function () {
+        new refhijack($(this)); //Ye didn't think I'd ferget them there chats, didja?
     });
 });
