@@ -13,7 +13,7 @@ Gemara links go to hebrewbooks.org, Mishna Torah in Hebrew goes to Mechon Mamre,
 ###Tanach Syntax rules:
 
 * The Tanach references should be of the form `[t book chapter verse]`. `verse` is optional.
-  * Example: `[t div1 4 2]` is interpreted as Divrei HaYamim I 4:2 and is replaced with `http://www.chabad.org/library/bible_cdo/aid/16524#v2`
+  * Example: `[t div1 4 2]` is interpreted as Divrei HaYamim I 4:2 and is replaced with `http://www.chabad.org/library/bible_cdo/aid/16524#v=2`
 * The script will recognize many different spellings and abbreviations for book names, but it will not accept less than 2 characters.
   * It's case-insenstive. (That means capitalization doesn't change anything.)
   * It only accepts common 2 or 3 letter abbreviations, so "gn", or "gen", but no "gene", or "genes".
@@ -30,13 +30,13 @@ When in doubt about a spelling, just click outside the box to see whether it wor
 If you're feeling adventurous, you can try the `r`, `l`, and `m` flags. These are optional, and are inserted just before the closing bracket. Separate them from the previous sections with any of the breaks mentioned above.
 
 * `r` will modify the link to show Rashi's commentary.
-  * `[t ber 1 1 r]` -> `http://www.chabad.org/library/bible_cdo/aid/8165/showrashi/true#v1`
+  * `[t ber 1 1 r]` -> `http://www.chabad.org/library/bible_cdo/aid/8165#showrashi=true&v=1`
 * `l` will insert SE's markdown link syntax with the reference as the title.
-  * `[t ber 1 1 l]` -> `[Bereshit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165#v1)`
+  * `[t ber 1 1 l]` -> `[Bereishit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165#v=1)`
 * `m` will link to Mechon Mamre instead of Chabad.org. (Note: Mechon Mamre does not offer Rashi; the `r` flag will be ignored.
   * `[t ber 1 1 m]` - > `http://www.mechon-mamre.org/p/pt/pt0101.htm#1`
 * You can use them together, in any order you like.
-  * `[t ber 1 1 lr]` -> `[Bereshit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165/showrashi/true#v1)`
+  * `[t ber 1 1 lr]` -> `[Bereishit 1:1](http://www.chabad.org/library/bible_cdo/aid/8165#showrashi=true&v=1)`
   * `[t ber 1 1 lm]` -> `[Bereshit 1:1](http://www.mechon-mamre.org/p/pt/pt0101.htm#1)`
 
 ####Other stuff
