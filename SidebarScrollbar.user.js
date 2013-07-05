@@ -10,20 +10,21 @@
 // @match        http://chat.stackoverflow.com/rooms/*
 // @match        http://chat.askubuntu.com/rooms/*
 // @author       @HodofHod
+// @namespace    HodofHod
 // ==/UserScript==
 
 function inject(f) {
-  var script = document.createElement('script');
+    var script = document.createElement('script');
     script.type = 'text/javascript';
     script.textContent = '(' + f.toString() + ')()';
-  document.body.appendChild(script);
-};
+    document.body.appendChild(script);
+}
 
-function sidebar(){
+function addScroll() {
     var sidebar = document.querySelector('#sidebar');
     sidebar.style.height = "auto";
     sidebar.style.bottom = "88px";
     sidebar.style.overflowY = "auto";
-};
+}
 
-inject(sidebar);
+inject(addScroll);
