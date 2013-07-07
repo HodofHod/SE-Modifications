@@ -64,11 +64,11 @@ inject(function ($) {
 			textarea = t.addClass('ref-hijacked')[0];//add an extra class. Why? No idea. Ask @TimStone, it's his fault
 		t.on('focusout', function () { //when you click away, I pounce!
 			if (r){
+				r = false;
 				tlink(textarea);  //check for Tanach links
 				glink(textarea);  //check for Gemara links
 				mtlink(textarea); //check for Mishna Torah links
 				try {StackExchange.MarkdownEditor.refreshAllPreviews();} catch (e) {}//refresh the Q's & A's preview panes
-				r = false;
 			}
 		});
 		t.on('change', function() {
@@ -81,7 +81,7 @@ inject(function ($) {
 			mesechtos = {'Chulin': [31, 141], 'Eruvin': [3, 104], 'Horayos': [28, 13], 'Rosh Hashanah': [9, 34], 'Shekalim': [5, 22], 'Menachos': [30, 109], 'Megilah': [11, 31], 'Bechoros': [32, 60], 'Brachos': [1, 63], 'Gitin': [19, 89], 'Taanis': [10, 30], 'Moed Katan': [12], 'Beitzah': [8, 39], 'Bava Kama': [21, 118], 'Kesuvos': [15, 111], 'Sanhedrin': [24, 112], 'Nazir': [17, 65], 'Kiddushin': [20, 81], 'Pesachim': [4, 120], 'Bava Basra': [23, 175], 'Sotah': [18, 48], 'Bava Metzia': [22, 118], 'Yoma': [6, 87], 'Succah': [7, 55], 'Meilah': [36, 21], 'Shabbos': [2, 156], 'Erchin': [33, 33], 'Nedarim': [16, 90], 'Shevuos': [26, 48], 'Temurah': [34, 33], 'Kerisus': [35, 27], 'Zevachim': [29, 119], 'Makkos': [25, 23], 'Avoda Zarah': [27, 75], 'Nidah': [37, 72], 'Chagigah': [13, 26], 'Yevamos': [14, 122]
 			};
 
-		var reg = /(\(|\s|^)\[(?:ref|g)[;,. :-]([\w' ]{2,}?[.]?)[;., :-](\d{1,3})([ab])([;., :-][lute]{0,4})?\]($|[\s,.;:\)])/mig,
+		var reg = /(\(|\s|^)\[(?:ref|g)[;,. :-]([a-zA-Z' ]{2,}?[.]?)[;., :-](\d{1,3})([ab])([;., :-][lute]{0,4})?\]($|[\s,.;:\)])/mig,
 			match;
 		while ((match = reg.exec(t.value)) !== null) {
 			var mes = match[2],
@@ -118,14 +118,14 @@ inject(function ($) {
 	}
 
 	function tlink(t) {
-		var spellings = ['Divrei Hayamim I:1,ch,chron,chroniclesi,cr,dh,divreihayamim,divreihayamimi,firstchronicles,i,ichr,ichronicles', 'Melachim I:1,firstkgs,firstkings,i,ikgs,ikings,k,kg,ki,kings,kingsi,melachim,melachimi,mlachima,stkings', 'Divrei Hayamim II:2,ch,chron,chroniclesii,cr,dh,divreihayamim,divreihayamimii,ii,iichr,iichronicles,secondchronicles', 'Melachim II:2,ii,iikgs,iikings,k,kg,ki,kings,kingsii,melachim,melachimii,mlachimb,ndkings,secondkgs,secondkings', 'Bereishit:beraishis,beraishit,berayshis,bereishis,bereishit,bereshit,braishis,braishit,brayshis,brayshit,breishis,breishit,ge,genesis,geneza,gn', 'Yirmiyahu:je,jeremia,jeremiah,jeremija,jr,yeremiyah,yeremiyahu,yirmiyahu', 'Michah:mch,mi,micah,micha,michah,miha,miq', 'Rus:rt,rth,ru,rus,ruta,ruth', 'Shemot:ex,exd,exod,exodus,sh,shemos,shemot,shmos,shmot', 'Vayikra:lb,le,leu,leviticus,lv,vayikra,vayiqra,vayyikra,vayyiqra', 'Bamidbar:bamidbar,bmidbar,br,nb,nm,nomb,nu,numbers', 'Devarim:de,deut,deuteronomio,deuteronomium,deuteronomy,devarim,dt', 'Yehoshua:ios,josh,joshua,josua,joz,jsh,yehoshua,yoshua', 'Shoftim:jdgs,jg,jt,judg,judges,jue,juges,shofetim,shoftim', 'Shmuel I:1,firstsamuel,i,isam,isamuel,s,sa,samuel,samueli,shmuel,shmuela,shmueli,sm', 'Shmuel II:2,ii,iisam,iisamuel,s,sa,samuel,samuelii,secondsamuel,shmuel,shmuelb,shmuelii,sm', 'Yeshayahu:is,isaiah,isiah,yeshayah,yeshayahu', 'Yechezkel:,ez,ezec,ezekial,ezekiel,hes,yecheskel,yechezkel', 'Hoshea:ho,hosea,hoshea', 'Yoel:ioel,jl,joel,jol,yoel', 'Amos:am,amos,ams', 'Ovadiah:ab,abdija,ob,obad,obadiah,obadija,obadja,obd,ovadiah,ovadyah', 'Yonah:ion,jna,jnh,jona,jonah,yonah', 'Nachum:na,nachum,naham,nahum,nam', 'Chavakuk:chavakuk,ha,habacuc,habakkuk,habakuk,habaqquq,habaquq', 'Tzefaniah:sefanja,sofonija,soph,tsefania,tsephania,tzefaniah,tzephaniah,zefanija,zefanja,zeph,zephanja,zp', 'Chaggai:chagai,chaggai,hagai,haggai,haggay,hg,hgg', 'Zechariah:sacharja,za,zach,zacharia,zaharija,zc,zch,zech,zechariah,zecharya,zekhariah', 'Malachi:malachi,malahija,malakhi,maleachi,ml', 'Tehillim:ps,psalm,psalmen,psalmi,psalms,psg,pslm,psm,pss,salmos,sl,tehilim,tehillim,thilim,thillim', 'Mishlei:mishlei,mishley,pr,prou,proverbs,prv', 'Iyov:hi,hiob,ijob,iyov,iyyov,jb', 'Shir HaShirim:sgs,shirhashirim,sng,so,song,songofsolomon,songofsongs,sos,ss', 'Eichah:aichah,eichah,eikhah,la,lamentaciones,lamentations,lm', 'Kohelet:ec,eccl,ecclesiastes,ecl,koheles,kohelet,qo,qohelet,qoheleth,qohleth', 'Esther:ester,estera,esther', 'Daniel:da,daniel,dn', 'Ezra:esra,ezra', 'Nechemiah:ne,nechemiah,nehemia,nehemiah,nehemija,nehemyah'
+		var spellings = ['Divrei Hayamim I:1,ch,chron,chroniclesi,cr,dh,divreihayamim,divreihayamimi,firstchronicles,i,ichr,ichronicles', 'Melachim I:1,firstkgs,firstkings,i,ikgs,ikings,k,kg,ki,kings,kingsi,melachim,melachimi,mlachima,stkings', 'Divrei Hayamim II:2,ch,chron,chroniclesii,cr,dh,divreihayamim,divreihayamimii,ii,iichr,iichronicles,secondchronicles', 'Melachim II:2,ii,iikgs,iikings,k,kg,ki,kings,kingsii,melachim,melachimii,mlachimb,ndkings,secondkgs,secondkings', 'Bereishit:beraishis,beraishit,berayshis,bereishis,bereishit,bereshit,braishis,braishit,brayshis,brayshit,breishis,breishit,ge,genesis,geneza,gn', 'Yirmiyahu:je,jeremia,jeremiah,jeremija,jr,yeremiyah,yeremiyahu,yirmiyahu', 'Michah:mch,mi,micah,micha,michah,miha,miq', 'Rus:rt,rth,ru,rus,ruta,ruth', 'Shemot:ex,exd,exod,exodus,sh,shemos,shemot,shmos,shmot', 'Vayikra:lb,le,leu,leviticus,lv,vayikra,vayiqra,vayyikra,vayyiqra', 'Bamidbar:bamidbar,bmidbar,br,nb,nm,nomb,nu,numbers', 'Devarim:de,deut,deuteronomio,deuteronomium,deuteronomy,devarim,dvarim,dt', 'Yehoshua:ios,josh,joshua,josua,joz,jsh,yehoshua,yoshua', 'Shoftim:jdgs,jg,jt,judg,judges,jue,juges,shofetim,shoftim', 'Shmuel I:1,firstsamuel,i,isam,isamuel,s,sa,samuel,samueli,shmuel,shmuela,shmueli,sm', 'Shmuel II:2,ii,iisam,iisamuel,s,sa,samuel,samuelii,secondsamuel,shmuel,shmuelb,shmuelii,sm', 'Yeshayahu:is,isaiah,isiah,yeshayah,yeshayahu', 'Yechezkel:,ez,ezec,ezekial,ezekiel,hes,yecheskel,yechezkel', 'Hoshea:ho,hosea,hoshea', 'Yoel:ioel,jl,joel,jol,yoel', 'Amos:am,amos,ams', 'Ovadiah:ab,abdija,ob,obad,obadiah,obadija,obadja,obd,ovadiah,ovadyah', 'Yonah:ion,jna,jnh,jona,jonah,yonah', 'Nachum:na,nachum,naham,nahum,nam', 'Chavakuk:chavakuk,ha,habacuc,habakkuk,habakuk,habaqquq,habaquq', 'Tzefaniah:sefanja,sofonija,soph,tsefania,tsephania,tzefaniah,tzephaniah,zefanija,zefanja,zeph,zephanja,zp', 'Chaggai:chagai,chaggai,hagai,haggai,haggay,hg,hgg', 'Zechariah:sacharja,za,zach,zacharia,zaharija,zc,zch,zech,zechariah,zecharya,zekhariah', 'Malachi:malachi,malahija,malakhi,maleachi,ml', 'Tehillim:ps,psalm,psalmen,psalmi,psalms,psg,pslm,psm,pss,salmos,sl,tehilim,tehillim,thilim,thillim', 'Mishlei:mishlei,mishley,pr,prou,proverbs,prv', 'Iyov:hi,hiob,ijob,iyov,iyyov,jb', 'Shir HaShirim:sgs,shirhashirim,sng,so,song,songofsolomon,songofsongs,sos,ss,canticles', 'Eichah:aichah,eichah,eikhah,la,lamentaciones,lamentations,lm', 'Kohelet:ec,eccl,ecclesiastes,ecl,koheles,kohelet,qo,qohelet,qoheleth,qohleth', 'Esther:ester,estera,esther', 'Daniel:da,daniel,dn', 'Ezra:esra,ezra', 'Nechemiah:ne,nechemiah,nehemia,nehemiah,nehemija,nehemyah'
 		];
 		//Keys are book names (duh) first value is chapter 1's id for chabad.org. 2nd value is number fo chapters
 		//Third value is Mechon Mamre's book id
-		var map = {'Tzefaniah': [16200, 3, '21'], 'Hoshea': [16155, 14, '13'], 'Nachum': [16194, 3, '19'], 'Michah': [16187, 7, '18'], 'Shoftim': [15809, 21, '07'], 'Melachim II': [15907, 25, '09b'], 'Tehillim': [16222, 150, '26'], 'Nechemiah': [16508, 13, '35b'], 'Kohelet': [16462, 12, '31'], 'Yirmiyahu': [15998, 52, '11'], 'Amos': [16173, 9, '15'], 'Zechariah': [16205, 14, '23'], 'Melachim I': [15885, 22, '09a'], 'Divrei Hayamim II': [16550, 36, '25b'], 'Shmuel I': [15830, 31, '08a'], 'Yeshayahu': [15932, 66, '10'], 'Shmuel II': [15861, 24, '08b'], 'Yonah': [16183, 4, '17'], 'Rus': [16453, 4, '29'], 'Shir HaShirim': [16445, 8, '30'], 'Vayikra': [9902, 27, '03'], 'Ezra': [16498, 10, '35a'], 'Esther': [16474, 10, '33'], 'Yehoshua': [15785, 24, '06'], 'Yechezkel': [16099, 48, '12'], 'Iyov': [16403, 42, '27'], 'Divrei Hayamim I': [16521, 29, '25a'], 'Mishlei': [16372, 31, '28'], 'Daniel': [16484, 12, '34'], 'Devarim': [9965, 34, '05'], 'Yoel': [16169, 4, '14'], 'Chavakuk': [16197, 3, '20'], 'Bamidbar': [9929, 36, '04'], 'Chaggai': [16203, 2, '22'], 'Shemot': [9862, 40, '02'], 'Malachi': [16219, 3, '24'], 'Bereishit': ['', 50, '01'], 'Eichah': [16457, 5, '32'], 'Ovadiah': [16182, 1, '16']
+		var map = {'Tzefaniah': [16200, 3, '21'], 'Hoshea': [16155, 14, '13'], 'Nachum': [16194, 3, '19'], 'Michah': [16187, 7, '18'], 'Shoftim': [15809, 21, '07'], 'Melachim II': [15907, 25, '09b'], 'Tehillim': [16222, 150, '26'], 'Nechemiah': [16508, 13, '35b'], 'Kohelet': [16462, 12, '31'], 'Yirmiyahu': [15998, 52, '11'], 'Amos': [16173, 9, '15'], 'Zechariah': [16205, 14, '23'], 'Melachim I': [15885, 22, '09a'], 'Divrei Hayamim II': [16550, 36, '25b'], 'Shmuel I': [15830, 31, '08a'], 'Yeshayahu': [15932, 66, '10'], 'Shmuel II': [15861, 24, '08b'], 'Yonah': [16183, 4, '17'], 'Rus': [16453, 4, '29'], 'Shir HaShirim': [16445, 8, '30'], 'Vayikra': [9902, 27, '03'], 'Ezra': [16498, 10, '35a'], 'Esther': [16474, 10, '33'], 'Yehoshua': [15785, 24, '06'], 'Yechezkel': [16099, 48, '12'], 'Iyov': [16403, 42, '27'], 'Divrei Hayamim I': [16521, 29, '25a'], 'Mishlei': [16372, 31, '28'], 'Daniel': [16484, 12, '34'], 'Devarim': [9965, 34, '05'], 'Yoel': [16169, 4, '14'], 'Chavakuk': [16197, 3, '20'], 'Bamidbar': [9929, 36, '04'], 'Chaggai': [16203, 2, '22'], 'Shemot': [9862, 40, '02'], 'Malachi': [16219, 3, '24'], 'Bereishit': [8165, 50, '01'], 'Eichah': [16457, 5, '32'], 'Ovadiah': [16182, 1, '16']
 		};
 
-		var reg = /(\(|\s|^)\[(?:ref|t)[;,. :-]([\w' ]{2,}?[.]?)[;., :-](\d{1,3})([;., :-]\d{1,3})?([;., :-][lurm]{0,4})?\]($|[\s,.;:\)])/mig, //abandon all hope, ye who enter here!
+		var reg = /(\(|\s|^)\[(?:ref|t)[;,. :-]([12]?[a-zA-Z' ]{2,}?[.]?[12]?)[;., :-](\d{1,3})([;., :-]\d{1,3})?([;., :-][lurm]{0,4})?\]($|[\s,.;:\)])/mig, //abandon all hope, ye who enter here!
 			match;
 
 		while ((match = reg.exec(t.value)) !== null) { //as long as there's another regex match to be found
@@ -172,56 +172,32 @@ inject(function ($) {
 	}
 
 	function mechonMamreT(book, chpt, vrs, flags, map) {
-		var url = null,
-			cid = null;
-		if (chpt < 10) { //Mechon Mamre likes all their chapter ids to be two digits, and everyone else can go fayfn.
-			cid = '0' + chpt;
-		} else if (chpt > 99) {
-			//mechon mamre (zol zayn gezunt un shtark) has an annoying way of shortening 3-digit chapter 
-			//numbers into 2 digit string+number combos. I.e., 100 = a0, 101 = a1, 110 = b0, etc.,
-			//So! Take a 3-digit number as a string, and convert the middle character to an int, 
-			//then convert that into a letter using a unicode number map, then prepend that to 
-			//the third character of the 3-digit number-string, and that becomes the chapter id 
-			//string to add to the url.
-			cid = String.fromCharCode(97 + parseInt(chpt.charAt(1), 10)) + chpt.charAt(2);
-		} else {
-			cid = chpt; //if it's a 2-digit number then shalom al yisroel
-		}
-		url = 'http://www.mechon-mamre.org/p/pt/pt' + map[book][2] + cid + '.htm';
-		if (vrs) { //if verse is specified in the reference
-			url += '#' + vrs;
-		}
+		var url = null;
+		if (chpt < 10) chpt = '0' + chpt; //Mechon Mamre likes all their chapter ids to be two digits, and everyone else can go fayfn.
+			
+		//mechon mamre (zol zayn gezunt un shtark) has an annoying way of shortening 3-digit chapter 
+		//numbers into 2 digit string+number combos. I.e., 100 = a0, 101 = a1, 110 = b0, etc.,
+		//So! Take a 3-digit number as a string, and convert the first (or first two) characters to an int, 
+		//then convert that into a hexadecimal letter, then prepend that to 
+		//the third character of the 3-digit number-string, and that becomes the chapter id 
+		//string to add to the url.
+		chpt = parseInt(chpt.slice(0,-1),10).toString(16) + chpt.slice(-1);
+		url = 'http://www.mechon-mamre.org/p/pt/pt' + map[book][2] + chpt + '.htm';
+		if (vrs) url += '#' + vrs; //if verse is specified in the reference
 		return url;
 
 	}
 
 	function chabadT(book, chpt, vrs, flags, map) {
-		var ber = //Bereishis' chapter ids are not sequential. See below.
-		[8165, 8166, 8167, 8168, 8169, 8171, 8170,
-		8172, 8173, 8174, 8175, 8176, 8208, 8209,
-		8210, 8211, 8212, 8213, 8214, 8215, 8216,
-		8217, 8218, 8219, 8220, 8221, 8222, 8223,
-		8224, 8225, 8226, 8227, 8228, 8229, 8230,
-		8231, 8232, 8233, 8234, 8235, 8236, 8237,
-		8238, 8239, 8240, 8241, 8242, 8243, 8244, 8245];
-
 		var cid = null,
 			url = null;
 		chpt = parseInt(chpt, 10);
-		if (book == "Bereishit") { //Chabad.org's chapter ids are sequential for each book besides Bereishis. So it gets special treatment. As if it was the youngest child or something
-			if (chpt > ber.length) { //Alright, that's it!
-				alert('"' + chpt + '" is not a valid chapter for Bereishit. \n\nThere are only 50 chapters in Bereishit. \n\nPlease try again.');
-				blowUp(computer); //because, why not?
-				return false;	 //for good measure.
-			}
-			cid = ber[chpt - 1];
-		} else { //Everybody else, eat your vegetables!
-			cid = map[book][0] + chpt - 1;
+		cid = map[book][0] + chpt - 1;
+		if ([8171,8170].indexOf(cid) != -1) { //Chabad.org's chapter ids are sequential for each book besides two chapters in Bereishis. So it gets special treatment. As if it was the youngest child or something. 
+			cid = (cid == 8170 ? 8171 : 8170); //essentially these two chapter ids are reversed. So reverse them back.
 		}
 		url = 'http://www.chabad.org/library/bible_cdo/aid/' + cid;
-		if (flags.indexOf('r') !== -1) { //Rashi flag is set?
-			url += "#showrashi=true";
-		}
+		if (flags.indexOf('r') !== -1) url += "#showrashi=true"; //Rashi flag is set?
 		if (vrs) { //Verse is specified?
 			if (flags.indexOf('r') !== -1) {//rashi is _also_ specified
 				url += '&v=' + vrs;
@@ -274,29 +250,35 @@ inject(function ($) {
 		}
 	}
 	function search(title, spellings, match, cllr, redo){
-		var last, //most recent title matched, gets used if counter==1
-			counter, //keep track of how many titles the word matches
+		var counter, //keep track of how many titles the word matches
 			titles_found = [], //keep track of which titles.
-			word = '',
+			word,
 			found = false;
 			var title_words = title.toLowerCase().match(/[a-zA-Z]+|[0-9]+/g);//.split(' ');//a fancy way to split. splits both spaces and numbers
-		redo = typeof(redo) !== 'undefined' ? redo : false; //if redo isn't passed, default to false.
+		redo = typeof(redo) !== 'undefined' ? redo : 0; //if redo isn't passed, default to false.
 		for (var wordi = 0; wordi < title_words.length; wordi++) { //iterate through each word in input
 			counter = 0; //reset the counter for each word
-			if (['1','2','i','ii'].indexOf(title_words[wordi]) != -1) { //special case for mulit-volumes
-				title_words[wordi] += '(,|$)';
+			switch(redo){
+				case 0://first time through, whole word match only.
+					word = '[,:]'+title_words[wordi] + '(,|$)';
+					break;
+				case 1://nothing found last time...
+					word = '[,:]'+title_words[wordi]; //this time, allow partial word matches.
+					break;
+				case 2://anywhere in the word match.
+					word = title_words[wordi];
+					break;
+				case 3://strip out prefixes before trying again
+					word = '[,:]' + title_words[wordi].replace(/^(ve|v|u|ha|u)/,'');
+					break;
 			}
-			if (!redo) {//first time through
-				word = new RegExp('[,:]'+title_words[wordi], 'i'); //turn word into a regex for searching
-			}else{//nothing found last time, strip out prefixes before trying again
-				word = new RegExp(title_words[wordi].replace(/^(v|ve|u|ha|u)/,''), 'i');
-			}
+			word = new RegExp(word);//turn word into a regex for searching
+			if (['1','2','i','ii'].indexOf(title_words[wordi]) != -1 && redo > 0) title_words[wordi] += '(,|$)';//special case for multi-volumes
 			if (titles_found.length === 0) { //if we haven't found any matches yet from previous words
 				for (var syni = 0; syni < spellings.length; syni++) { //iterate through different titles
 					if (word.test(spellings[syni])) { //check if the word is in the synonyms
 						counter++;
 						titles_found.push(syni); //add the title's index to the list of titles matched
-						last = spellings[syni].slice(0, spellings[syni].indexOf(':')); //assign the title name to 'last
 					}
 				}
 			} else { //we've already matched some titles from previous words
@@ -304,42 +286,38 @@ inject(function ($) {
 					var syni = titles_found[topi];
 					if (word.test(spellings[syni])) {
 						counter++;
-						last = spellings[syni].slice(0, spellings[syni].indexOf(':'));
 					}
 				}
 			}
 			if (counter === 1) { //only one title matched, so we know we've got the right one
-				return last; //don't even go through the rest of the words
-			} else {
-				console.log('not cool');
+				return spellings[titles_found[0]].slice(0,spellings[titles_found[0]].indexOf(':'));
 			}
 		}
 	
 		if (!found) { //No match :( (Technically, this if is not needed; if anything has been found we already returned)
-			var t, 
-				name;
+			if (redo < 3) { //we haven't retried with out prefixes and partial matches.
+				redo++;
+				return search(title, spellings, match, cllr, redo); //then we'll try
+			}
+			var t, p;
 			if (cllr == 'mtlink'){
 				t = 'part of Rambam';
-				name = 'topics';
+				p = 'topics';
 			} else if (cllr == 'tlink'){
 				t = 'book of Tanach';
-				name = 'books';
+				p = 'books';
 			} else if (cllr == 'glink'){
 				t = 'tractate of Gemara';
-				name = 'tractates';
+				p = 'tractates';
 			}
 			if (titles_found.length > 1) {//ambiguous. multiple matches found
-				alert("We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + match[2] + '"' + ") seemed ambiguous to our system, and could have referred to multiple " + name + ". Try to refine your entry by making it more specific. \n\nIf you'd like, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434");
+				var titles = '\n';
+				titles_found.map(function (t) { titles += spellings[t].slice(0, spellings[t].indexOf(':')) + '\n';});
+				alert("We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + match[2] + '"' + ") seemed ambiguous to our system, and could have referred to multiple " + p + ". Try to refine your entry by making it more specific. \n\nIf you'd like, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434" + "\n\n" + p + ' matched:' + titles);
 				return false;
-			} else { //no matches found at all.
-				if (!redo) { //we haven't retried with out prefixes
-					redo = true;
-					return search(title, spellings, match, cllr, redo); //then we'll try
-					}
-				else { //been there, done that
-					alert("We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + match[2] + '"'  + ") was not recognized by our system. This might be because you're using a spelling or an abbreviation that isn't in our system yet. \n\nIf you'd like to add this spelling, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434");
-					return false;
-				}
+			} else { //no matches found at all. //been there, done that
+				alert("We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + match[2] + '"'  + ") was not recognized by our system. This might be because you're using a spelling or an abbreviation that isn't in our system yet. \n\nIf you'd like to add this spelling, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434");
+				return false;
 			}
 		}
 	}
@@ -350,26 +328,19 @@ inject(function ($) {
 	}
 	
 	function mechonMamreMT(topic, chpt, law, mtmap) {
-		var base = 'http://www.mechon-mamre.org/i/',
-			cid = mtmap[topic][0],
-			res;
-		if (chpt < 10) {
-			chpt = '0' + chpt;
-		}
-		res = base + cid + chpt + '.htm';
-		if (law){
-			res += '#' + law;
-		}
-		return res;
+		if (chpt < 10) chpt = '0' + chpt;
+		var res = mtmap[topic][0] + chpt + '.htm';
+		if (law) res += '#' + law;
+		return 'http://www.mechon-mamre.org/i/' + res;
 	}
 	
-	$('textarea[name="comment"]:not(.ref-hijacked)').live('focus', function () {
+	$(document).on('focus', 'textarea[name="comment"]:not(.ref-hijacked)', function () {
 		new refhijack($(this)); //Alright, everybody keep calm! I'm hijackin' this 'ere comment box!
 	});
-	$('textarea[name="post-text"]:not(.ref-hijacked)').live('focus', function () {
+	$(document).on('focus', 'textarea[name="post-text"]:not(.ref-hijacked)', function () {
 		new refhijack($(this)); //And while I'm at it, I'll them questions and answers too!
 	});
-	$('#input:not(.ref-hijacked)').live('focus', function () {
+	$(document).on('focus', '#input:not(.ref-hijacked)', function () {
 		new refhijack($(this)); //Ye didn't think I'd ferget them there chats, didja?
 	});
 });
