@@ -18,7 +18,7 @@
 // @exclude		http://*/reputation
 // @author		@HodofHod
 // @namespace		HodofHod
-// @version		2.8.1
+// @version		2.8.2
 // ==/UserScript==
 
 
@@ -125,7 +125,7 @@ inject(function ($) {
 		var map = {'Tzefaniah': [16200, 3, '21'], 'Hoshea': [16155, 14, '13'], 'Nachum': [16194, 3, '19'], 'Michah': [16187, 7, '18'], 'Shoftim': [15809, 21, '07'], 'Melachim II': [15907, 25, '09b'], 'Tehillim': [16222, 150, '26'], 'Nechemiah': [16508, 13, '35b'], 'Kohelet': [16462, 12, '31'], 'Yirmiyahu': [15998, 52, '11'], 'Amos': [16173, 9, '15'], 'Zechariah': [16205, 14, '23'], 'Melachim I': [15885, 22, '09a'], 'Divrei Hayamim II': [16550, 36, '25b'], 'Shmuel I': [15830, 31, '08a'], 'Yeshayahu': [15932, 66, '10'], 'Shmuel II': [15861, 24, '08b'], 'Yonah': [16183, 4, '17'], 'Rus': [16453, 4, '29'], 'Shir HaShirim': [16445, 8, '30'], 'Vayikra': [9902, 27, '03'], 'Ezra': [16498, 10, '35a'], 'Esther': [16474, 10, '33'], 'Yehoshua': [15785, 24, '06'], 'Yechezkel': [16099, 48, '12'], 'Iyov': [16403, 42, '27'], 'Divrei Hayamim I': [16521, 29, '25a'], 'Mishlei': [16372, 31, '28'], 'Daniel': [16484, 12, '34'], 'Devarim': [9965, 34, '05'], 'Yoel': [16169, 4, '14'], 'Chavakuk': [16197, 3, '20'], 'Bamidbar': [9929, 36, '04'], 'Chaggai': [16203, 2, '22'], 'Shemot': [9862, 40, '02'], 'Malachi': [16219, 3, '24'], 'Bereishit': ['', 50, '01'], 'Eichah': [16457, 5, '32'], 'Ovadiah': [16182, 1, '16']
 		};
 
-		var reg = /(\(|\s|^)\[(?:ref|t)[;,. :-]([\w' ]{2,}?[.]?)[;., :-](\d{1,2})([;., :-]\d{1,3})?([;., :-][lurm]{0,4})?\]($|[\s,.;:\)])/mig, //abandon all hope, ye who enter here!
+		var reg = /(\(|\s|^)\[(?:ref|t)[;,. :-]([\w' ]{2,}?[.]?)[;., :-](\d{1,3})([;., :-]\d{1,3})?([;., :-][lurm]{0,4})?\]($|[\s,.;:\)])/mig, //abandon all hope, ye who enter here!
 			match;
 
 		while ((match = reg.exec(t.value)) !== null) { //as long as there's another regex match to be found
