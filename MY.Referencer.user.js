@@ -58,6 +58,11 @@ function inject() { //Inject the script into the document
 	}
 }
 
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = 'https://github.com/ckoppelman/SE-Modifications/referencers/test.js';
+document.body.appendChild(script);
+
 inject(function ($) {
 	function refhijack(t) {
 		var r = true,
