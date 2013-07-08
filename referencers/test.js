@@ -1,1 +1,3 @@
-alert("hello!");
+function makeSomeNoise() {
+  alert("hello!");
+}
