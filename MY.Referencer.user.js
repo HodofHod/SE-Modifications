@@ -18,7 +18,7 @@
 // @exclude		http://*/reputation
 // @author		@HodofHod
 // @namespace		HodofHod
-// @version		2.8.8
+// @version		2.8.9
 // ==/UserScript==
 
 
@@ -77,7 +77,7 @@ inject(function ($) {
 	}
 
 	function glink(t) {
-		var spellings = ['Brachos:berachos,berachot,brachos,brachot,brcht,brchs', 'Shabbos:shabbos,shabbat,shabbas,shabos,shabat,shbt,shbs', 'Eruvin:eruvin,eiruvin,ervn,er', 'Pesachim:pesachim,psachim,pesakhim,psakhim,pes,psa,pschm,ps', 'Shekalim:shekalim,shekolim,shkalim,shkolim,shk,shek', 'Yoma:yoma,yuma,ym', 'Succah:succah,sukkah,suka,sukah,sk,sc', 'Beitzah:beitzah,betzah,betza,btz', 'Rosh Hashanah:rosh,hashana,rsh,rh', 'Taanis:taanis,taanith,tanith,tanis,tns,tn', 'Megilah:megilah,mgl', 'Moed Katan:moedkatan,md,mk', 'Chagigah:chagigah,chg', 'Yevamos:yevamos,yevamot,yevamoth,yvms,yvmt', 'Kesuvos:kesuvos,kesubos,kesubot,ketubot,ketuvot,ksuvos,ksubos,ksvs,ksvt,ktbt,ks,kt', 'Nedarim:nedarim,ndrm,ndr', 'Nazir:nazir,nozir,naz,noz,nzr,nz', 'Sotah:sotah,sota,sot,so,st', 'Gitin:gitin,gittin,git,gtn,gt', 'Kiddushin:kiddushin,kidushin,kid,ki,kds,kdshn,kdsh,kd', 'Bava Kama:bavakama,babakama,bavakamma,bk,bkama', 'Bava Metzia:bavametzia,bavametziah,babametziah,babametzia,bm,bmetzia,bmetziah', 'Bava Basra:bavabasra,bavabatra,bababatra,bavabatrah,bb,bbatra,bbasra,bbatrah,bbasrah', 'Sanhedrin:sanhedrin,sn,snh,snhd,snhdrn', 'Makkos:makkos,makos,makkot,makot,mkt', 'Shevuos:shevuos,shevuot,shavuot,shavuos,shvt,shvs,shvuot,shvuos', 'Avoda Zarah:avodazarah,avodazara,avodahzara,avodahzarah,avodah,az,avd,avo,avod,av', 'Horayos:horayos,horaiot,horaios,horayot,horaot,ho,hor,hrs,hrt,hr', 'Zevachim:zevachim,zevakhim,zvchm,zvkhm', 'Menachos:menachos,menachot,menakhos,menakhot,mncht,mnkht', 'Chulin:chulin,chullin,khulin,khullin,chl,khl,chln,khln', 'Bechoros:bechoros,bchoros,bechorot,bchorot,bcrt,bchrt,bkhrt,bc,bch,bkh', 'Erchin:erchin,erkhin,arachin,arakhin,ara,erc,erk', 'Temurah:temurah,tmurah,tmr', 'Kerisus:kerisus,krisus,keritut,kritut,kerisos,krisos,keritot,kritot,kerithoth,krithoth,kr,ker,krt,krs', 'Meilah:meilah,meila,mei,ml', 'Nidah:nidah,niddah'],
+		var spellings = ['Brachos:berachos,berachot,brachos,brachot,brcht,brchs', 'Shabbos:shabbos,shabbat,shabbas,shabos,shabat,shbt,shbs', 'Eruvin:eruvin,eiruvin,ervn,er', 'Pesachim:pesachim,psachim,pesakhim,psakhim,pes,psa,pschm,ps', 'Shekalim:shekalim,shekolim,shkalim,shkolim,shk,shek', 'Yoma:yoma,yuma,ym', 'Succah:succah,sukkah,suka,sukah,sk,sc', 'Beitzah:beitzah,betzah,betza,btz', 'Rosh Hashanah:rosh,hashana,rsh,rh', 'Taanis:taanis,taanith,tanith,tanis,tns,tn', 'Megilah:megilah,mgl', 'Moed Katan:moedkatan,md,mk', 'Chagigah:chagigah,chg', 'Yevamos:yevamos,yevamot,yevamoth,yvms,yvmt', 'Kesuvos:kesuvos,kesubos,kesubot,ketubot,ketuvot,ksuvos,ksubos,ksvs,ksvt,ktbt,ks,kt', 'Nedarim:nedarim,ndrm,ndr', 'Nazir:nazir,nozir,naz,noz,nzr,nz', 'Sotah:sotah,sota,sot,so,st', 'Gitin:gitin,gittin,git,gtn,gt', 'Kiddushin:kiddushin,kidushin,kid,ki,kds,kdshn,kdsh,kd', 'Bava Kama:bavakama,babakama,bavakamma,bk,bkama', 'Bava Metzia:bavametzia,bavametziah,babametziah,babametzia,bm,bmetzia,bmetziah', 'Bava Basra:bavabasra,bavabatra,bababatra,bavabatrah,bb,bbatra,bbasra,bbatrah,bbasrah', 'Sanhedrin:sanhedrin,sn,snh,snhd,snhdrn', 'Makkos:makkos,makos,makkot,makot,mkt', 'Shevuos:shevuos,shevuot,shavuot,shavuos,shvt,shvs,shvuot,shvuos', 'Avoda Zarah:avodazarah,avodazara,avodahzara,avodahzarah,avodah,az,avd,avo,avod,av', 'Horayos:horayos,horaiot,horaios,horayot,horiyot,horaot,ho,hor,hrs,hrt,hr', 'Zevachim:zevachim,zevakhim,zvchm,zvkhm', 'Menachos:menachos,menachot,menakhos,menakhot,mncht,mnkht', 'Chulin:chulin,chullin,khulin,khullin,chl,khl,chln,khln', 'Bechoros:bechoros,bchoros,bechorot,bchorot,bcrt,bchrt,bkhrt,bc,bch,bkh', 'Erchin:erchin,erkhin,arachin,arakhin,ara,erc,erk', 'Temurah:temurah,tmurah,tmr', 'Kerisus:kerisus,krisus,keritut,kritut,kerisos,krisos,keritot,kritot,kerithoth,krithoth,kr,ker,krt,krs', 'Meilah:meilah,meila,mei,ml', 'Nidah:nidah,niddah'],
 			mesechtos = {'Chulin': [31, 141], 'Eruvin': [3, 104], 'Horayos': [28, 13], 'Rosh Hashanah': [9, 34], 'Shekalim': [5, 22], 'Menachos': [30, 109], 'Megilah': [11, 31], 'Bechoros': [32, 60], 'Brachos': [1, 63], 'Gitin': [19, 89], 'Taanis': [10, 30], 'Moed Katan': [12], 'Beitzah': [8, 39], 'Bava Kama': [21, 118], 'Kesuvos': [15, 111], 'Sanhedrin': [24, 112], 'Nazir': [17, 65], 'Kiddushin': [20, 81], 'Pesachim': [4, 120], 'Bava Basra': [23, 175], 'Sotah': [18, 48], 'Bava Metzia': [22, 118], 'Yoma': [6, 87], 'Succah': [7, 55], 'Meilah': [36, 21], 'Shabbos': [2, 156], 'Erchin': [33, 33], 'Nedarim': [16, 90], 'Shevuos': [26, 48], 'Temurah': [34, 33], 'Kerisus': [35, 27], 'Zevachim': [29, 119], 'Makkos': [25, 23], 'Avoda Zarah': [27, 75], 'Nidah': [37, 72], 'Chagigah': [13, 26], 'Yevamos': [14, 122]
 			};
 
@@ -95,21 +95,25 @@ inject(function ($) {
 
 			mes = mes.toLowerCase().replace(/['.]/g, '');//sanitize
 			flags = flags.toLowerCase();//sanitize
-			mes = search(mes,spellings,match,'glink');
+			side = side.toLowerCase();
+			mes = search(mes,spellings,match,'glink');//search for the mesechta's name
+			
 			if (mes) {//if search() returned successfully.
 				if (parseInt(page, 10) > mesechtos[mes][1] || page == '1' || page == '0') { //if mesechta doesn't have that page
 					alert('"' + page + side + '"' + 'is not a valid page for Mesechtas ' + mes +'. Please try again.');
 					continue; //skip to the next gemara match
 				}
-				if (side == 'a') side = ''; //hebrewbooks is weird.
-				res = 'http://hebrewbooks.org/shas.aspx?mesechta=' + mesechtos[mes][0] + '&daf=' + page + side;
+				res = 'http://hebrewbooks.org/shas.aspx?mesechta=' + mesechtos[mes][0] + '&daf=' + page + (side=='a'?'':'b');//hebrewbooks is weird, it deserves weird code.
 				if (flags.indexOf('t') !== -1) { //text version flag is set
 					res = res + '&format=text';
 				} else {
 					res = res + '&format=pdf';
 				}
 				if (flags.indexOf('l') !== -1) { //link title flag is set
-					if (flags.indexOf('u') !== -1) mes = match[2];//if leave untouched flag is set.
+					if (flags.indexOf('u') !== -1){//if "leave untouched" flag is set.
+						mes = match[2];
+						side = match[4];
+					}
 					res = '[' + mes + ' ' + page + side + '](' + res + ')';
 				}
 				t.value = t.value.replace(match[0], pre + res + suf);
@@ -257,18 +261,22 @@ inject(function ($) {
 		redo = typeof(redo) !== 'undefined' ? redo : 0; //if redo isn't passed, default to false.
 		for (var wordi = 0; wordi < title_words.length; wordi++) { //iterate through each word in input
 			counter = 0; //reset the counter for each word
+			word = title_words[wordi];
 			switch(redo){
 				case 0://first time through, whole word match only.
-					word = '[,:]'+title_words[wordi] + '(,|$)';
+					word = '[,:]' + word + '(,|$)';
 					break;
 				case 1://nothing found last time...
-					word = '[,:]'+title_words[wordi]; //this time, allow partial word matches.
+					word = '[,:]' + word; //this time, allow partial word matches.
 					break;
 				case 2://anywhere in the word match.
-					word = title_words[wordi];
+					word = word;
 					break;
 				case 3://strip out prefixes before trying again
-					word = '[,:]' + title_words[wordi].replace(/^(ve|v|u|ha|u)/,'');
+					word = '[,:]' + word.replace(/^(ve|v|u|ha|u)/,'');
+					break;
+				case 4:
+					word = word.slice(0,3);
 					break;
 			}
 			word = new RegExp(word);//turn word into a regex for searching
@@ -294,7 +302,7 @@ inject(function ($) {
 		}
 	
 		if (!found) { //No match :( (Technically, this if is not needed; if anything has been found we already returned)
-			if (redo < 3) { //we haven't retried with out prefixes and partial matches.
+			if (redo < 4) { //we haven't retried with out prefixes and partial matches.
 				redo++;
 				return search(title, spellings, match, cllr, redo); //then we'll try
 			}
