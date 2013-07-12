@@ -67,7 +67,7 @@ inject(function ($) {
             return this.replace(/[\\^$*+?.\(\)|{}[\]]/g, "\\$&");
         };
     })();
-
+    
     function register (prefix, linker) {
         registrations[prefix.escapeRegExp()] = linker;
         prefixes.push(prefix.escapeRegExp());
@@ -77,19 +77,19 @@ inject(function ($) {
         register("t", { link: tlink,
                         regex: /([12a-zA-Z'. ]{2,})[;., :-]+(\d{1,3})([;., :-]+\d{1,3})?/i,
                         spellings: ['Divrei Hayamim I:1,ch,chron,chroniclesi,cr,dh,divreihayamim,divreihayamimi,firstchronicles,i,ichr,ichronicles', 'Melachim I:1,firstkgs,firstkings,i,ikgs,ikings,k,kg,ki,kings,kingsi,melachim,melachimi,mlachima,stkings', 'Divrei Hayamim II:2,ch,chron,chroniclesii,cr,dh,divreihayamim,divreihayamimii,ii,iichr,iichronicles,secondchronicles', 'Melachim II:2,ii,iikgs,iikings,k,kg,ki,kings,kingsii,melachim,melachimii,mlachimb,ndkings,secondkgs,secondkings', 'Bereishit:beraishis,beraishit,berayshis,bereishis,bereishit,bereshit,braishis,braishit,brayshis,brayshit,breishis,breishit,ge,genesis,geneza,gn', 'Yirmiyahu:je,jeremia,jeremiah,jeremija,jr,yeremiyah,yeremiyahu,yirmiyahu', 'Michah:mch,mi,micah,micha,michah,miha,miq', 'Rus:rt,rth,ru,rus,ruta,ruth', 'Shemot:ex,exd,exod,exodus,sh,shemos,shemot,shmos,shmot', 'Vayikra:lb,le,leu,leviticus,lv,vayikra,vayiqra,vayyikra,vayyiqra', 'Bamidbar:bamidbar,bmidbar,br,nb,nm,nomb,nu,numbers', 'Devarim:de,deut,deuteronomio,deuteronomium,deuteronomy,devarim,dvarim,dt', 'Yehoshua:ios,josh,joshua,josua,joz,jsh,yehoshua,yoshua', 'Shoftim:jdgs,jg,jt,judg,judges,jue,juges,shofetim,shoftim', 'Shmuel I:1,firstsamuel,i,isam,isamuel,s,sa,samuel,samueli,shmuel,shmuela,shmueli,sm', 'Shmuel II:2,ii,iisam,iisamuel,s,sa,samuel,samuelii,secondsamuel,shmuel,shmuelb,shmuelii,sm', 'Yeshayahu:is,isaiah,isiah,yeshayah,yeshayahu', 'Yechezkel:,ez,ezec,ezekial,ezekiel,hes,yecheskel,yechezkel', 'Hoshea:ho,hosea,hoshea', 'Yoel:ioel,jl,joel,jol,yoel', 'Amos:am,amos,ams', 'Ovadiah:ab,abdija,ob,obad,obadiah,obadija,obadja,obd,ovadiah,ovadyah', 'Yonah:ion,jna,jnh,jona,jonah,yonah', 'Nachum:na,nachum,naham,nahum,nam', 'Chavakuk:chavakuk,ha,habacuc,habakkuk,habakuk,habaqquq,habaquq', 'Tzefaniah:sefanja,sofonija,soph,tsefania,tsephania,tzefaniah,tzephaniah,zefanija,zefanja,zeph,zephanja,zp', 'Chaggai:chagai,chaggai,hagai,haggai,haggay,hg,hgg', 'Zechariah:sacharja,za,zach,zacharia,zaharija,zc,zch,zech,zechariah,zecharya,zekhariah', 'Malachi:malachi,malahija,malakhi,maleachi,ml', 'Tehillim:ps,psalm,psalmen,psalmi,psalms,psg,pslm,psm,pss,salmos,sl,tehilim,tehillim,thilim,thillim', 'Mishlei:mishlei,mishley,pr,prou,proverbs,prv', 'Iyov:hi,hiob,ijob,iyov,iyyov,jb', 'Shir HaShirim:sgs,shirhashirim,sng,so,song,songofsolomon,songofsongs,sos,ss,canticles', 'Eichah:aichah,eichah,eikhah,la,lamentaciones,lamentations,lm', 'Kohelet:ec,eccl,ecclesiastes,ecl,koheles,kohelet,qo,qohelet,qoheleth,qohleth', 'Esther:ester,estera,esther', 'Daniel:da,daniel,dn', 'Ezra:esra,ezra', 'Nechemiah:ne,nechemiah,nehemia,nehemiah,nehemija,nehemyah'],
-                        searchType: "tlink",
+                        searchType: { book: "book of Tanakh", partPlural: "books" },
                         displayName: function(canonicalName) { return canonicalName; }
                          });
         register("g", { link: glink, 
                         regex: /([a-zA-Z' .]{2,})[;., :-]+(\d{1,3})([ab])/i,
                         spellings: ['Brachos:berachos,berachot,brachos,brachot,ber,bra,brcht,brchs,br', 'Shabbos:shabbos,shabbat,shabbas,shabos,shabat,shbt,shbs,shab,sha', 'Eruvin:eruvin,eiruvin,eru,eir,ervn,er', 'Pesachim:pesachim,psachim,pesakhim,psakhim,pes,psa,pschm,ps', 'Shekalim:shekalim,shekolim,shkalim,shkolim,shk,shek', 'Yoma:yoma,yuma,yum,yom,ym', 'Succah:succah,succa,sukkah,sukka,suka,sukah,sk,suk,suc,sc', 'Beitzah:beitzah,beitza,betzah,betza,bei,bet,btz,be,btz', 'Rosh Hashanah:rosh,hashana,ros,rsh,rh,ro,rsh', 'Taanis:taanis,taanit,taanith,tanit,tanith,tanis,tan,tns,tn,taa,ta', 'Megilah:megilah,megila,meg,mgl,mg', 'Moed Katan:moedkatan,moe,md,mk', 'Chagigah:chagigah,chagiga,cha,chag,chg', 'Yevamos:yevamos,yevamot,yevamoth,yev,yvm,yvms,yvmt,yv', 'Kesuvos:kesuvos,kesubos,kesubot,ketubot,ketuvot,ksuvos,ksubos,ket,kes,ksvs,ksvt,ktbt,ks,kt', 'Nedarim:nedarim,ned,ndrm,ndr,ne', 'Nazir:nazir,nozir,naz,noz,nzr,nz', 'Sotah:sotah,sota,sot,so,st', 'Gitin:gitin,gittin,git,gtn,gt', 'Kiddushin:kiddushin,kidushin,kid,ki,kds,kdshn,kdsh,kd', 'Bava Kama:bavakama,babakama,bavakamma,bk,bkama', 'Bava Metzia:bavametzia,bavametziah,babametziah,babametzia,bm,bmetzia,bmetziah', 'Bava Basra:bavabasra,bavabatra,bababatra,bavabatrah,bb,bbatra,bbasra,bbatrah,bbasrah', 'Sanhedrin:sanhedrin,san,sa,sn,snh,snhd,snhdrn', 'Makkos:makkos,makos,makkot,makot,ma,mak,mkt', 'Shevuos:shevuos,shevuot,shavuot,shavuos,shv,shvt,shvs,shvuot,shvuos', 'Avoda Zarah:avodazarah,avodazara,avodahzara,avodahzarah,avoda,avodah,az,avd,avo,avod,av', 'Horayos:horayos,horaiot,horaios,horayot,horaot,ho,hor,hrs,hrt,hr', 'Zevachim:zevachim,zevakhim,zev,zv,zvchm,zvkhm', 'Menachos:menachos,menachot,menakhos,menakhot,men,mn,mncht,mnkht', 'Chulin:chulin,chullin,khulin,khullin,chu,khu,chl,khl,chln,khln', 'Bechoros:bechoros,bchoros,bechorot,bchorot,bec,bech,bek,bekh,bcrt,bchrt,bkhrt,bc,bch,bkh', 'Erchin:erchin,erkhin,arachin,arakhin,ara,erc,erk', 'Temurah:temurah,temura,tmurah,tmura,tem,tm,tmr', 'Kerisus:kerisus,krisus,keritut,kritut,kerisos,krisos,keritot,kritot,kerithoth,krithoth,kr,ker,krt,krs', 'Meilah:meilah,meila,mei,ml', 'Nidah:nidah,nida,niddah,nidda,ni,nid'],
-                        searchType: "glink",
+                        searchType: { book: "tractate of Gemara", partPlural: "tractates" },
                         displayName: function(canonicalName) { return canonicalName; }
                         });
         register("mt", { link: mtlink,
                         regex: /([a-zA-Z' .]{2,})([;., :-]+\d{1,2})?([;., :-]+\d{1,2})?/i,
                         spellings: ['Yesodey HaTorah:yesodei,yisodei,yisodey,hatorah,hatora,yht,yt,yis', "De'ot:deot,deos,deyos,deios,deyot,deiot,daot,daos", 'Talmud Torah:talmud,torah,tt', 'Avodat Kochavim:avodah,avodat,avodas,kochavim,chukot,chukos,goim,hagoim,ak,zarah,goy,az', 'Teshuvah:teshuvah,tshuvah,tsh', "Kri'at Shema:krias,kriat,kriyat,kriyas,shema,shma,ks,krsh", 'Tefilah uBirkat Kohanim:tefilah,tfila,tfilah,tefillah,birkat,birkas,birchas,birchat,kohanim,cohanim,tbk', "Tefillin, Mezuzah, v'Sefer Torah:,tefillin,tefilin,tfilin,mezuzah,mzuza,mzuzah,sefer,torah,stam", 'Tzitzis:tzitzis,tzizit,tsitsit,tsitsis,sisis,sisit', 'Berachot:berachot,berachos,brachos,brachot', 'Milah:milah,bris,brit', 'Seder HaTefilah:seder,siddur,sidur,hatefilah,hatfilah,tfila,tfilah,tefilla,tefillah', 'Shabbos:shabbat,shabat,shabbos,shabes,shabbes,sh', 'Eruvin:eruvin,eiruvin,er', 'Shevitat Asor:shvisas,shevisas,shevitat,shvitat,asor', 'Shevitat Yom Tov:shvisas,shevisas,shevitat,shvitat,yomtov,yt,tov', "Chometz U'Matzah:chametz,hamets,chamets,chometz,ham,matza,massa,masa,matsa,matzo,chum,cm", 'Haggadah:hagada,haggadah,hagadah', "Shofar, Sukkah, v'Lulav:,shofar,sukkah,succah,sukah,succa,lulav", 'Shekalim:sheqalim,shekalim,shkalim,shekolim,shek', 'Kiddush HaChodesh:hodesh,hachodesh,hahodesh,hakhodesh,kidush,kiddush,khc', "Ta'aniyot:taaniyos,taanios,taaniyot,taaniot,tanios,taniyos,taanis,taanit,tanis,taan,taniyot", 'Megillah vChanukah:mg,megila,mgila,megillah,chanukah,chanukkah,hanukkah,hanukka,channuka,han,mgvch,mgch', 'Ishut:ishut,ishus,eshus', 'Gerushin:gerushin,geirushin,gittin,gitin', 'Yibbum vChalitzah:yibbum,yibum,chalitzah,halitzah,chaliza,chalizah,halissa', 'Naarah Besulah:naarah,naara,narah,betulah,bsula,bsulah,besulah', 'Sotah:sotah,soda', 'Issurei Biah:issurei,isurei,isurey,issurey,biah,biyah,ib,isub', "Ma'achalot Assurot:maachalot,machalot,maachalos,machalos,assurot,asurot,assuros,asuros,ma,maacha", 'Shechitah:shechitah,shehita,shehitah', 'Sechirut:sechirut,sechirus,sachir,schirus,schirut', "She'elah uFikkadon:sheailah,sheeilah,sheelah,shailah,shaylah,sheaila,fikkadon,pikadon,piqadon", 'Malveh veLoveh:malveh,loveh', "To'en veNit'an:toen,toain,nitan,nitaan", 'Nehalot:nachalos,nachlos,nachlot,nahalot,nahlot,nachalaos,nehalot', 'Kilaayim:kilaayim,kilaim', 'Matnot Aniyiim:matanos,aniyim,tzedaka,mattanot,mattanos,matnot,matnos,aniyiim', 'Terumot:terumos,terumot,ter', 'Maaserot:maaserot,maaseros,mayseros,maser,maas', 'Maaser Sheini:maaser,maser,mayser,sheni,sheini,neta,revai,kerem,msvnr,msnr,ms', 'Bikkurim:bikkurim,bikurim,shar,shaar,matnot,matnos,matanos,matanot,kehunah,shebgevulin,shebgvulin,bikk', 'Shemita:shemitta,shemitah,shmitah,shmitta,yovel,yoivel,yoival,sy,shy', 'Shvuot:shvuot,shvuos,shevuos,shevuot', 'Nedarim:neder,ndr,nedarim', 'Nezirut:nazir,nezerut,nezirut,naz,nz', 'Arachim vaCharamim:arachim,arachin,erkin,erchin,charamot,charamos,haramim,charamim,cherem,arch,arvch,charamin', 'Beis Habechirah:beit,beis,bet,bes,habechirah,habchirah,habekhirah,bh', 'Kli Hamikdash:kli,klei,kley,hamikdash,hamikdosh,mikdosh,haovdim,bo,ba', 'Biat Hamikdash:biat,bias,hamikdash,hamikdosh', 'Issurei Mizbeiach:issurei,isurei,issurey,isurey,issure,mizbeiach,mizbeyach,mizbeyakh', 'Temidin uMusafim:tmidin,temidin,temidim,tmidim,tamidim,tamidin,musafin,musafim', 'Maaseh HaKorbanot:maseh,maaseh,mayseh,hakorbonos,hakorbanot,hakorbanos', 'Pesulei Hamukdashim:pesulei,pesuley,hamukdashim', 'Avodat Yom HaKippurim:avodat,avodas,avoidas,yom,hakippurim,hakipurim,kippurim,kipur,ayk,yk', "Me'ilah:meilah", "Sanhedrin veha'Onashin HaMesurin lahem:sanhedrin,haonshin,hamesurin,lahem", 'Edut:edus,eduth,edhuth,eidim', 'Mamrim:mamrim,mamrin', 'Avel:uvel,aveilus,aveilut,avelus,aveluth', 'Melachim uMilchamot:melachim,melech,mashiach,melochim,mlochim,mlachim,milchamot,milchamteihem,milchamosehem,milchamoseihem,milchamotehem,milchamoteihem,milchomosehem,milchomoseihem,milhamotehem,milhamoteihem', 'Korban Pesach:korban,karban,pesah,pesach,pesakh', 'Chagigah:chagigah,hagigah', 'Bechorot:bechorot,bechoros,bchorot,bchoros', 'Shegagot:shegagot,shegagos,shgagot,shgagos', 'Mechussarey Kapparah:mechussarey,mechusarei,mechussarei,kapparah,kaparah,mk', 'Temurah:temurah,tmurah', "Tum'at Met:tumas,tumat,met,mes,meit,meis,mais,mait", 'Parah Adummah:parah,poroh,adumah,adummah', "Tum'at Tsara'at:tumas,tumat,tzaraas,tzoras,tzaras,tzaraat,tzarat,tsarat,tsaraat", "Metamme'ey Mishkav uMoshav:metammey,metammeey,metammei,metamei,metamey,mtamei,mtamey,mishkav,mishkov,moshav,mmm", "She'ar Avot HaTum'ah:shear,shar,shaar,avot,avos,hatumah,hatumaa,tumah,sat", "Tum'at Okhalin:tumas,tumat,okhalin,ochalin,oichlin,oichlim,to", 'Kelim:keilim,kelim,ke', 'Mikvot:mikvaot,mikvot,mikvos,mikvaos,mikvah,mkv', 'Nizkei Mammon:nizkei,nizkey,niskei,niskey,mamon,mammon,mamoin,mumoin,nm', 'Genevah:genevah,geneivah,geneiva,gneva,gneivah,gnevah,gne', "Gezelah va'Avedah:gezelah,gezeilah,gzeilah,gzelah,gezela,gzeila,avedah,aveidah,ga,gva", 'Chovel uMazzik:chovel,choivel,choyvel,mazzik,mazik', 'Rotseah uShmirat Nefesh:rotseach,rotzeach,rotseah,rotzeah,rotzeiach,shmirat,shmiras,shemirat,shemiras,nefesh,nafesh,rotz,rusn,rsn', 'Mechirah:mechirah,mehirah,mchirah,mekhirah,mch', 'Zechiyah uMattanah:zechiyah,zekhiyah,zechiah,mattanah,matanah,zech,zch,zm', 'Shechenim:shechenim,shekhenim,shehenim', 'Sheluchin veShuttafin:sheluchin,shluchin,sheluchim,shelukhin,shluchim,shuttafin,shutafin,shutfin,ss,svs', 'Avadim:avadim,avodim,av,avd'],
-                        searchType: "mtlink",
+                        searchType: { book: "part of Rambam", partPlural: "topic" },
                         displayName: function(canonicalName, isUntouched) { return "Rambam, " + (isUntouched ? "Hilchot " : "") + canonicalName; }
                         });
     })();
@@ -105,7 +105,7 @@ inject(function ($) {
         
         options = (options || '').toLowerCase();
         workName = match[CAPTURE_INDEX_OF_NAME].toLowerCase().replace(/ \./g, '');
-        actualName = search(mes, spellings, match, linker.searchType);
+        actualName = search(workName, spellings, match[CAPTURE_INDEX_OF_NAME], linker.searchType);
         
         if(!actualName) {
             return null;
@@ -263,7 +263,7 @@ inject(function ($) {
         return res;
 	}
 	
-	function search (title, spellings, match, cllr, redo){
+	function search (title, spellings, searchInfo, originalTitle, redo){
 		var counter, //keep track of how many titles the word matches
 			titles_found = [], //keep track of which titles.
 			word,
@@ -287,7 +287,7 @@ inject(function ($) {
 					break;
 			}
 			word = new RegExp(word);//turn word into a regex for searching
-			if (['1','2','i','ii'].indexOf(title_words[wordi]) != -1 && redo > 0) title_words[wordi] += '(,|$)';//special case for multi-volumes
+			if (['1','2','i','ii'].indexOf(title_words[wordi]) !== -1 && redo > 0) title_words[wordi] += '(,|$)';//special case for multi-volumes
 			if (titles_found.length === 0) { //if we haven't found any matches yet from previous words
 				for (var syni = 0; syni < spellings.length; syni++) { //iterate through different titles
 					if (word.test(spellings[syni])) { //check if the word is in the synonyms
@@ -311,26 +311,17 @@ inject(function ($) {
 		if (!found) { //No match :( (Technically, this if is not needed; if anything has been found we already returned)
 			if (redo < 3) { //we haven't retried with out prefixes and partial matches.
 				redo++;
-				return search(title, spellings, match, cllr, redo); //then we'll try
+				return search(title, spellings, match, searchInfo, redo); //then we'll try
 			}
-			var t, p;
-			if (cllr == 'mtlink'){
-				t = 'part of Rambam';
-				p = 'topics';
-			} else if (cllr == 'tlink'){
-				t = 'book of Tanach';
-				p = 'books';
-			} else if (cllr == 'glink'){
-				t = 'tractate of Gemara';
-				p = 'tractates';
-			}
+			var t = searchInfo.book, p = searchInfo.partPlural;
+
 			if (titles_found.length > 1) {//ambiguous. multiple matches found
 				var titles = '\n';
 				titles_found.map(function (t) { titles += spellings[t].slice(0, spellings[t].indexOf(':')) + '\n';});
-				alert("We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + match[2] + '"' + ") seemed ambiguous to our system, and could have referred to multiple " + p + ". Try to refine your entry by making it more specific. \n\nIf you'd like, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434" + "\n\n" + p + ' matched:' + titles);
+				alert("We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + originalTitle + '"' + ") seemed ambiguous to our system, and could have referred to multiple " + p + ". Try to refine your entry by making it more specific. \n\nIf you'd like, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434" + "\n\n" + p + ' matched:' + titles);
 				return false;
 			} else { //no matches found at all. //been there, done that
-				alert("We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + match[2] + '"'  + ") was not recognized by our system. This might be because you're using a spelling or an abbreviation that isn't in our system yet. \n\nIf you'd like to add this spelling, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434");
+				alert("We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + originalTitle + '"'  + ") was not recognized by our system. This might be because you're using a spelling or an abbreviation that isn't in our system yet. \n\nIf you'd like to add this spelling, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434");
 				return false;
 			}
 		}
