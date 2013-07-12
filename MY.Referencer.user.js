@@ -62,11 +62,11 @@ inject(function ($) {
     var registrations = [],
     prefixes = [];
 
-(function () {
-String.prototype.escapeRegExp = function() {
-    return this.replace(/[\\^$*+?.\(\)|{}[\]]/g, "\\$&");
-};
-})();
+    (function () {
+        String.prototype.escapeRegExp = function() {
+            return this.replace(/[\\^$*+?.\(\)|{}[\]]/g, "\\$&");
+        };
+    })();
 
     function register (prefix, linker) {
         registrations[prefix.escapeRegExp()] = linker;
