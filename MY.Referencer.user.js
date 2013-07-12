@@ -105,7 +105,7 @@ inject(function ($) {
         
         options = (options || '').toLowerCase();
         workName = match[CAPTURE_INDEX_OF_NAME].toLowerCase().replace(/ \./g, '');
-        actualName = search(workName, spellings, match[CAPTURE_INDEX_OF_NAME], linker.searchType);
+        actualName = search(workName, linker.spellings, match[CAPTURE_INDEX_OF_NAME], linker.searchType);
         
         if(!actualName) {
             return null;
