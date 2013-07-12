@@ -18,7 +18,7 @@
 // @exclude		http://*/reputation
 // @author		@HodofHod
 // @namespace		HodofHod
-// @version		2.8.7
+// @version		3.0
 // ==/UserScript==
 
 
@@ -58,13 +58,15 @@ function inject() { //Inject the script into the document
 	}
 }
 
-String.prototype.escapeRegExp = function() {
-    return this.replace(/(?=[\\^$*+?.()|{}[\]])/g, "\\");
-};
-
 inject(function ($) {
     var registrations = [],
     prefixes = [];
+
+(function () {
+String.prototype.escapeRegExp = function() {
+    return this.replace(/[\\^$*+?.\(\)|{}[\]]/g, "\\$&");
+};
+})();
 
     function register (prefix, linker) {
         registrations[prefix.escapeRegExp()] = linker;
@@ -78,15 +80,18 @@ inject(function ($) {
     })();
 
 	function refhijack(t) {
-		var r = true,
-		    i,
+		var r = true, i, regex, match, that = this,
 			textarea = t.addClass('ref-hijacked')[0];//add an extra class. Why? No idea. Ask @TimStone, it's his fault
+
 		t.on('focusout', function () { //when you click away, I pounce!
-			if (r){
-				r = false;
-			    for(i = 0; i < prefixes.length, i++){
-			        registrations[prefixes[i]].call(textarea);			    
-			    }
+		    if (r){
+			    regex = new RegExp("(\\(|\\s|^)\\[(" + prefixes.join("|") + ")[;,. :-]" +
+                               "(.+?)" +
+                               "(?:[;., :-]([a-z]{0,4}))?\\]($|[\\s,.;:\\)])", "mig");
+				match = regex.exec(textarea.value);
+                r = false;
+                registrations[match[2]].call(that, textarea);			    
+
 				try {StackExchange.MarkdownEditor.refreshAllPreviews();} catch (e) {}//refresh the Q's & A's preview panes
 			}
 		});
