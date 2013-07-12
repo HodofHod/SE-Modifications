@@ -84,8 +84,8 @@ inject(function ($) {
 		t.on('focusout', function () { //when you click away, I pounce!
 			if (r){
 				r = false;
-			    for(i = 0; i < registrations.length, i++){
-			        registrations[i].call(textarea);			    
+			    for(i = 0; i < prefixes.length, i++){
+			        registrations[prefixes[i]].call(textarea);			    
 			    }
 				try {StackExchange.MarkdownEditor.refreshAllPreviews();} catch (e) {}//refresh the Q's & A's preview panes
 			}
