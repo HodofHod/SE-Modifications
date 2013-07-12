@@ -58,21 +58,35 @@ function inject() { //Inject the script into the document
 	}
 }
 
-var script = document.createElement('script');
-script.type = 'text/javascript';
-script.src = 'https://github.com/ckoppelman/SE-Modifications/referencers/test.js';
-document.body.appendChild(script);
+String.prototype.escapeRegExp = function() {
+    return this.replace(/(?=[\\^$*+?.()|{}[\]])/g, "\\");
+};
 
 inject(function ($) {
+    var registrations = [],
+    prefixes = [];
+
+    function register (prefix, linker) {
+        registrations[prefix.escapeRegExp()] = linker;
+        prefixes.push(prefix.escapeRegExp());
+    }
+    
+    (function () {
+        register("t", tlink);
+        register("g", glink);
+        register("mt", mtlink);
+    })();
+
 	function refhijack(t) {
 		var r = true,
+		    i,
 			textarea = t.addClass('ref-hijacked')[0];//add an extra class. Why? No idea. Ask @TimStone, it's his fault
 		t.on('focusout', function () { //when you click away, I pounce!
 			if (r){
 				r = false;
-				tlink(textarea);  //check for Tanach links
-				glink(textarea);  //check for Gemara links
-				mtlink(textarea); //check for Mishna Torah links
+			    for(i = 0; i < registrations.length, i++){
+			        registrations[i].call(textarea);			    
+			    }
 				try {StackExchange.MarkdownEditor.refreshAllPreviews();} catch (e) {}//refresh the Q's & A's preview panes
 			}
 		});
