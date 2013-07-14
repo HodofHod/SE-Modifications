@@ -113,13 +113,13 @@ inject(function ($) {
         
         url = linker.link(actualName, match, options);
         
-        if(url && options.contains("l")) {
+        if(url && options.indexOf("l") !== -1) {
             // l always means add link with text
-            if(options.contains("u")) {
+            if(options.indexOf("u") !== -1) {
                 // u means use the name the user passed in
                 displayText = linker.name(match[CAPTURE_INDEX_OF_NAME], true);
             } else {
-                displayText = linker.name(workName, false);
+                displayText = linker.name(actualName, false);
             }
             return "[" + displayText + "](" + url +")";
         }
