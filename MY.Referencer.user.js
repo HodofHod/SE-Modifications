@@ -18,7 +18,7 @@
 // @exclude     http://*/reputation
 // @author      @HodofHod
 // @namespace       HodofHod
-// @version     3.0.1
+// @version     3.0.2
 // ==/UserScript==
 
 
@@ -44,12 +44,15 @@ register(prefix, linker) should be called to register each linker with a prefix.
     {
         regex: /^.*$/i,                             // a regular expression to match on
 
-        spellings: ["canonicalName:spelling1"],     // An array of strings. See @HodofHod for more info
+        spellings: ["canonicalName:spelling1, sp2"],// An array of strings. See @HodofHod for more info
 
         searchType: {                               // human-readable text to fill in here:
             book : "string",                        //      "we couldn't figure out which " + {{book}} + " you were trying to link to.
             partPlural : "strings"                  //      "... seemed ambiguous to our system, and could have referred to multiple " + {{partPlural}} + ".
         },
+        nameOverrides: {                            // an optional property to override
+            "canonicalName" : "userPreferredName"   // specific canonical names in `l`-flagged links
+        }
         displayName: function (name, match, isUntouched),
                                                     // a function which returns human-readable text
                                                     // to represent the source. name is the name of the work,
@@ -210,7 +213,11 @@ inject(function ($) {
                     displayText = linker.displayName(match[CAPTURE_INDEX_OF_NAME], match, true);
                 } else {
                     // l always means add link with text
-                    displayText = linker.displayName(actualName, match, false);
+                    var fixedName = actualName;
+                    if(linker.nameOverrides !== undefined) {
+                        fixedName = linker.nameOverrides[actualName] || actualName;
+                    }
+                    displayText = linker.displayName(fixedName, match, false);
                 }
 
                 return "[" + displayText + "](" + url + ")";
@@ -316,6 +323,7 @@ inject(function ($) {
                     }
                     return res;
                 },
+                nameOverrides: {"Esther" : "Ester" },
                 spellings: ['Divrei Hayamim I:1,ch,chron,chroniclesi,cr,dh,divreihayamim,divreihayamimi,firstchronicles,i,ichr,ichronicles', 'Melachim I:1,firstkgs,firstkings,i,ikgs,ikings,k,kg,ki,kings,kingsi,melachim,melachimi,mlachima,stkings', 'Divrei Hayamim II:2,ch,chron,chroniclesii,cr,dh,divreihayamim,divreihayamimii,ii,iichr,iichronicles,secondchronicles', 'Melachim II:2,ii,iikgs,iikings,k,kg,ki,kings,kingsii,melachim,melachimii,mlachimb,ndkings,secondkgs,secondkings', 'Bereishit:beraishis,beraishit,berayshis,bereishis,bereishit,bereshit,braishis,braishit,brayshis,brayshit,breishis,breishit,ge,genesis,geneza,gn', 'Yirmiyahu:je,jeremia,jeremiah,jeremija,jr,yeremiyah,yeremiyahu,yirmiyahu', 'Michah:mch,mi,micah,micha,michah,miha,miq', 'Rus:rt,rth,ru,rus,ruta,ruth', 'Shemot:ex,exd,exod,exodus,sh,shemos,shemot,shmos,shmot', 'Vayikra:lb,le,leu,leviticus,lv,vayikra,vayiqra,vayyikra,vayyiqra', 'Bamidbar:bamidbar,bmidbar,br,nb,nm,nomb,nu,numbers', 'Devarim:de,deut,deuteronomio,deuteronomium,deuteronomy,devarim,dvarim,dt', 'Yehoshua:ios,josh,joshua,josua,joz,jsh,yehoshua,yoshua', 'Shoftim:jdgs,jg,jt,judg,judges,jue,juges,shofetim,shoftim', 'Shmuel I:1,firstsamuel,i,isam,isamuel,s,sa,samuel,samueli,shmuel,shmuela,shmueli,sm', 'Shmuel II:2,ii,iisam,iisamuel,s,sa,samuel,samuelii,secondsamuel,shmuel,shmuelb,shmuelii,sm', 'Yeshayahu:is,isaiah,isiah,yeshayah,yeshayahu', 'Yechezkel:,ez,ezec,ezekial,ezekiel,hes,yecheskel,yechezkel', 'Hoshea:ho,hosea,hoshea', 'Yoel:ioel,jl,joel,jol,yoel', 'Amos:am,amos,ams', 'Ovadiah:ab,abdija,ob,obad,obadiah,obadija,obadja,obd,ovadiah,ovadyah', 'Yonah:ion,jna,jnh,jona,jonah,yonah', 'Nachum:na,nachum,naham,nahum,nam', 'Chavakuk:chavakuk,ha,habacuc,habakkuk,habakuk,habaqquq,habaquq', 'Tzefaniah:sefanja,sofonija,soph,tsefania,tsephania,tzefaniah,tzephaniah,zefanija,zefanja,zeph,zephanja,zp', 'Chaggai:chagai,chaggai,hagai,haggai,haggay,hg,hgg', 'Zechariah:sacharja,za,zach,zacharia,zaharija,zc,zch,zech,zechariah,zecharya,zekhariah', 'Malachi:malachi,malahija,malakhi,maleachi,ml', 'Tehillim:ps,psalm,psalmen,psalmi,psalms,psg,pslm,psm,pss,salmos,sl,tehilim,tehillim,thilim,thillim', 'Mishlei:mishlei,mishley,pr,prou,proverbs,prv', 'Iyov:hi,hiob,ijob,iyov,iyyov,jb', 'Shir HaShirim:sgs,shirhashirim,sng,so,song,songofsolomon,songofsongs,sos,ss,canticles', 'Eichah:aichah,eichah,eikhah,la,lamentaciones,lamentations,lm', 'Kohelet:ec,eccl,ecclesiastes,ecl,koheles,kohelet,qo,qohelet,qoheleth,qohleth', 'Esther:ester,estera,esther', 'Daniel:da,daniel,dn', 'Ezra:esra,ezra', 'Nechemiah:ne,nechemiah,nehemia,nehemiah,nehemija,nehemyah'],
                 searchType: { book: "book of Tanakh", partPlural: "books" },
                 displayName: function (name, match) {
