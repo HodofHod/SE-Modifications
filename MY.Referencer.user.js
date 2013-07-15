@@ -115,7 +115,7 @@ inject(function ($) {
             titles,
             found = false,
             title_words = title.toLowerCase().match(/[a-zA-Z]+|[0-9]+/g);//.split(' ');//a fancy way to split. splits both spaces and numbers
-        redo = redo === undefined ? redo : 0; //if redo isn't passed, default to false.
+        redo = redo === undefined ? 0 : redo; //if redo isn't passed, default to false.
         for (wordi = 0; wordi < title_words.length; wordi += 1) { //iterate through each word in input
             counter = 0; //reset the counter for each word
             switch (redo) {
