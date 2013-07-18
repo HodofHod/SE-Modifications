@@ -19,7 +19,7 @@
 // @exclude     http://*/reputation
 // @author      @HodofHod
 // @namespace       HodofHod
-// @version     3.1.0
+// @version     3.1.1
 // ==/UserScript==
 
 
@@ -90,17 +90,18 @@ function inject() { //Inject the script into the document
     }
 }
 
-function sefariahCaller(ref, refId) {
+function sefariahCaller(ref, refId, lang) {
     "use strict";
     GM_xmlhttpRequest({
         method: "GET",
-        context: { refId : refId },
+        context: { refId : refId , lang : lang },
         url: "http://sefaria.org/api/texts/" + encodeURIComponent(ref) + "?context=0&commentary=0",
         onload: function (response) {
             var value = JSON.stringify({
                     textResponse : {
                         replaceText : response.context.refId,
-                        data : JSON.parse(response.responseText)
+                        data : JSON.parse(response.responseText),
+                        lang : response.context.lang
                     }
                 });
             window.postMessage(value, "*");
@@ -123,7 +124,7 @@ function receiveMessage(event) {
 
     if (messageJSON.hasOwnProperty("textRequest")) {
         textRef = messageJSON.textRequest.ref;
-        sefariahCaller(textRef, messageJSON.textRequest.replaceText);
+        sefariahCaller(textRef, messageJSON.textRequest.replaceText, messageJSON.textRequest.lang);
     }
 }
 
@@ -246,12 +247,12 @@ inject(function ($) {
             return null;
         }
 
-        if (options.indexOf("w") !== -1) {
+        if (options.indexOf("w") !== -1 || options.indexOf("h") !== -1) {
             if (typeof linker.getText === 'function') {
                 text = linker.getText(actualName, match, options);
 
                 window.addEventListener("message", function (event) {
-                    var myText = text, messageJSON;
+                    var myText = text, messageJSON, fullText;
                     try {
                         messageJSON = JSON.parse(event.data);
                     } catch (ignore) {
@@ -264,10 +265,16 @@ inject(function ($) {
 
                     if (messageJSON.hasOwnProperty("textResponse")) {
                         if (messageJSON.textResponse.replaceText === myText) {
+                            if (messageJSON.textResponse.lang === "en") {
+                                fullText = messageJSON.textResponse.data.text;
+                            } else {
+                                fullText = messageJSON.textResponse.data.he;
+                            }
+                            
                             $('.ref-hijacked').each(function () {
                                 $(this)[0].value = $(this)[0].value.replace(
                                     text,
-                                    messageJSON.textResponse.data.text
+                                    fullText
                                 );
                             });
                             try { StackExchange.MarkdownEditor.refreshAllPreviews(); } catch (ignore) {} //refresh the Q's & A's preview panes
@@ -434,7 +441,7 @@ inject(function ($) {
                     var fixedBook = (sefariaMapping && sefariaMapping.hasOwnProperty(book)) ? sefariaMapping[book] : book,
 
                         ref = fixedBook + "." + match[2] + (match[3] ? "." + match[3] : ""),
-                        refId = '[refId:' + ref + ']';
+                        refId = '[refId:' + ref + ":" + flags + ']';
 
                     if (!isValidChapter(book, match[2])) {
                         return null;
@@ -444,6 +451,7 @@ inject(function ($) {
                         JSON.stringify( {
                             textRequest: {
                                 ref: ref,
+                                lang: flags.indexOf("h") !== -1 ? "he" : "en",
                                 replaceText: refId
                             }
                         }), "*");
