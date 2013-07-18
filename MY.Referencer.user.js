@@ -275,8 +275,10 @@ inject(function ($) {
 
                             if(!fullText.length) {
                             
-                                alert("Sorry, the verse that you specified does not exist " +
-                                        "in that book or sefaria.org does not know about it. " +
+                                alert("Sorry, either the " + messageJSON.textResponse.data.sectionNames[1].toLowerCase() +
+                                        " that you specified does not exist in that " +
+                                        messageJSON.textResponse.data.sectionNames[0].toLowerCase() +
+                                        " or sefaria.org does not know about it. " +
                                         "Please try again with better values." + warningText);
                                 return;
                             }
