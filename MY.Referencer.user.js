@@ -92,6 +92,9 @@ function inject() { //Inject the script into the document
 
 function sefariahCaller(ref, refId, lang) {
     "use strict";
+    var failure = function () {
+        alert("We had problems connecting to sefaria.org and could not fill in the text.");
+    };
     GM_xmlhttpRequest({
         method: "GET",
         context: { refId : refId , lang : lang },
@@ -105,7 +108,9 @@ function sefariahCaller(ref, refId, lang) {
                     }
                 });
             window.postMessage(value, "*");
-        }
+        },
+        ontimeout: failure,
+        onerror: failure
     });
 }
 
