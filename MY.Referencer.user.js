@@ -13,12 +13,13 @@
 // @match       http://meta.answers.onstartups.com/*
 // @match       http://stackapps.com/*
 // @match       http://*.stackexchange.com/*
+// @match       http://sefaria.org/api/*
 // @exclude     http://api.*.stackexchange.com/*
 // @exclude     http://data.stackexchange.com/*
 // @exclude     http://*/reputation
 // @author      @HodofHod
 // @namespace       HodofHod
-// @version     3.0.4
+// @version     3.1.1
 // ==/UserScript==
 
 
@@ -89,11 +90,55 @@ function inject() { //Inject the script into the document
     }
 }
 
+function sefariahCaller(ref, refId, lang) {
+    "use strict";
+    var failure = function () {
+        alert("We had problems connecting to sefaria.org and could not fill in the text.");
+    };
+    GM_xmlhttpRequest({
+        method: "GET",
+        context: { refId : refId , lang : lang },
+        url: "http://sefaria.org/api/texts/" + encodeURIComponent(ref) + "?context=0&commentary=0",
+        onload: function (response) {
+            var value = JSON.stringify({
+                    textResponse : {
+                        replaceText : response.context.refId,
+                        data : JSON.parse(response.responseText),
+                        lang : response.context.lang
+                    }
+                });
+            window.postMessage(value, "*");
+        },
+        ontimeout: failure,
+        onerror: failure
+    });
+}
+
+function receiveMessage(event) {
+    'use strict';
+    var messageJSON, textRef;
+    try {
+        messageJSON = JSON.parse(event.data);
+    } catch (ignore) {
+        // Do nothing
+    }
+
+    if (!messageJSON) {
+        return; //-- Message is not for us.
+    }
+
+    if (messageJSON.hasOwnProperty("textRequest")) {
+        textRef = messageJSON.textRequest.ref;
+        sefariahCaller(textRef, messageJSON.textRequest.replaceText, messageJSON.textRequest.lang);
+    }
+}
+
+window.addEventListener("message", receiveMessage, false);
+
 inject(function ($) {
     "use strict";
     var registrations = [],
         prefixes = [];
-
     (function () {
         String.prototype.hodRef_escapeRegExp = function () {
             return this.replace(/[\\\^$*+?.\(\)|\[\]]/g, "\\$&");
@@ -189,8 +234,10 @@ inject(function ($) {
             actualName = null,
             displayText = null,
             url,
+            text,
             addLink,
             untouched,
+            fixedName,
             CAPTURE_INDEX_OF_NAME = 1;
 
         if (!match) {
@@ -205,6 +252,58 @@ inject(function ($) {
             return null;
         }
 
+        if (options.indexOf("w") !== -1 || options.indexOf("h") !== -1) {
+            if (typeof linker.getText === 'function') {
+                text = linker.getText(actualName, match, options);
+
+                window.addEventListener("message", function (event) {
+                    var myText = text, messageJSON, fullText, warningText = "";
+                    try {
+                        messageJSON = JSON.parse(event.data);
+                    } catch (ignore) {
+                        // Do nothing
+                    }
+
+                    if (!messageJSON) {
+                        return; //-- Message is not for us.
+                    }
+
+                    if (messageJSON.hasOwnProperty("textResponse")) {
+                        if (messageJSON.textResponse.replaceText === myText) {
+                            if (messageJSON.textResponse.lang === "en") {
+                                fullText = messageJSON.textResponse.data.text;
+                                warningText = " In general, sefaria.org has more Hebrew" +
+                                        ' than English.';
+                            } else {
+                                fullText = messageJSON.textResponse.data.he;
+								if(fullText.length) { fullText += "&rlm;"; }
+                            }
+
+                            if(!fullText.length) {
+                            
+                                alert("Sorry, either the " + messageJSON.textResponse.data.sectionNames[1].toLowerCase() +
+                                        " that you specified does not exist in that " +
+                                        messageJSON.textResponse.data.sectionNames[0].toLowerCase() +
+                                        " or sefaria.org does not know about it. " +
+                                        "Please try again with better values." + warningText);
+                                return;
+                            }
+
+                            $('.ref-hijacked').each(function () {
+                                $(this)[0].value = $(this)[0].value.replace(
+                                    text,
+                                    fullText
+                                );
+                            });
+                            try { StackExchange.MarkdownEditor.refreshAllPreviews(); } catch (ignore) {} //refresh the Q's & A's preview panes
+                        }
+                    }
+
+                }, false);
+                return text;
+            }
+        }
+
         url = linker.link(actualName, match, options);
 
         if (url) {
@@ -217,8 +316,8 @@ inject(function ($) {
                     displayText = linker.displayName(match[CAPTURE_INDEX_OF_NAME], match, true);
                 } else {
                     // l always means add link with text
-                    var fixedName = actualName;
-                    if(linker.nameOverrides !== undefined) {
+                    fixedName = actualName;
+                    if (linker.nameOverrides !== undefined) {
                         fixedName = linker.nameOverrides[actualName] || actualName;
                     }
                     displayText = linker.displayName(fixedName, match, false);
@@ -297,6 +396,36 @@ inject(function ($) {
                         }
                     }
                     return url; //Then we're ready to rummmmmmbbblleee.....
+                },
+
+                sefariaMapping = {
+                    "Yeshayahu" : "Yishayahu",
+                    "Yechezkel" : "Yehezkel",
+                    "Michah" : "Micah",
+                    "Nachum" : "Nahum",
+                    "Chavakuk" : "Havakkuk",
+                    "Tzefaniah" : "Tzephaniah",
+                    "Tehillim" : "Tehilim",
+                    "Rus" : "Rut",
+                    "Nechemiah" : "Nehemiah",
+                    "Divrei Hayamim I" : "Divrei HaYamim I",
+                    "Divrei Hayamim II" : "Divrei HaYamim II"
+                },
+
+                map = {'Tzefaniah': [16200, 3, '21'], 'Hoshea': [16155, 14, '13'], 'Nachum': [16194, 3, '19'], 'Michah': [16187, 7, '18'], 'Shoftim': [15809, 21, '07'], 'Melachim II': [15907, 25, '09b'], 'Tehillim': [16222, 150, '26'], 'Nechemiah': [16508, 13, '35b'], 'Kohelet': [16462, 12, '31'], 'Yirmiyahu': [15998, 52, '11'], 'Amos': [16173, 9, '15'], 'Zechariah': [16205, 14, '23'], 'Melachim I': [15885, 22, '09a'], 'Divrei Hayamim II': [16550, 36, '25b'], 'Shmuel I': [15830, 31, '08a'], 'Yeshayahu': [15932, 66, '10'], 'Shmuel II': [15861, 24, '08b'], 'Yonah': [16183, 4, '17'], 'Rus': [16453, 4, '29'], 'Shir HaShirim': [16445, 8, '30'], 'Vayikra': [9902, 27, '03'], 'Ezra': [16498, 10, '35a'], 'Esther': [16474, 10, '33'], 'Yehoshua': [15785, 24, '06'], 'Yechezkel': [16099, 48, '12'], 'Iyov': [16403, 42, '27'], 'Divrei Hayamim I': [16521, 29, '25a'], 'Mishlei': [16372, 31, '28'], 'Daniel': [16484, 12, '34'], 'Devarim': [9965, 34, '05'], 'Yoel': [16169, 4, '14'], 'Chavakuk': [16197, 3, '20'], 'Bamidbar': [9929, 36, '04'], 'Chaggai': [16203, 2, '22'], 'Shemot': [9862, 40, '02'], 'Malachi': [16219, 3, '24'], 'Bereishit': [8165, 50, '01'], 'Eichah': [16457, 5, '32'], 'Ovadiah': [16182, 1, '16']
+                },
+
+                isValidChapter = function (book, chpt) {
+                    if (chpt === '0') { //If the chapter number is 0, then someone's trying to cheat me!
+                        alert('"0" is not a valid chapter number. Please try again.');
+                        return false;
+                    }
+
+                    if (chpt > map[book][1]) { //Stop trying to sneak fake chapters in, aright?
+                        alert('"' + chpt + '" is not a valid chapter for ' + book + '. \n\nThere are only ' + map[book][1] + ' `chapters in ' + book + '\n\nPlease try again.');
+                        return false;
+                    }
+                    return true;
                 };
 
             return {
@@ -304,20 +433,12 @@ inject(function ($) {
                 link: function (book, match, flags) {
                     //Keys are book names (duh) first value is chapter 1's id for chabad.org. 2nd value is number of chapters
                     //Third value is Mechon Mamre's book id
-                    var map = {'Tzefaniah': [16200, 3, '21'], 'Hoshea': [16155, 14, '13'], 'Nachum': [16194, 3, '19'], 'Michah': [16187, 7, '18'], 'Shoftim': [15809, 21, '07'], 'Melachim II': [15907, 25, '09b'], 'Tehillim': [16222, 150, '26'], 'Nechemiah': [16508, 13, '35b'], 'Kohelet': [16462, 12, '31'], 'Yirmiyahu': [15998, 52, '11'], 'Amos': [16173, 9, '15'], 'Zechariah': [16205, 14, '23'], 'Melachim I': [15885, 22, '09a'], 'Divrei Hayamim II': [16550, 36, '25b'], 'Shmuel I': [15830, 31, '08a'], 'Yeshayahu': [15932, 66, '10'], 'Shmuel II': [15861, 24, '08b'], 'Yonah': [16183, 4, '17'], 'Rus': [16453, 4, '29'], 'Shir HaShirim': [16445, 8, '30'], 'Vayikra': [9902, 27, '03'], 'Ezra': [16498, 10, '35a'], 'Esther': [16474, 10, '33'], 'Yehoshua': [15785, 24, '06'], 'Yechezkel': [16099, 48, '12'], 'Iyov': [16403, 42, '27'], 'Divrei Hayamim I': [16521, 29, '25a'], 'Mishlei': [16372, 31, '28'], 'Daniel': [16484, 12, '34'], 'Devarim': [9965, 34, '05'], 'Yoel': [16169, 4, '14'], 'Chavakuk': [16197, 3, '20'], 'Bamidbar': [9929, 36, '04'], 'Chaggai': [16203, 2, '22'], 'Shemot': [9862, 40, '02'], 'Malachi': [16219, 3, '24'], 'Bereishit': [8165, 50, '01'], 'Eichah': [16457, 5, '32'], 'Ovadiah': [16182, 1, '16']
-                              },
-                        chpt = match[2],
+                    var chpt = match[2],
                         vrs = match[3] || '',
                         res;
 
                     flags = flags.toLowerCase(); //more matching purposes
-                    if (chpt === '0') { //If the chapter number is 0, then someone's trying to cheat me!
-                        alert('"0" is not a valid chapter number. Please try again.');
-                        return null;
-                    }
-
-                    if (chpt > map[book][1]) { //Stop trying to sneak fake chapters in, aright?
-                        alert('"' + chpt + '" is not a valid chapter for ' + book + '. \n\nThere are only ' + map[book][1] + ' `chapters in ' + book + '\n\nPlease try again.');
+                    if (!isValidChapter(book, chpt)) {
                         return null;
                     }
                     if (flags.indexOf('m') !== -1) { //Mechon Mamre flag is set
@@ -333,6 +454,26 @@ inject(function ($) {
                 displayName: function (name, match) {
                     var verse = match[3] ? ":" + match[3] : '';
                     return name + " " + match[2] + verse;
+                },
+                getText: function (book, match, flags) {
+                    var fixedBook = (sefariaMapping && sefariaMapping.hasOwnProperty(book)) ? sefariaMapping[book] : book,
+
+                        ref = fixedBook + "." + match[2] + (match[3] ? "." + match[3] : ""),
+                        refId = '[refId:' + ref + ":" + flags + ']';
+
+                    if (!isValidChapter(book, match[2])) {
+                        return null;
+                    }
+
+                    window.postMessage(
+                        JSON.stringify( {
+                            textRequest: {
+                                ref: ref,
+                                lang: flags.indexOf("h") !== -1 ? "he" : "en",
+                                replaceText: refId
+                            }
+                        }), "*");
+                    return refId;
                 }
             };
         }()));
