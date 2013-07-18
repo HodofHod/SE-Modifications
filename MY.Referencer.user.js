@@ -13,6 +13,7 @@
 // @match       http://meta.answers.onstartups.com/*
 // @match       http://stackapps.com/*
 // @match       http://*.stackexchange.com/*
+// @match       http://sefaria.org/api/*
 // @exclude     http://api.*.stackexchange.com/*
 // @exclude     http://data.stackexchange.com/*
 // @exclude     http://*/reputation
@@ -104,6 +105,7 @@ function receiveMessage (event) {
     if (!messageJSON) return; //-- Message is not for us.
 
     if (messageJSON.hasOwnProperty("textRequest")) {
+        console.log(messageJSON.textRequest);
         var textRef = messageJSON.textRequest.ref;
         var response = sefariahCaller(textRef);
     }
@@ -112,25 +114,20 @@ function receiveMessage (event) {
 
 function sefariahCaller(ref) {
     var responseData;
-    var req = GM_xmlhttpRequest( {
-        method: 'GET',
-        url: "http://http://sefaria.org/api/texts/" + ref + "?context=0",
-        headers: {
-            Accept: "application/json"
-        },
+    console.log("in sefariiahCaller");
+    GM_xmlhttpRequest({
+        method: "GET",
+        url: "http://sefaria.org/api/texts/" + ref + "?context=0&commentary=0",
         onload: function (response) {
-            console.log("returned");
-            window.postMessage(
-                JSON.stringify({
-                    textResponse: {
-                        response: JSON.parse(response.responseText), 
-                        ref: ref
-                    }
-                })
-            , "*");
+            alert(response.responseText);
+        },
+        onreadystatechange: function (response) {
+            console.log("readystatechange", response);
         }
     });
-    
+    console.log(req);
+    console.log("leaving caller");
+    return req;
 }
 
 inject(function ($) {
@@ -387,10 +384,10 @@ inject(function ($) {
                     var verse = match[3] ? ":" + match[3] : '';
                     return name + " " + match[2] + verse;
                 },
-                getText: function() {
+                getText: function(book, match, flags) {
                     window.postMessage(
                         JSON.stringify({
-                            textRequest: {ref: "Kohelet.2.4"}
+                            textRequest: { ref: book + "." + match[2] + (match[3] ? "." + match[3] : "") }
                         }), "*");
                     
                 }
