@@ -252,7 +252,7 @@ inject(function ($) {
                 text = linker.getText(actualName, match, options);
 
                 window.addEventListener("message", function (event) {
-                    var myText = text, messageJSON, fullText;
+                    var myText = text, messageJSON, fullText, warningText = "";
                     try {
                         messageJSON = JSON.parse(event.data);
                     } catch (ignore) {
@@ -267,10 +267,20 @@ inject(function ($) {
                         if (messageJSON.textResponse.replaceText === myText) {
                             if (messageJSON.textResponse.lang === "en") {
                                 fullText = messageJSON.textResponse.data.text;
+                                warningText = " In general, sefaria.org has more Hebrew" +
+                                        ' than English.';
                             } else {
                                 fullText = messageJSON.textResponse.data.he;
                             }
+
+                            if(!fullText.length) {
                             
+                                alert("Sorry, the verse that you specified does not exist " +
+                                        "in that book or sefaria.org does not know about it. " +
+                                        "Please try again with better values." + warningText);
+                                return;
+                            }
+
                             $('.ref-hijacked').each(function () {
                                 $(this)[0].value = $(this)[0].value.replace(
                                     text,
