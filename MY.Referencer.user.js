@@ -276,6 +276,7 @@ inject(function ($) {
                                         ' than English.';
                             } else {
                                 fullText = messageJSON.textResponse.data.he;
+								if(fullText.length) { fullText += "&rlm;"; }
                             }
 
                             if(!fullText.length) {
