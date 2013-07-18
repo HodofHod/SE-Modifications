@@ -90,45 +90,44 @@ function inject() { //Inject the script into the document
     }
 }
 
-window.addEventListener ("message", receiveMessage, false);
-
-function receiveMessage (event) {
-    var messageJSON;
-    try {
-        messageJSON = JSON.parse(event.data);
-    }
-    catch (zError) {
-        // Do nothing
-    }
-    console.log ("messageJSON:", messageJSON);
-
-    if (!messageJSON) return; //-- Message is not for us.
-
-    if (messageJSON.hasOwnProperty("textRequest")) {
-        console.log(messageJSON.textRequest);
-        var textRef = messageJSON.textRequest.ref;
-        var response = sefariahCaller(textRef);
-    }
-}    
-    
-
-function sefariahCaller(ref) {
-    var responseData;
-    console.log("in sefariiahCaller");
+function sefariahCaller(ref, refId) {
+    "use strict";
     GM_xmlhttpRequest({
         method: "GET",
-        url: "http://sefaria.org/api/texts/" + ref + "?context=0&commentary=0",
+        context: { refId : refId },
+        url: "http://sefaria.org/api/texts/" + encodeURIComponent(ref) + "?context=0&commentary=0",
         onload: function (response) {
-            alert(response.responseText);
-        },
-        onreadystatechange: function (response) {
-            console.log("readystatechange", response);
+            var value = JSON.stringify({
+                    textResponse : {
+                        replaceText : response.context.refId,
+                        data : JSON.parse(response.responseText)
+                    }
+                });
+            window.postMessage(value, "*");
         }
     });
-    console.log(req);
-    console.log("leaving caller");
-    return req;
 }
+
+function receiveMessage(event) {
+    'use strict';
+    var messageJSON, textRef;
+    try {
+        messageJSON = JSON.parse(event.data);
+    } catch (ignore) {
+        // Do nothing
+    }
+
+    if (!messageJSON) {
+        return; //-- Message is not for us.
+    }
+
+    if (messageJSON.hasOwnProperty("textRequest")) {
+        textRef = messageJSON.textRequest.ref;
+        sefariahCaller(textRef, messageJSON.textRequest.replaceText);
+    }
+}
+
+window.addEventListener("message", receiveMessage, false);
 
 inject(function ($) {
     "use strict";
@@ -232,6 +231,7 @@ inject(function ($) {
             text,
             addLink,
             untouched,
+            fixedName,
             CAPTURE_INDEX_OF_NAME = 1;
 
         if (!match) {
@@ -246,12 +246,36 @@ inject(function ($) {
             return null;
         }
 
-        if(options.indexOf("w") !== -1) {
-            console.log("w exists - word time?");
-            if(typeof linker.getText === 'function') {
-                console.log("linker.getText exists - word time!");
+        if (options.indexOf("w") !== -1) {
+            if (typeof linker.getText === 'function') {
                 text = linker.getText(actualName, match, options);
-                return "> " + text;
+
+                window.addEventListener("message", function (event) {
+                    var myText = text, messageJSON;
+                    try {
+                        messageJSON = JSON.parse(event.data);
+                    } catch (ignore) {
+                        // Do nothing
+                    }
+
+                    if (!messageJSON) {
+                        return; //-- Message is not for us.
+                    }
+
+                    if (messageJSON.hasOwnProperty("textResponse")) {
+                        if (messageJSON.textResponse.replaceText === myText) {
+                            $('.ref-hijacked').each(function () {
+                                $(this)[0].value = $(this)[0].value.replace(
+                                    text,
+                                    messageJSON.textResponse.data.text
+                                );
+                            });
+                            try { StackExchange.MarkdownEditor.refreshAllPreviews(); } catch (ignore) {} //refresh the Q's & A's preview panes
+                        }
+                    }
+
+                }, false);
+                return text;
             }
         }
 
@@ -267,8 +291,8 @@ inject(function ($) {
                     displayText = linker.displayName(match[CAPTURE_INDEX_OF_NAME], match, true);
                 } else {
                     // l always means add link with text
-                    var fixedName = actualName;
-                    if(linker.nameOverrides !== undefined) {
+                    fixedName = actualName;
+                    if (linker.nameOverrides !== undefined) {
                         fixedName = linker.nameOverrides[actualName] || actualName;
                     }
                     displayText = linker.displayName(fixedName, match, false);
@@ -347,6 +371,36 @@ inject(function ($) {
                         }
                     }
                     return url; //Then we're ready to rummmmmmbbblleee.....
+                },
+
+                sefariaMapping = {
+                    "Yeshayahu" : "Yishayahu",
+                    "Yechezkel" : "Yehezkel",
+                    "Michah" : "Micah",
+                    "Nachum" : "Nahum",
+                    "Chavakuk" : "Havakkuk",
+                    "Tzefaniah" : "Tzephaniah",
+                    "Tehillim" : "Tehilim",
+                    "Rus" : "Rut",
+                    "Nechemiah" : "Nehemiah",
+                    "Divrei Hayamim I" : "Divrei HaYamim I",
+                    "Divrei Hayamim II" : "Divrei HaYamim II"
+                },
+
+                map = {'Tzefaniah': [16200, 3, '21'], 'Hoshea': [16155, 14, '13'], 'Nachum': [16194, 3, '19'], 'Michah': [16187, 7, '18'], 'Shoftim': [15809, 21, '07'], 'Melachim II': [15907, 25, '09b'], 'Tehillim': [16222, 150, '26'], 'Nechemiah': [16508, 13, '35b'], 'Kohelet': [16462, 12, '31'], 'Yirmiyahu': [15998, 52, '11'], 'Amos': [16173, 9, '15'], 'Zechariah': [16205, 14, '23'], 'Melachim I': [15885, 22, '09a'], 'Divrei Hayamim II': [16550, 36, '25b'], 'Shmuel I': [15830, 31, '08a'], 'Yeshayahu': [15932, 66, '10'], 'Shmuel II': [15861, 24, '08b'], 'Yonah': [16183, 4, '17'], 'Rus': [16453, 4, '29'], 'Shir HaShirim': [16445, 8, '30'], 'Vayikra': [9902, 27, '03'], 'Ezra': [16498, 10, '35a'], 'Esther': [16474, 10, '33'], 'Yehoshua': [15785, 24, '06'], 'Yechezkel': [16099, 48, '12'], 'Iyov': [16403, 42, '27'], 'Divrei Hayamim I': [16521, 29, '25a'], 'Mishlei': [16372, 31, '28'], 'Daniel': [16484, 12, '34'], 'Devarim': [9965, 34, '05'], 'Yoel': [16169, 4, '14'], 'Chavakuk': [16197, 3, '20'], 'Bamidbar': [9929, 36, '04'], 'Chaggai': [16203, 2, '22'], 'Shemot': [9862, 40, '02'], 'Malachi': [16219, 3, '24'], 'Bereishit': [8165, 50, '01'], 'Eichah': [16457, 5, '32'], 'Ovadiah': [16182, 1, '16']
+                },
+
+                isValidChapter = function (book, chpt) {
+                    if (chpt === '0') { //If the chapter number is 0, then someone's trying to cheat me!
+                        alert('"0" is not a valid chapter number. Please try again.');
+                        return false;
+                    }
+
+                    if (chpt > map[book][1]) { //Stop trying to sneak fake chapters in, aright?
+                        alert('"' + chpt + '" is not a valid chapter for ' + book + '. \n\nThere are only ' + map[book][1] + ' `chapters in ' + book + '\n\nPlease try again.');
+                        return false;
+                    }
+                    return true;
                 };
 
             return {
@@ -354,20 +408,12 @@ inject(function ($) {
                 link: function (book, match, flags) {
                     //Keys are book names (duh) first value is chapter 1's id for chabad.org. 2nd value is number of chapters
                     //Third value is Mechon Mamre's book id
-                    var map = {'Tzefaniah': [16200, 3, '21'], 'Hoshea': [16155, 14, '13'], 'Nachum': [16194, 3, '19'], 'Michah': [16187, 7, '18'], 'Shoftim': [15809, 21, '07'], 'Melachim II': [15907, 25, '09b'], 'Tehillim': [16222, 150, '26'], 'Nechemiah': [16508, 13, '35b'], 'Kohelet': [16462, 12, '31'], 'Yirmiyahu': [15998, 52, '11'], 'Amos': [16173, 9, '15'], 'Zechariah': [16205, 14, '23'], 'Melachim I': [15885, 22, '09a'], 'Divrei Hayamim II': [16550, 36, '25b'], 'Shmuel I': [15830, 31, '08a'], 'Yeshayahu': [15932, 66, '10'], 'Shmuel II': [15861, 24, '08b'], 'Yonah': [16183, 4, '17'], 'Rus': [16453, 4, '29'], 'Shir HaShirim': [16445, 8, '30'], 'Vayikra': [9902, 27, '03'], 'Ezra': [16498, 10, '35a'], 'Esther': [16474, 10, '33'], 'Yehoshua': [15785, 24, '06'], 'Yechezkel': [16099, 48, '12'], 'Iyov': [16403, 42, '27'], 'Divrei Hayamim I': [16521, 29, '25a'], 'Mishlei': [16372, 31, '28'], 'Daniel': [16484, 12, '34'], 'Devarim': [9965, 34, '05'], 'Yoel': [16169, 4, '14'], 'Chavakuk': [16197, 3, '20'], 'Bamidbar': [9929, 36, '04'], 'Chaggai': [16203, 2, '22'], 'Shemot': [9862, 40, '02'], 'Malachi': [16219, 3, '24'], 'Bereishit': [8165, 50, '01'], 'Eichah': [16457, 5, '32'], 'Ovadiah': [16182, 1, '16']
-                              },
-                        chpt = match[2],
+                    var chpt = match[2],
                         vrs = match[3] || '',
                         res;
 
                     flags = flags.toLowerCase(); //more matching purposes
-                    if (chpt === '0') { //If the chapter number is 0, then someone's trying to cheat me!
-                        alert('"0" is not a valid chapter number. Please try again.');
-                        return null;
-                    }
-
-                    if (chpt > map[book][1]) { //Stop trying to sneak fake chapters in, aright?
-                        alert('"' + chpt + '" is not a valid chapter for ' + book + '. \n\nThere are only ' + map[book][1] + ' `chapters in ' + book + '\n\nPlease try again.');
+                    if (!isValidChapter(book, chpt)) {
                         return null;
                     }
                     if (flags.indexOf('m') !== -1) { //Mechon Mamre flag is set
@@ -384,12 +430,24 @@ inject(function ($) {
                     var verse = match[3] ? ":" + match[3] : '';
                     return name + " " + match[2] + verse;
                 },
-                getText: function(book, match, flags) {
+                getText: function (book, match, flags) {
+                    var fixedBook = (sefariaMapping && sefariaMapping.hasOwnProperty(book)) ? sefariaMapping[book] : book,
+
+                        ref = fixedBook + "." + match[2] + (match[3] ? "." + match[3] : ""),
+                        refId = '[refId:' + ref + ']';
+
+                    if (!isValidChapter(book, match[2])) {
+                        return null;
+                    }
+
                     window.postMessage(
-                        JSON.stringify({
-                            textRequest: { ref: book + "." + match[2] + (match[3] ? "." + match[3] : "") }
+                        JSON.stringify( {
+                            textRequest: {
+                                ref: ref,
+                                replaceText: refId
+                            }
                         }), "*");
-                    
+                    return refId;
                 }
             };
         }()));
