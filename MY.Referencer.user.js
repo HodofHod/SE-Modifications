@@ -18,7 +18,7 @@
 // @exclude     http://*/reputation
 // @author      @HodofHod
 // @namespace       HodofHod
-// @version     3.0.4
+// @version     3.1.0
 // ==/UserScript==
 
 
@@ -89,11 +89,54 @@ function inject() { //Inject the script into the document
     }
 }
 
+window.addEventListener ("message", receiveMessage, false);
+
+function receiveMessage (event) {
+    var messageJSON;
+    try {
+        messageJSON = JSON.parse(event.data);
+    }
+    catch (zError) {
+        // Do nothing
+    }
+    console.log ("messageJSON:", messageJSON);
+
+    if (!messageJSON) return; //-- Message is not for us.
+
+    if (messageJSON.hasOwnProperty("textRequest")) {
+        var textRef = messageJSON.textRequest.ref;
+        var response = sefariahCaller(textRef);
+    }
+}    
+    
+
+function sefariahCaller(ref) {
+    var responseData;
+    var req = GM_xmlhttpRequest( {
+        method: 'GET',
+        url: "http://http://sefaria.org/api/texts/" + ref + "?context=0",
+        headers: {
+            Accept: "application/json"
+        },
+        onload: function (response) {
+            console.log("returned");
+            window.postMessage(
+                JSON.stringify({
+                    textResponse: {
+                        response: JSON.parse(response.responseText), 
+                        ref: ref
+                    }
+                })
+            , "*");
+        }
+    });
+    
+}
+
 inject(function ($) {
     "use strict";
     var registrations = [],
         prefixes = [];
-
     (function () {
         String.prototype.hodRef_escapeRegExp = function () {
             return this.replace(/[\\\^$*+?.\(\)|\[\]]/g, "\\$&");
@@ -189,6 +232,7 @@ inject(function ($) {
             actualName = null,
             displayText = null,
             url,
+            text,
             addLink,
             untouched,
             CAPTURE_INDEX_OF_NAME = 1;
@@ -203,6 +247,15 @@ inject(function ($) {
 
         if (!actualName) {
             return null;
+        }
+
+        if(options.indexOf("w") !== -1) {
+            console.log("w exists - word time?");
+            if(typeof linker.getText === 'function') {
+                console.log("linker.getText exists - word time!");
+                text = linker.getText(actualName, match, options);
+                return "> " + text;
+            }
         }
 
         url = linker.link(actualName, match, options);
@@ -333,6 +386,13 @@ inject(function ($) {
                 displayName: function (name, match) {
                     var verse = match[3] ? ":" + match[3] : '';
                     return name + " " + match[2] + verse;
+                },
+                getText: function() {
+                    window.postMessage(
+                        JSON.stringify({
+                            textRequest: {ref: "Kohelet.2.4"}
+                        }), "*");
+                    
                 }
             };
         }()));
