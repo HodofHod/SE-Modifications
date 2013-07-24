@@ -11,6 +11,7 @@
 // @match        http://chat.askubuntu.com/rooms/*
 // @author       @HodofHod
 // @namespace    HodofHod
+// @version      1.1
 // ==/UserScript==
 
 function inject(f) {
@@ -21,10 +22,12 @@ function inject(f) {
 }
 
 function addScroll() {
-    var sidebar = document.querySelector('#sidebar');
-    sidebar.style.height = "auto";
-    sidebar.style.bottom = "88px";
-    sidebar.style.overflowY = "auto";
+    $('#sidebar').css({
+                        height:'auto',
+                        bottom:'88px',
+                        'overflow-y':'auto',
+                    });
+    $('#my-rooms').css("margin-left", "18px")
 }
 
 inject(addScroll);
