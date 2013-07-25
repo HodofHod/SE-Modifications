@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.3.0
+// @version      3.3.2
 // ==/UserScript==
 
 
@@ -106,7 +106,7 @@ inject(function ($) {
 			matches = [],
 			regex = new RegExp("(\\(|\\s|^)(\\[\\s*(" + prefixes.join("|") + ")[;,. :-]" +
 							   "([^\\]\\[]+?)" +
-							   "(?:[;.,\\s:-]?([a-z]{0,4}))?\\s*\\])(?![^$\\s,.;:\\)])", "mig");
+							   "(?:[;.,\\s:-]([a-z]{0,4}))?\\s*\\])(?![^$\\s,.;:\\)])", "mig");
 		$.each(t.split('\n'), function (i, line){
 			while (line.indexOf('	') !== 0 && (match = regex.exec(line)) !== null) {
 				if (!d[match]) {
@@ -272,7 +272,7 @@ inject(function ($) {
 					}
 
 					if (chpt > map[book][1]) { //Stop trying to sneak fake chapters in, aright?
-						return [false,'"' + chpt + '" is not a valid chapter for ' + book + '. \n\nThere are only ' + map[book][1] + ' `chapters in ' + book + '\n\nPlease try again.'];
+						return [false,'"' + chpt + '" is not a valid chapter for ' + book + '. \n\nThere are only ' + map[book][1] + ' chapters in ' + book + '\n\nPlease try again.'];
 					}
 					if (flags.indexOf('m') !== -1) { //Mechon Mamre flag is set
 						res = mechonMamreT(book, chpt, vrs, map);
@@ -377,34 +377,25 @@ inject(function ($) {
 			m[1] && (res = res.replace(m[0][0], m[0][1] + m[2]));
 		});
 		
-		if (force) {
-			elem.value = res;
-			$(elem).trigger('click');//not input
-			return !errors;
-		}
-		
 		var alrt = 'There are invalid references in your '+type+'. Are you sure you want to continue?';
-		if (errors && !confirm(alrt)) return false;
+		if (!force && errors && !confirm(alrt)) return false;
 		elem.value = res;
 		$(elem).trigger('click');
-		return true;
+		return !errors;
 			
 	}
-	
-	$(document).on('focus', '.wmd-input:not(.ref-hijacked), [name="comment"]:not(.ref-hijacked), #input:not(.ref-hijacked)', function(){//Hijack comments and chats on focus.
-		$(this).addClass('ref-hijacked');//add a class.
-		var tElem = $(this),
-			pre = $('<pre>'+this.value+'</pre>');
+	function tHijack(elem){
+		var pre = $('<pre>'+elem.value+'</pre>');
 		pre.css({
 				color:'transparent',
 				border:'none',
-				padding:$(this).css('padding'),
+				padding:$(elem).css('padding'),
 				opacity:'.5',
 				position:'absolute',
-				top:$(this).offset().top - $(this).parent().offset().top + 'px',
-				'font-size':$(this).css('font-size'),
-				'font-family':$(this).css('font-family'),
-				'line-height':$(this).css('line-height'),
+				top:$(elem).offset().top - $(elem).parent().offset().top + 'px',
+				'font-size':$(elem).css('font-size'),
+				'font-family':$(elem).css('font-family'),
+				'line-height':$(elem).css('line-height'),
 				'text-align':'left',
 				'pointer-events':'none',
 				'background-color':'transparent',
@@ -412,16 +403,16 @@ inject(function ($) {
 				'overflow-y':'hidden',
 				})
 				.css({padding:'+=1'});
-		$(this).after(pre);
+		$(elem).after(pre);
 
-		this.id == 'input' && pre.css('padding','2px 4px');//different padding for chat
-		$(this).on('input focus mousemove scroll',function(){
-			pre.css({width:$(this).css('width'),height:$(this).css('height')});//for resizing.
-			pre.scrollTop($(this).scrollTop());//for scrolling.
+		elem.id == 'input' && pre.css('padding','2px 4px');//different padding for chat
+		$(elem).on('input focus mousemove scroll',function(){
+			pre.css({width:$(elem).css('width'),height:$(elem).css('height')});//for resizing.
+			pre.scrollTop($(elem).scrollTop());//for scrolling.
 		});
-		$(this).on('input focus mousedown',function(){
-			pre.html(this.value);
-			var matches = reference(this.value),
+		$(elem).on('input focus mousedown',function(){
+			pre.html(elem.value);
+			var matches = reference(elem.value),
 				ids = [],
 				r, cl, hl;
 			$.each(matches, function(i, m){
@@ -437,13 +428,13 @@ inject(function ($) {
 				$(id[0]).data('msg', id[1]);
 			});
 		});
-		$(this).on('mousemove input mouseout', function tt(e){
+		$(elem).on('mousemove input mouseout', function tt(e){
 			var b = false;
 			$.each($('[class*="grp"]'), function(i, g){
 				var gOffset = $(g).offset(),
 					gWidth  = $(g).width(),
 					gHeight = $(g).height();
-				if (e.pageX > gOffset.left && e.pageX < (gOffset.left + gWidth) && e.pageY > gOffset.top && e.pageY < (gOffset.top + gHeight)) {
+				if (e.pageX >= gOffset.left && e.pageX <= (gOffset.left + gWidth) && e.pageY > gOffset.top && e.pageY < (gOffset.top + gHeight)) {
 					console.log('AAAH!! A MOUSE!!!');
 					$('#tt').is('p') || $("body").append("<p id='tt'>"+ $(g).data('msg') +"</p>");
 					$('#tt').css({
@@ -463,6 +454,11 @@ inject(function ($) {
 			});
 			!b && $("#tt").remove();
 		});
+	}
+	$(document).on('focus', '[name="comment"]:not(.ref-hijacked), #input:not(.ref-hijacked)', function(){//Hijack comments and chats on focus.
+		$(this).addClass('ref-hijacked');//add a class.
+		var tElem = $(this);
+		tHijack(this);
 		$('#sayit-button').on('mousedown', function(){
 			repl(tElem[0], 'chat message') && $(this).trigger('click');
 		});
@@ -470,9 +466,11 @@ inject(function ($) {
 			repl(tElem[0], 'comment') && $(this).trigger('click');
 		});
 	}); 
-	$(document).on('focus', '.wmd-input:not(.prev-hijacked)', function (){
+	$(document).on('focus', '.wmd-input:not(.ref-hijacked)', function (){
 		console.log('inputfocus');
-		$(this).addClass('prev-hijacked');//add a class.
+		$(this).addClass('ref-hijacked');//add a class.
+		tHijack(this);
+		
 		var previewPane = $('#' + $(this).attr('id').replace('input','preview')),//select the preview element
 			clonedPane = previewPane.clone().attr('id', 'wmd-preview-hij');//clone the preview and change the clone's id
 		previewPane.after(clonedPane).css({'display':'none'});//append the clone, and hide the original preview 
