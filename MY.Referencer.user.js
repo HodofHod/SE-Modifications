@@ -16,9 +16,9 @@
 // @exclude      http://api.*.stackexchange.com/*
 // @exclude      http://data.stackexchange.com/*
 // @exclude      http://*/reputation
-// @author       @HodofHod
+// @author       HodofHod
 // @namespace    HodofHod
-// @version      3.1.0
+// @version      3.3.0
 // ==/UserScript==
 
 
@@ -37,34 +37,34 @@ Quick map:
 inject() injects the code into the page
 
 reference() is called for each textarea's events, and calls link() each time a prefix matches. If
-    link returns a value, we replace the text.  At the end, replaces the contents of each textarea.
+	link returns a value, we replace the text.  At the end, replaces the contents of each textarea.
 
 link() calls search() to find the canonicalName, then calls linker.link() to generate the url and
 	optionally calls linker.displayName() to generate the displayText.  Returns the replacement string.
 
 register(prefix, linker) should be called to register each linker with a prefix.  A linker is expected to have:
-{
-	regex: /^.*$/i,							 // a regular expression to match on
+	{
+		regex: /^.*$/i,							 // a regular expression to match on
 
-	spellings: ["canonicalName:spelling1, sp2"],// An array of strings. See @HodofHod for more info
+		spellings: ["canonicalName:spelling1, sp2"],// An array of strings. See @HodofHod for more info
 
-	searchType: {							   // human-readable text to fill in here:
-		book : "string",						//	  "we couldn't figure out which " + {{book}} + " you were trying to link to.
-		partPlural : "strings"				  //	  "... seemed ambiguous to our system, and could have referred to multiple " + {{partPlural}} + ".
-	},
-	nameOverrides: {							// an optional property to override
-		"canonicalName" : "userPreferredName"   // specific canonical names in `l`-flagged links
+		searchType: {							   // human-readable text to fill in here:
+			book : "string",						//	  "we couldn't figure out which " + {{book}} + " you were trying to link to.
+			partPlural : "strings"				  //	  "... seemed ambiguous to our system, and could have referred to multiple " + {{partPlural}} + ".
+		},
+		nameOverrides: {							// an optional property to override
+			"canonicalName" : "userPreferredName"   // specific canonical names in `l`-flagged links
+		}
+		displayName: function (name, match, isUntouched),
+													// a function which returns human-readable text
+													// to represent the source. name is the name of the work,
+													// match is the regex results, and isUntouched is if the "u" flag was used
+													// must return valid value if link() is valid
+
+		link: function (actualName, match, options) // a function which returns a url
+													// given the canonical name, regex results, and flags
+													// (or any falsy value if invalid)
 	}
-	displayName: function (name, match, isUntouched),
-												// a function which returns human-readable text
-												// to represent the source. name is the name of the work,
-												// match is the regex results, and isUntouched is if the "u" flag was used
-												// must return valid value if link() is valid
-
-	link: function (actualName, match, options) // a function which returns a url
-												// given the canonical name, regex results, and flags
-												// (or any falsy value if invalid)
-}
 
 search() does the searching, regex style. Pretty powerful, and will match things pretty broadly.
 Throws alert() windows if the search comes up empty or ambiguous.
@@ -92,8 +92,8 @@ function inject() { //Inject the script into the document
 
 inject(function ($) {
 	var registrations = [],
-		prefixes = [];
-		d = []
+		prefixes = [],
+		d = [];
 	
 	function register(prefix, linker) {
 		var cleanPrefix = prefix.replace(/[\\\^$*+?.\(\)|\[\]]/g, "\\$&");
@@ -101,84 +101,63 @@ inject(function ($) {
 		prefixes.push(cleanPrefix);
 	}
 	
-	function reference(t) {
+	function reference(t) {//takes a string. returns array, [match_object, true/false, replacement/error]
 		var match,
-			reps = [],
-			res = [],
+			matches = [],
 			regex = new RegExp("(\\(|\\s|^)(\\[\\s*(" + prefixes.join("|") + ")[;,. :-]" +
-							   "(.+?)" +
-							   "(?:[;.,\\s:-]([a-z]{0,4}))?\\s*\\])($|[\\s,.;:\\)])", "mig");
-		$.each(t.value.split('\n'), function (i, line){
-			if (line.indexOf('    ') === 0){
-				res.push(line);
-				return;
-			} 
-			while ((match = regex.exec(line)) !== null) {
-				if (d[match[2]]) {
-					line = line.replace(match[0], match[1] + d[match[2]] + match[6]);
-					continue;
-				} else if (d[match[2]] === false){
-					continue;
+							   "([^\\]\\[]+?)" +
+							   "(?:[;.,\\s:-]?([a-z]{0,4}))?\\s*\\])(?![^$\\s,.;:\\)])", "mig");
+		$.each(t.split('\n'), function (i, line){
+			while (line.indexOf('	') !== 0 && (match = regex.exec(line)) !== null) {
+				if (!d[match]) {
+					d[match] = link(registrations[match[3]], match[4], match[5]);
 				}
-				var replacementText = link(registrations[match[3]], match[4], match[5]);
-				if (replacementText) {
-					line = line.replace(match[0], match[1] + replacementText + match[6]);
-					d[match[2]] = replacementText;
-				}else{
-					d[match[2]] = false;
-				}
+				matches.push([match].concat(d[match]));
 			}
-			res.push(line);
 		});
-		t.value = res.join('\n');
+		return matches;
 	}
 
 	function link(linker, value, options) {
 		var match = linker.regex.exec(value),
-			workName,
-			actualName = null,
+			searchResult = null,
 			displayText = null,
 			CAPTURE_INDEX_OF_NAME = 1;
 
-		if (!match) return null;
+		if (!match) return [false, 'Bad syntax'];
 
 		options = (options || '').toLowerCase();
-		workName = match[CAPTURE_INDEX_OF_NAME].toLowerCase().replace(/ \./g, '');
-		actualName = search(workName, linker.spellings, match[CAPTURE_INDEX_OF_NAME], linker.searchType);
-
-		if (!actualName) return null;
-
-		var url = linker.link(actualName, match, options);
-
-		if (url) {
+		searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
+		if (!searchResult[0]) return searchResult;//first value is bool, second is name or error text
+		var url = linker.link(searchResult[1], match, options);//returns either url, or [false, error_message]
+		if (url[0]) {
+			url = [true, url];
 			var addLink = options.indexOf("l") !== -1,
 				untouched = options.indexOf("u") !== -1;
 
 			if (untouched || addLink) {
-				if (untouched) {
-					// u means use the name the user passed in
+				if (untouched) { // u means use the name the user passed in
 					displayText = linker.displayName(match[CAPTURE_INDEX_OF_NAME], match, true);
-				} else {
-					// l always means add link with text
-					var fixedName = actualName;
+				} else { // l always means add link with text
+					var fixedName = searchResult[1];
 					if(linker.nameOverrides !== undefined) {
-						fixedName = linker.nameOverrides[actualName] || actualName;
+						fixedName = linker.nameOverrides[searchResult[1]] || searchResult[1];
 					}
 					displayText = linker.displayName(fixedName, match, false);
 				}
-				return "[" + displayText + "](" + url + ")";
+				return [true, "[" + displayText + "](" + url[1] + ")"];
 			}
 		}
-		return url;
+		return url;//either [true, url] or [false, error-text]
 	}
   
-	function search(title, spellings, searchInfo, originalTitle, redo) {
+	function search(title, spellings, searchInfo, redo) {
 		var counter, //keep track of how many titles the word matches
 			titles_found = [], //keep track of which titles.
 			word,
 			found = false,
-			title_words = title.toLowerCase().match(/[a-zA-Z]+|[0-9]+/g);//a fancy way to split. splits both spaces and numbers
-		redo = redo === undefined ? 0 : redo; //if redo isn't passed, default to false.
+			title_words = title.toLowerCase().replace(/[']/g,'').match(/[a-zA-Z]+|[0-9]+/g);//a fancy way to split. splits both spaces and numbers
+		redo = redo === undefined ? 0 : redo; //if redo isn't passed, default to 0.
 		for (var wordi = 0; wordi < title_words.length; wordi++) { //iterate through each word in input
 			word = title_words[wordi];
 			counter = 0; //reset the counter for each word
@@ -199,10 +178,10 @@ inject(function ($) {
 				word = word.slice(0, 3);
 				break; 
 			}
-			word = new RegExp(word);//turn word into a regex for searching
 			if (['1', '2', 'i', 'ii'].indexOf(title_words[wordi]) !== -1) {//special case for multi-volumes
 				word = '[,:]' + title_words[wordi] + '(,|$)'; 
 			} 
+			word = new RegExp(word);//turn word into a regex for searching
 			if (titles_found.length === 0) { //if we haven't found any matches yet from previous words
 				for (var syni = 0; syni < spellings.length; syni++) { //iterate through different titles
 					if (word.test(spellings[syni])) { //check if the word is in the synonyms
@@ -219,29 +198,23 @@ inject(function ($) {
 				}
 			}
 			if (counter === 1) { //only one title matched, so we know we've got the right one
-				return spellings[titles_found[0]].slice(0, spellings[titles_found[0]].indexOf(':'));
+				return [true, spellings[titles_found[0]].slice(0, spellings[titles_found[0]].indexOf(':'))];
 			}
 		}
 
 		if (!found) { //No match :( (Technically, this if is not needed; if anything has been found we already returned)
-			if (redo < 4) { //we haven't retried with out prefixes and partial matches.
-				redo++;
-				return search(title, spellings, searchInfo, searchInfo, redo); //then we'll try
-			}
-
 			var t = searchInfo.book,
 				p = searchInfo.partPlural;
-
-			if (titles_found.length > 1) {//ambiguous. multiple matches found
-				var titles;
+			if (titles_found.length > 1) {//ambiguous. multiple matches found, no point in retrying
+				var titles = '';
 				titles_found.map(function (t) { titles += spellings[t].slice(0, spellings[t].indexOf(':')) + '\n'; });
-				alert("We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + originalTitle + '"' + ") seemed ambiguous to our system, and could have referred to multiple " + p + ". Try to refine your entry by making it more specific. \n\nIf you'd like, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434" + "\n\n" + p + ' matched:\n' + titles);
-				return false;
+				return [false, "We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + title + '"' + ") seemed ambiguous to our system, and could have referred to multiple " + p + ". Try to refine your entry by making it more specific. \n\nIf you'd like, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434" + "\n\n" + p + ' matched:\n' + titles];
+			}else if (redo < 4) { //no matches, but we haven't retried with out prefixes and partial matches.
+				redo++;
+				return search(title, spellings, searchInfo, redo); //then we'll try
+			}else{//no matches found at all.
+				return [false, "We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + title + '"'  + ") was not recognized by our system. This might be because you're using a spelling or an abbreviation that isn't in our system yet. \n\nIf you'd like to add this spelling, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434"];
 			}
-
-			//no matches found at all.
-			alert("We're sorry; we couldn't figure out which " + t + " you were trying to link to. The text you entered, (" + '"' + originalTitle + '"'  + ") was not recognized by our system. This might be because you're using a spelling or an abbreviation that isn't in our system yet. \n\nIf you'd like to add this spelling, you can ping @HodofHod in this chat room and he'll look into it: \nhttp://chat.stackexchange.com/rooms/9434");
-			return false;
 		}
 	}
   
@@ -295,13 +268,11 @@ inject(function ($) {
 
 					flags = flags.toLowerCase(); //more matching purposes
 					if (chpt === '0') { //If the chapter number is 0, then someone's trying to cheat me!
-						alert('"0" is not a valid chapter number. Please try again.');
-						return null;
+						return [false, '"0" is not a valid chapter number. Please try again.'];
 					}
 
 					if (chpt > map[book][1]) { //Stop trying to sneak fake chapters in, aright?
-						alert('"' + chpt + '" is not a valid chapter for ' + book + '. \n\nThere are only ' + map[book][1] + ' `chapters in ' + book + '\n\nPlease try again.');
-						return null;
+						return [false,'"' + chpt + '" is not a valid chapter for ' + book + '. \n\nThere are only ' + map[book][1] + ' `chapters in ' + book + '\n\nPlease try again.'];
 					}
 					if (flags.indexOf('m') !== -1) { //Mechon Mamre flag is set
 						res = mechonMamreT(book, chpt, vrs, map);
@@ -323,15 +294,14 @@ inject(function ($) {
 		register("g", {
 			regex: /^([a-zA-Z'" .]{2,}?)[;.,\s:\-]+(\d{1,3})([ab])$/i,
 			link: function (mes, match, flags) {
-				var mesechtos = {'Chulin': [31, 141], 'Eruvin': [3, 104], 'Horayos': [28, 13], 'Rosh Hashanah': [9, 34], 'Shekalim': [5, 22], 'Menachos': [30, 109], 'Megilah': [11, 31], 'Bechoros': [32, 60], 'Brachos': [1, 63], 'Gitin': [19, 89], 'Taanis': [10, 30], 'Moed Katan': [12], 'Beitzah': [8, 39], 'Bava Kama': [21, 118], 'Kesuvos': [15, 111], 'Sanhedrin': [24, 112], 'Nazir': [17, 65], 'Kiddushin': [20, 81], 'Pesachim': [4, 120], 'Bava Basra': [23, 175], 'Sotah': [18, 48], 'Bava Metzia': [22, 118], 'Yoma': [6, 87], 'Succah': [7, 55], 'Meilah': [36, 21], 'Shabbos': [2, 156], 'Erchin': [33, 33], 'Nedarim': [16, 90], 'Shevuos': [26, 48], 'Temurah': [34, 33], 'Kerisus': [35, 27], 'Zevachim': [29, 119], 'Makkos': [25, 23], 'Avoda Zarah': [27, 75], 'Nidah': [37, 72], 'Chagigah': [13, 26], 'Yevamos': [14, 122]
+				var mesechtos = {'Chulin': [31, 141], 'Eruvin': [3, 104], 'Horayos': [28, 13], 'Rosh Hashanah': [9, 34], 'Shekalim': [5, 22], 'Menachos': [30, 110], 'Megilah': [11, 31], 'Bechoros': [32, 60], 'Brachos': [1, 63], 'Gitin': [19, 89], 'Taanis': [10, 30], 'Moed Katan': [12], 'Beitzah': [8, 39], 'Bava Kama': [21, 118], 'Kesuvos': [15, 111], 'Sanhedrin': [24, 112], 'Nazir': [17, 65], 'Kiddushin': [20, 81], 'Pesachim': [4, 120], 'Bava Basra': [23, 175], 'Sotah': [18, 48], 'Bava Metzia': [22, 118], 'Yoma': [6, 87], 'Succah': [7, 55], 'Meilah': [36, 21], 'Shabbos': [2, 156], 'Erchin': [33, 33], 'Nedarim': [16, 90], 'Shevuos': [26, 48], 'Temurah': [34, 33], 'Kerisus': [35, 27], 'Zevachim': [29, 119], 'Makkos': [25, 23], 'Avoda Zarah': [27, 75], 'Nidah': [37, 72], 'Chagigah': [13, 26], 'Yevamos': [14, 122]
 					},
 					page = match[2],
 					side = match[3].toLowerCase(),
 					res;
 
 				if (parseInt(page, 10) > mesechtos[mes][1] || page === '1' || page === '0') { //if mesechta doesn't have that page
-					alert('"' + page + side + '" is not a valid page for Mesechtas ' + mes + '. Please try again.');
-					return null; //skip to the next gemara match
+					return [false, '"' + page + side + '" is not a valid page for Mesechtas ' + mes + '. Please try again.'];
 				}
 				if (side === 'a') {
 					side = ''; //hebrewbooks is weird.
@@ -376,8 +346,7 @@ inject(function ($) {
 					if (law) { law = parseInt(law, 10); } //same for law
 
 					if (chpt > mtmap[topic][1]) {
-						alert('"' + chpt + '" is not a valid chapter for Hilchot ' + topic + '. \n\nThere are only ' + (mtmap[topic][1]) + ' chapters in Hilchot' + topic + '\n\nPlease try again.');
-						return null;
+						return [false, '"' + chpt + '" is not a valid chapter for Hilchot ' + topic + '. \n\nThere are only ' + (mtmap[topic][1]) + ' chapters in Hilchot' + topic + '\n\nPlease try again.'];
 					}
 
 					if (flags.indexOf('e') !== -1) { //english flags is set.
@@ -388,7 +357,7 @@ inject(function ($) {
 					return res;
 				},
 				spellings: ['Yesodey HaTorah:yesodei,yisodei,yisodey,hatorah,hatora,yht,yt,yis', "De'ot:deot,deos,deyos,deios,deyot,deiot,daot,daos", 'Talmud Torah:talmud,torah,tt', 'Avodat Kochavim:avodah,avodat,avodas,kochavim,chukot,chukos,goim,hagoim,ak,zarah,goy,az', 'Teshuvah:teshuvah,tshuvah,tsh', "Kri'at Shema:krias,kriat,kriyat,kriyas,shema,shma,ks,krsh", 'Tefilah uBirkat Kohanim:tefilah,tfilah,tefillah,birkat,birkas,birchas,birchat,kohanim,cohanim,tbk', "Tefillin, Mezuzah, v'Sefer Torah:,tefillin,tefilin,tfilin,mezuzah,mzuzah,sefer,torah,stam", 'Tzitzis:tzitzis,tzizit,tsitsit,tsitsis,sisis,sisit', 'Berachot:berachot,berachos,brachos,brachot', 'Milah:milah,bris,brit', 'Seder HaTefilah:seder,siddur,sidur,hatefilah,hatfilah,tfilah,tefillah', 'Shabbos:shabbat,shabat,shabbos,shabes,shabbes,sh', 'Eruvin:eruvin,eiruvin,er', 'Shevitat Asor:shvisas,shevisas,shevitat,shvitat,asor', 'Shevitat Yom Tov:shvisas,shevisas,shevitat,shvitat,yomtov,yt', "Chometz U'Matzah:chametz,chamets,chometz,ham,matza,massa,masa,matsa,matzo,chm,cm", 'Haggadah:hagada,haggadah,hagadah', "Shofar, Sukkah, v'Lulav:,shofar,sukkah,succah,sukah,succa,lulav", 'Shekalim:sheqalim,shekalim,shkalim,shekolim,shek', 'Kiddush HaChodesh:hodesh,hachodesh,hahodesh,hakhodesh,kidush,kiddush,khc', "Ta'aniyot:taaniyos,taanios,taaniyot,taaniot,tanios,taniyos,taanis,taanit,tanis,taan,taniyot", 'Megillah vChanukah:mg,megila,mgila,megillah,chanukah,chanukkah,hanukkah,hanukka,channuka,han,mgvch,mgch', 'Ishut:ishut,ishus,eshus', 'Gerushin:gerushin,geirushin,gittin,gitin', 'Yibbum vChalitzah:yibbum,yibum,chalitzah,halitzah,chaliza,chalizah,halissa', 'Naarah Besulah:naarah,narah,betulah,bsulah,besulah', 'Sotah:sotah,soda', 'Issurei Biah:issurei,isurei,isurey,issurey,biah,biyah,ib,isub', "Ma'achalot Assurot:maachalot,machalot,maachalos,machalos,assurot,asurot,assuros,asuros,ma,maacha", 'Shechitah:shechitah,shehita,shehitah', 'Sechirut:sechirut,sechirus,sachir,schirus,schirut', "She'elah uFikkadon:sheailah,sheeilah,sheelah,shailah,shaylah,sheaila,fikkadon,pikadon,piqadon", 'Malveh veLoveh:malveh,loveh', "To'en veNit'an:toen,toain,nitan,nitaan", 'Nehalot:nachalos,nachlos,nachlot,nahalot,nahlot,nachalaos,nehalot', 'Kilaayim:kilaayim,kilaim', 'Matnot Aniyiim:matanos,aniyim,tzedaka,mattanot,mattanos,matnot,matnos,aniyiim', 'Terumot:terumos,terumot,ter', 'Maaserot:maaserot,maaseros,mayseros,maser,maas', 'Maaser Sheini:maaser,maser,mayser,sheni,sheini,neta,revai,kerem,msvnr,msnr,ms', 'Bikkurim:bikkurim,bikurim,shar,shaar,matnot,matnos,matanos,matanot,kehunah,shebgevulin,shebgvulin,bikk', 'Shemita:shemitta,shemitah,shmitah,shmitta,yovel,yoivel,yoival,sy,shy', 'Shvuot:shvuot,shvuos,shevuos,shevuot', 'Nedarim:neder,ndr,nedarim', 'Nezirut:nazir,nezerut,nezirut,naz,nz', 'Arachim vaCharamim:arachim,arachin,erkin,erchin,charamot,charamos,haramim,charamim,cherem,arch,arvch,charamin', 'Beis Habechirah:beit,beis,bet,bes,habechirah,habchirah,habekhirah,bh', 'Kli Hamikdash:kli,klei,kley,hamikdash,hamikdosh,mikdosh,haovdim,bo,ba', 'Biat Hamikdash:biat,bias,hamikdash,hamikdosh', 'Issurei Mizbeiach:issurei,isurei,issurey,isurey,issure,mizbeiach,mizbeyach,mizbeyakh', 'Temidin uMusafim:tmidin,temidin,temidim,tmidim,tamidim,tamidin,musafin,musafim', 'Maaseh HaKorbanot:maseh,maaseh,mayseh,hakorbonos,hakorbanot,hakorbanos', 'Pesulei Hamukdashim:pesulei,pesuley,hamukdashim', 'Avodat Yom HaKippurim:avodat,avodas,avoidas,yom,hakippurim,hakipurim,kippurim,kipur,ayk,yk', "Me'ilah:meilah", "Sanhedrin veha'Onashin HaMesurin lahem:sanhedrin,haonshin,hamesurin,lahem", 'Edut:edus,eduth,edhuth,eidim', 'Mamrim:mamrim,mamrin', 'Avel:uvel,aveilus,aveilut,avelus,aveluth', 'Melachim uMilchamot:melachim,melech,mashiach,melochim,mlochim,mlachim,milchamot,milchamteihem,milchamosehem,milchamoseihem,milchamotehem,milchamoteihem,milchomosehem,milchomoseihem,milhamotehem,milhamoteihem', 'Korban Pesach:korban,karban,pesah,pesach,pesakh', 'Chagigah:chagigah,hagigah', 'Bechorot:bechorot,bechoros,bchorot,bchoros', 'Shegagot:shegagot,shegagos,shgagot,shgagos', 'Mechussarey Kapparah:mechussarey,mechusarei,mechussarei,kapparah,kaparah,mk', 'Temurah:temurah,tmurah', "Tum'at Met:tumas,tumat,met,mes,meit,meis,mais,mait", 'Parah Adummah:parah,poroh,adumah,adummah', "Tum'at Tsara'at:tumas,tumat,tzaraas,tzoras,tzaras,tzaraat,tzarat,tsarat,tsaraat", "Metamme'ey Mishkav uMoshav:metammey,metammeey,metammei,metamei,metamey,mtamei,mtamey,mishkav,mishkov,moshav,mmm", "She'ar Avot HaTum'ah:shear,shar,shaar,avot,avos,hatumah,hatumaa,tumah,sat", "Tum'at Okhalin:tumas,tumat,okhalin,ochalin,oichlin,oichlim,to", 'Kelim:keilim,kelim,ke', 'Mikvot:mikvaot,mikvot,mikvos,mikvaos,mikvah,mkv', 'Nizkei Mammon:nizkei,nizkey,niskei,niskey,mamon,mammon,mamoin,mumoin,nm', 'Genevah:genevah,geneivah,geneiva,gneva,gneivah,gnevah,gne', "Gezelah va'Avedah:gezelah,gezeilah,gzeilah,gzelah,avedah,aveidah,ga,gva", 'Chovel uMazzik:chovel,choivel,choyvel,mazzik,mazik', 'Rotseah uShmirat Nefesh:rotseach,rotzeach,rotseah,rotzeah,rotzeiach,shmirat,shmiras,shemirat,shemiras,nefesh,nafesh,rotz,rusn,rsn', 'Mechirah:mechirah,mehirah,mchirah,mekhirah,mch', 'Zechiyah uMattanah:zechiyah,zekhiyah,zechiah,mattanah,matanah,zech,zch,zm', 'Shechenim:shechenim,shekhenim,shehenim', 'Sheluchin veShuttafin:sheluchin,shluchin,sheluchim,shelukhin,shluchim,shuttafin,shutafin,shutfin,ss,svs', 'Avadim:avadim,avodim,av,avd'],
-				searchType: { book: "part of Rambam", partPlural: "topic" },
+				searchType: { book: "part of Rambam", partPlural: "topics" },
 				displayName: function (inputName, match, isUntouched) {
 					var name = "Rambam, " + (isUntouched ?  "" : "Hilchot ") + inputName,
 						chapter = match[2] ? " " + match[2] : "",
@@ -399,23 +368,121 @@ inject(function ($) {
 		}()));
 	}());
 
-
- 	$(document).on('focus', '[name="comment"]:not(.ref-hijacked), #input:not(.ref-hijacked)', function(){//Hijack comments and chats on focus.
-		$(this).addClass('ref-hijacked');//add a class.
-		$(this).on('focusout', function(){reference(this);});
-	}); 
-	$(document).on('focus', '.wmd-input:not(.ref-hijacked)', function (){//hijack Qs and As
-		$(this).addClass('ref-hijacked');//add a class.
-		var previewPane = $('#' + $(this).attr('id').replace('input','preview')),//select the preview element
-			clonedPane = previewPane.clone(false).attr('id', 'wmd-preview-hij');//clone the preview and change the clone's id
-		previewPane.after(clonedPane).css({'display':'none'});//append the clone, and hide the original preview 
-		var t = this;
+	function repl(elem, type, force){
+		var matches = reference(elem.value),
+			res = elem.value,
+			errors = false;
+		$.each(matches, function(i, m){
+			if (!m[1]) errors = true;
+			m[1] && (res = res.replace(m[0][0], m[0][1] + m[2]));
+		});
+		
+		if (force) {
+			elem.value = res;
+			$(elem).trigger('click');//not input
+			return !errors;
+		}
+		
+		var alrt = 'There are invalid references in your '+type+'. Are you sure you want to continue?';
+		if (errors && !confirm(alrt)) return false;
+		elem.value = res;
+		$(elem).trigger('click');
+		return true;
 			
-		$(this).on('input focus keydown', function(){
+	}
+	
+	$(document).on('focus', '.wmd-input:not(.ref-hijacked), [name="comment"]:not(.ref-hijacked), #input:not(.ref-hijacked)', function(){//Hijack comments and chats on focus.
+		$(this).addClass('ref-hijacked');//add a class.
+		var tElem = $(this),
+			pre = $('<pre>'+this.value+'</pre>');
+		pre.css({
+				color:'transparent',
+				border:'none',
+				padding:$(this).css('padding'),
+				opacity:'.5',
+				position:'absolute',
+				top:$(this).offset().top - $(this).parent().offset().top + 'px',
+				'font-size':$(this).css('font-size'),
+				'font-family':$(this).css('font-family'),
+				'line-height':$(this).css('line-height'),
+				'text-align':'left',
+				'pointer-events':'none',
+				'background-color':'transparent',
+				'white-space':'pre-wrap',
+				'overflow-y':'hidden',
+				})
+				.css({padding:'+=1'});
+		$(this).after(pre);
+
+		this.id == 'input' && pre.css('padding','2px 4px');//different padding for chat
+		$(this).on('input focus mousemove scroll',function(){
+			pre.css({width:$(this).css('width'),height:$(this).css('height')});//for resizing.
+			pre.scrollTop($(this).scrollTop());//for scrolling.
+		});
+		$(this).on('input focus mousedown',function(){
+			pre.html(this.value);
+			var matches = reference(this.value),
+				ids = [],
+				r, cl, hl;
+			$.each(matches, function(i, m){
+				ids.push(['.grp'+i, m[2].replace(/\n/g, '<br>')]);
+				r = m[0][2];
+				cl = m[1] ? 'match' : 'error';
+				hl = '<span class="'+cl+'"><span class="grp'+i+'">'+ r.split('').join('</span>'+'<span class="grp'+i+'">') + '</span></span>';
+				pre.html(pre.html().replace(m[0][0], m[0][1] + hl));//as long as I'm replacing the html in the loop, I can't assign the msg to data.
+			});
+			$('.error').css('background-color','pink');
+			$('.match').css('background-color','lightgreen');
+			$.each(ids, function(i, id){
+				$(id[0]).data('msg', id[1]);
+			});
+		});
+		$(this).on('mousemove input mouseout', function tt(e){
+			var b = false;
+			$.each($('[class*="grp"]'), function(i, g){
+				var gOffset = $(g).offset(),
+					gWidth  = $(g).width(),
+					gHeight = $(g).height();
+				if (e.pageX > gOffset.left && e.pageX < (gOffset.left + gWidth) && e.pageY > gOffset.top && e.pageY < (gOffset.top + gHeight)) {
+					console.log('AAAH!! A MOUSE!!!');
+					$('#tt').is('p') || $("body").append("<p id='tt'>"+ $(g).data('msg') +"</p>");
+					$('#tt').css({
+								top:(e.pageY - 10) + "px",
+								left:(e.pageX + 20) + "px",
+								position:'absolute',
+								border:'1px solid #333',
+								background:'#f7f5d1',
+								padding:'2px 5px',
+								'max-width':'300px',
+								'overflow-wrap':'break-word',
+								'z-index':'2',
+								})
+							.fadeIn("fast");
+					b = true;
+				}
+			});
+			!b && $("#tt").remove();
+		});
+		$('#sayit-button').on('mousedown', function(){
+			repl(tElem[0], 'chat message') && $(this).trigger('click');
+		});
+		$($(this).parent('td').next('td').children('input')).on('mousedown', function(){
+			repl(tElem[0], 'comment') && $(this).trigger('click');
+		});
+	}); 
+	$(document).on('focus', '.wmd-input:not(.prev-hijacked)', function (){
+		console.log('inputfocus');
+		$(this).addClass('prev-hijacked');//add a class.
+		var previewPane = $('#' + $(this).attr('id').replace('input','preview')),//select the preview element
+			clonedPane = previewPane.clone().attr('id', 'wmd-preview-hij');//clone the preview and change the clone's id
+		previewPane.after(clonedPane).css({'display':'none'});//append the clone, and hide the original preview 
+		
+		var t = this;
+		$(this).on('input focus', function(){
 			var oldText = t.value, //save the old text
 				start = t.selectionStart, //save the old cursor location
 				end = t.selectionEnd;
-			reference(t); //replace the text in the textarea
+			repl(t, '', true); //replace the text in the textarea, ignoring errors
 			StackExchange.MarkdownEditor.refreshAllPreviews(); //refresh the hidden preview
 			clonedPane.html(previewPane.clone(false).html()); //update the visible preview from the hidden one
 			t.value = oldText; //and undo the textarea's text
@@ -423,10 +490,15 @@ inject(function ($) {
 		});
 		
 		$('#' + $(this).attr('id').replace('wmd-input','submit-button')).on('mousedown', function(){
+			console.log('mousedown');
+			var a,b;
 			if ($(this).attr('id') == 'submit-button-42') {//if submitting Q and A together..
-				reference($('#wmd-input')[0]); //refresh the Q too
+				b = repl($('#wmd-input')[0], 'question'); //refresh the Q too
+				b && (a = repl(t, 'answer, too'));
+			}else{
+				a = repl(t, 'post');
 			}
-			reference(t);//replace the text
+			a && b && $(this).trigger('submit');
 		});
 	});
 });
