@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.3.3
+// @version      3.3.4
 // ==/UserScript==
 
 
@@ -412,46 +412,58 @@ inject(function ($) {
 			pre.scrollTop($(elem).scrollTop());//for scrolling.
 		});
 		$(elem).on('input focus mousedown',function(){
-			pre.html(elem.value);
+			var res = elem.value;
 			var matches = reference(elem.value),
 				ids = [],
 				r, cl, hl;
+			console.log(matches);
 			$.each(matches, function(i, m){
 				ids.push(['.grp'+i, m[2].replace(/\n/g, '<br>')]);
 				r = m[0][2];
 				cl = m[1] ? 'match' : 'error';
-				hl = '<span class="'+cl+'"><span class="grp'+i+'">'+ r.split('').join('</span>'+'<span class="grp'+i+'">') + '</span></span>';
-				pre.html(pre.html().replace(m[0][0], m[0][1] + hl));//as long as I'm replacing the html in the loop, I can't assign the msg to data.
+				hl = '<span class="'+cl+'"><span class="grp'+i+'">'+ r.split(/[;:, .]/).join('</span><span class="grp'+i+'"> </span>'+'<span class="grp'+i+'">') + '</span></span>';//we lose the delimiter with the split, so there's an extra span to add it in. Without its own span, they cause issues at line wrap.
+				res = res.replace(m[0][0], m[0][1] + hl);//as long as I'm replacing the html in the loop, I can't assign the msg to data.
 			});
+			pre.html(res);
 			$('.error').css('background-color','pink');
 			$('.match').css('background-color','lightgreen');
 			$.each(ids, function(i, id){
 				$(id[0]).data('msg', id[1]);
 			});
 		});
-		$(elem).on('mousemove input mouseout', function tt(e){
+		
+		$(elem).on('mouseout', function tt(e){
+			$('#tt').remove();
+		});
+		$(elem).on('mousemove input', function tt(e){
 			var b = false;
-			$.each($('[class*="grp"]'), function(i, g){
-				var gOffset = $(g).offset(),
-					gWidth  = $(g).width(),
-					gHeight = $(g).height();
-				if (e.pageX >= gOffset.left && e.pageX <= (gOffset.left + gWidth) && e.pageY > gOffset.top && e.pageY < (gOffset.top + gHeight)) {
-					console.log('AAAH!! A MOUSE!!!');
-					$('#tt').is('p') || $("body").append("<p id='tt'>"+ $(g).data('msg') +"</p>");
-					$('#tt').css({
-								top:(e.pageY - 10) + "px",
-								left:(e.pageX + 20) + "px",
-								position:'absolute',
-								border:'1px solid #333',
-								background:'#f7f5d1',
-								padding:'2px 5px',
-								'max-width':'300px',
-								'overflow-wrap':'break-word',
-								'z-index':'2',
-								})
-							.fadeIn("fast");
-					b = true;
+			$.each($('.error, .match'), function(i, m){
+				if (e.pageY > $(m).offset().top && e.pageY < ($(m).offset().top + $(m).height())){
+					$.each($(m).children(), function(i, g){
+						var gOffset = $(g).offset(),
+							gWidth  = $(g).width(),
+							gHeight = $(g).height();
+						if (e.pageX >= gOffset.left && e.pageX <= (gOffset.left + gWidth) && e.pageY > gOffset.top && e.pageY < (gOffset.top + gHeight)) {
+							console.log('AAAH!! A MOUSE!!!');
+							$('#tt').is('p') || $("body").append("<p id='tt'>"+ $(g).data('msg') +"</p>");
+							$('#tt').css({
+										top:(e.pageY - 10) + "px",
+										left:(e.pageX + 20) + "px",
+										position:'absolute',
+										border:'1px solid #333',
+										background:'#f7f5d1',
+										padding:'2px 5px',
+										'max-width':'300px',
+										'overflow-wrap':'break-word',
+										'z-index':'2',
+										})
+									.fadeIn("fast");
+							b = true;
+							return false;
+						}
+					});
 				}
+				if (b) return false;
 			});
 			!b && $("#tt").remove();
 		});
