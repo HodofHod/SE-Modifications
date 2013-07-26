@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.3.5
+// @version      3.3.6
 // ==/UserScript==
 
 
@@ -119,17 +119,19 @@ inject(function ($) {
 	}
 
 	function link(linker, value, options) {
-		var match = linker.regex.exec(value),
+		var match = linker.regex.exec(value) || linker.regex2.exec(value),
 			searchResult = null,
 			displayText = null,
 			CAPTURE_INDEX_OF_NAME = 1;
-		console.log('link');
-		console.log(match);
 		if (!match) return [false, 'Bad syntax'];
 
 		options = (options || '').toLowerCase();
 		searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
-		if (!searchResult[0]) return searchResult;//first value is bool, second is name or error text
+		if (!searchResult[0]){
+			linker.regex2 && (match = linker.regex2.exec(value));
+			searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
+			if (!searchResult[0]) return searchResult;//first value is bool, second is name or error text
+		}
 		var url = linker.link(searchResult[1], match, options);//returns either url, or [false, error_message]
 		if (url[0]) {
 			url = [true, url];
@@ -183,6 +185,7 @@ inject(function ($) {
 				word = '[,:]' + title_words[wordi] + '(,|$)'; 
 			} 
 			word = new RegExp(word);//turn word into a regex for searching
+			
 			if (titles_found.length === 0) { //if we haven't found any matches yet from previous words
 				for (var syni = 0; syni < spellings.length; syni++) { //iterate through different titles
 					if (word.test(spellings[syni])) { //check if the word is in the synonyms
@@ -195,10 +198,12 @@ inject(function ($) {
 					syni = titles_found[topi];
 					if (word.test(spellings[syni])) {
 						counter++;
+					}else{
+						titles_found.splice(titles_found.indexOf(syni), 1) && topi--;
 					}
 				}
 			}
-			if (counter === 1) { //only one title matched, so we know we've got the right one
+			if (titles_found.length === 1) { //only one title matched/left, so we know we've got the right one
 				return [true, spellings[titles_found[0]].slice(0, spellings[titles_found[0]].indexOf(':'))];
 			}
 		}
@@ -258,7 +263,8 @@ inject(function ($) {
 				};
 
 			return {
-				regex: /^([12a-zA-Z'". ]{2,})[;.,\s:]+(\d{1,3})(?:[;.,\s:\-]+(\d{1,3}))?$/i,
+				regex : /^([12a-zA-Z'". ]{2,}?)[;.,\s:]+(\d{1,3})(?:[;.,\s:\-]+(\d{1,3}))?$/i,
+				regex2: /^([12a-zA-Z'". ]{2,})[;.,\s:]+(\d{1,3})(?:[;.,\s:\-]+(\d{1,3}))?$/i,
 				link: function (book, match, flags) {
 					//Keys are book names (duh) first value is chapter 1's id for chabad.org. 2nd value is number of chapters
 					//Third value is Mechon Mamre's book id
@@ -447,18 +453,24 @@ inject(function ($) {
 						if (e.pageX >= gOffset.left && e.pageX <= (gOffset.left + gWidth) && e.pageY > gOffset.top && e.pageY < (gOffset.top + gHeight)) {
 							console.log('AAAH!! A MOUSE!!!');
 							$('#tt').is('p') || $("body").append("<p id='tt'>"+ $(g).data('msg') +"</p>");
-							$('#tt').css({
-										top:(e.pageY - 10) + "px",
-										left:(e.pageX + 20) + "px",
-										position:'absolute',
-										border:'1px solid #333',
-										background:'#f7f5d1',
-										padding:'2px 5px',
-										'max-width':'300px',
-										'overflow-wrap':'break-word',
-										'z-index':'2',
-										})
-									.fadeIn("fast");
+							t = $('#tt');
+							t.css({
+									top:'0px',
+									left:(e.pageX + 20) + "px",
+									position:'absolute',
+									border:'1px solid #333',
+									background:'#f7f5d1',
+									padding:'2px 5px',
+									'max-width':'300px',
+									'overflow-wrap':'break-word',
+									'z-index':'2',
+									})
+							 .fadeIn("fast");
+							if (t.height() + e.pageY > $(document).height()) {
+								t.css('top', ($(document).height() - t.height()) + (e.pageY - gOffset.top) - 20 + 'px')
+							}else{
+								t.css({top:(e.pageY - 10) + "px"});
+							}
 							b = true;
 							return false;
 						}
@@ -476,8 +488,9 @@ inject(function ($) {
 		$('#sayit-button').on('mousedown', function(){
 			repl(tElem[0], 'chat message') && $(this).trigger('click');
 		});
+		tElem.data('events').keydown.splice(0, 0, {handler:function(e){if(!e.shiftKey && e.which == 13){repl(tElem[0], 'comment');}}});
 		$($(this).parent('td').next('td').children('input')).on('mousedown', function(){
-			repl(tElem[0], 'comment') && $(this).trigger('click');
+			repl(tElem[0], 'comment') && $(tElem).trigger('submit');
 		});
 	}); 
 	$(document).on('focus', '.wmd-input:not(.ref-hijacked)', function (){
