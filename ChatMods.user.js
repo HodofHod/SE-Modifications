@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         Chat Fixes
-// @description  Fixes some bugs in StackExchange's chat rooms
+// @name         Chat Mods
+// @description  Modifications and bug fixes for StackExchange's chat rooms
 // @include      http://chat.meta.stackoverflow.com/rooms/*
 // @include      http://chat.stackexchange.com/rooms/*
 // @include      http://chat.stackoverflow.com/rooms/*
