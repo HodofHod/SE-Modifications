@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.3.6
+// @version      3.3.7
 // ==/UserScript==
 
 
@@ -106,7 +106,7 @@ inject(function ($) {
 			matches = [],
 			regex = new RegExp("(\\(|\\s|^)(\\[\\s*(" + prefixes.join("|") + ")[;,. :-]" +
 							   "([^\\]\\[]+?)" +
-							   "(?:[;.,\\s:-]([a-z]{0,4}))?\\s*\\])(?![^$\\s,.;:\\)])", "mig");
+							   "(?:[;.,\\s:-]+([a-z]{0,4}))?\\s*\\])(?![^$\\s,.;:\\)])", "mig");
 		$.each(t.split('\n'), function (i, line){
 			while (line.indexOf('	') !== 0 && (match = regex.exec(line)) !== null) {
 				if (!d[match]) {
@@ -119,7 +119,7 @@ inject(function ($) {
 	}
 
 	function link(linker, value, options) {
-		var match = linker.regex.exec(value) || linker.regex2.exec(value),
+		var match = linker.regex.exec(value) || !!linker.regex2 && linker.regex2.exec(value),
 			searchResult = null,
 			displayText = null,
 			CAPTURE_INDEX_OF_NAME = 1;
