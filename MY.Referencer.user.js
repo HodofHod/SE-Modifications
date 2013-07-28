@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.4.0
+// @version      3.4.1
 // ==/UserScript==
 
 
@@ -105,7 +105,7 @@ inject(function ($) {
 			matches = [],
 			regex = new RegExp("(\\(|\\s|^)(\\[\\s*(" + prefixes.join("|") + ")[;,. :-]" +
 							   "([^\\]\\[]+?)" +
-							   "(?:[;.,\\s:-]+([a-z]{0,4}))?\\s*\\])(?![^$\\s,\?.;:\\)])", "mig");
+							   "(?:[;.,\\s:-]+([a-z]{0,4}))?\\s*\\])($|[\\s,\?.;:\\)])", "mig");
 		$.each(t.split('\n'), function (i, line){
 			while (line.indexOf('	') !== 0 && (match = regex.exec(line)) !== null) {
 				if (!d[match]) {
@@ -122,6 +122,7 @@ inject(function ($) {
 			searchResult = null,
 			displayText = null,
 			CAPTURE_INDEX_OF_NAME = 1;
+		console.log(value+':'+value.match(/\d+|[a-zA-Z.'" ]+/g));
 		options = (options || '').toLowerCase();
 		if (!match || value.match(/\d+/g).length > 3) return [false, 'Bad syntax'];
 		searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
@@ -369,14 +370,17 @@ inject(function ($) {
 			errors = false;
 		$.each(matches, function(i, m){
 			if (!m[1]) errors = true;
-			m[1] && (res = res.replace(m[0][0], m[0][1] + m[2]));
+			m[1] && (res = res.replace(m[0][0], m[0][1] + m[2] + m[0][6]));
 		});
 		
 		var alrt = 'There are invalid references in your '+type+'. Are you sure you want to continue?';
-		if (!force && errors && !confirm(alrt)) return false;
-		elem.value = res;
-		$(elem).trigger('click');
-		return !errors;
+		if (force || !errors || confirm(alrt)){
+			elem.value = res;
+			$(elem).trigger('click');
+			return true;
+		}else{
+			return false;
+		}
 			
 	}
 	function tHijack(elem){
@@ -415,7 +419,7 @@ inject(function ($) {
 				r = m[0][2];
 				cl = m[1] ? 'match' : 'error';
 				hl = '<span class="'+cl+'"><span class="grp'+i+'">'+ r.match(/[\[a-zA-Z'\]]+|[0-9]+|[.,;:' ]/g).join('</span>'+'<span class="grp'+i+'">') + '</span></span>';
-				res = res.replace(m[0][0], m[0][1] + hl);//as long as I'm replacing the html in the loop, I can't assign the msg to data.
+				res = res.replace(m[0][0], m[0][1] + hl  + m[0][6]);
 			});
 			pre.html(res);
 			$('.error').css('background-color','pink');
@@ -471,11 +475,24 @@ inject(function ($) {
 		$(this).addClass('ref-hijacked');//add a class.
 		var tElem = $(this);
 		tHijack(this);
+		
+		$(tElem).parents('form').data('events').submit.splice(0, 0, {handler:function(e){
+			if (!repl(tElem[0], 'comment')) {
+				e.stopImmediatePropagation();
+				return false;
+			}
+		}});
+		//type = /^chat\./.test(window.location.host) ? 'chat message' : 'comment';
+		$('#input').data('events').keydown.splice(0, 0, {handler:function(e){
+			if(!e.shiftKey && e.which == 13){
+				if (!repl(tElem[0], 'chat message')) {
+					e.stopImmediatePropagation();
+					return false;
+				}
+			}
+		}});
 		$('#sayit-button').on('mousedown', function(){
 			repl(tElem[0], 'chat message') && $(this).trigger('click');
-		});
-		$($(this).parent('td').next('td').children('input')).on('mousedown', function(){
-			repl(tElem[0], 'comment') && $(tElem).trigger('submit');
 		});
 	}); 
 	$(document).on('focus', '.wmd-input:not(.ref-hijacked)', function (){
@@ -499,16 +516,12 @@ inject(function ($) {
 			t.setSelectionRange(start, end); //and its cursor
 		});
 		
-		$('#' + $(this).attr('id').replace('wmd-input','submit-button')).on('mousedown', function(){
-			console.log('mousedown');
-			var a,b;
-			if ($(this).attr('id') == 'submit-button-42') {//if submitting Q and A together..
-				b = repl($('#wmd-input')[0], 'question'); //refresh the Q too
-				b && (a = repl(t, 'answer, too'));
-			}else{
-				a = repl(t, 'post');
+		$(t).parents('form').data('events').submit.splice(0, 0, {handler : submit});
+		function submit(e){
+			if (!repl(t, 'post')){//TODO: be mechalek between questions and answers.
+				e.stopImmediatePropagation();
+				return false;
 			}
-			a && b && $(this).trigger('submit');
-		});
+		}
 	});
 });
