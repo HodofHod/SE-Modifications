@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.3.8
+// @version      3.4.0
 // ==/UserScript==
 
 
@@ -67,7 +67,6 @@ register(prefix, linker) should be called to register each linker with a prefix.
 	}
 
 search() does the searching, regex style. Pretty powerful, and will match things pretty broadly.
-Throws alert() windows if the search comes up empty or ambiguous.
 
 the various linker.link functions manage tanach, gemara, and mishneh torah
 references, respectively. They generally call the below functions to generate the URL.
@@ -106,7 +105,7 @@ inject(function ($) {
 			matches = [],
 			regex = new RegExp("(\\(|\\s|^)(\\[\\s*(" + prefixes.join("|") + ")[;,. :-]" +
 							   "([^\\]\\[]+?)" +
-							   "(?:[;.,\\s:-]+([a-z]{0,4}))?\\s*\\])(?![^$\\s,.;:\\)])", "mig");
+							   "(?:[;.,\\s:-]+([a-z]{0,4}))?\\s*\\])(?![^$\\s,\?.;:\\)])", "mig");
 		$.each(t.split('\n'), function (i, line){
 			while (line.indexOf('	') !== 0 && (match = regex.exec(line)) !== null) {
 				if (!d[match]) {
@@ -119,19 +118,20 @@ inject(function ($) {
 	}
 
 	function link(linker, value, options) {
-		var match = linker.regex.exec(value) || !!linker.regex2 && linker.regex2.exec(value),
+		var match = linker.regex.exec(value),
 			searchResult = null,
 			displayText = null,
 			CAPTURE_INDEX_OF_NAME = 1;
-		if (!match) return [false, 'Bad syntax'];
-
 		options = (options || '').toLowerCase();
+		if (!match || value.match(/\d+/g).length > 3) return [false, 'Bad syntax'];
 		searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
-		if (!searchResult[0]){
-			linker.regex2 && (match = linker.regex2.exec(value));
-			searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
-			if (!searchResult[0]) return searchResult;//first value is bool, second is name or error text
+		if (!searchResult[0] && searchResult[1].search(/ambiguous/) !== -1){
+			match = !!linker.regex2 && linker.regex2.exec(value);
+			(match) && (searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType));
 		}
+		if (!searchResult[0]) return searchResult;
+	
+		
 		var url = linker.link(searchResult[1], match, options);//returns either url, or [false, error_message]
 		if (url[0]) {
 			url = [true, url];
@@ -159,7 +159,8 @@ inject(function ($) {
 			titles_found = [], //keep track of which titles.
 			word,
 			found = false,
-			title_words = title.toLowerCase().replace(/['.]/g,'').match(/[a-zA-Z]+|[0-9]+/g);//a fancy way to split. splits both spaces and numbers
+			san = title.toLowerCase().replace(/['.]/g,'');
+			title_words = (san.match(/[0-9]/g) || []).concat(san.match(/[a-zA-Z]+/g));
 		redo = redo === undefined ? 0 : redo; //if redo isn't passed, default to 0.
 		for (var wordi = 0; wordi < title_words.length; wordi++) { //iterate through each word in input
 			word = title_words[wordi];
@@ -259,7 +260,7 @@ inject(function ($) {
 
 			return {
 				regex : /^([12]?[a-zA-Z'". ]{2,}?\.?[12]?)[;.,\s:]+(\d{1,3})(?:[;.,\s:\-]+(\d{1,3}))?$/i,
-				regex2: /^([12]?[a-zA-Z'". ]{2,}[12]?)[;.,\s:]+(\d{1,3})(?:[;.,\s:\-]+(\d{1,3}))?$/i,
+				regex2: /^([a-zA-Z'". ]{2,}[12]?)[;.,\s:]+(\d{1,3})(?:[;.,\s:\-]+(\d{1,3}))?$/i,
 				link: function (book, match, flags) {
 					//Keys are book names (duh) first value is chapter 1's id for chabad.org. 2nd value is number of chapters
 					//Third value is Mechon Mamre's book id
@@ -284,7 +285,7 @@ inject(function ($) {
 					}
 					return res;
 				},
-				nameOverrides: {"Esther" : "Ester" },
+				//nameOverrides: {"Esther" : "Ester" },
 				spellings: ['Divrei Hayamim I:1,ch,chron,chroniclesi,cr,dh,divreihayamim,divreihayamimi,firstchronicles,i,ichr,ichronicles', 'Melachim I:1,firstkgs,firstkings,i,ikgs,ikings,k,kg,ki,kings,kingsi,melachim,melachimi,mlachima,stkings', 'Divrei Hayamim II:2,ch,chron,chroniclesii,cr,dh,divreihayamim,divreihayamimii,ii,iichr,iichronicles,secondchronicles', 'Melachim II:2,ii,iikgs,iikings,k,kg,ki,kings,kingsii,melachim,melachimii,mlachimb,ndkings,secondkgs,secondkings', 'Bereishit:beraishis,beraishit,berayshis,bereishis,bereishit,bereshit,braishis,braishit,brayshis,brayshit,breishis,breishit,ge,genesis,geneza,gn', 'Yirmiyahu:je,jeremia,jeremiah,jeremija,jr,yeremiyah,yeremiyahu,yirmiyahu', 'Michah:mch,mi,micah,micha,michah,miha,miq', 'Rus:rt,rth,ru,rus,ruta,ruth', 'Shemot:ex,exd,exod,exodus,sh,shemos,shemoth,shmos,shmot', 'Vayikra:lb,le,leu,leviticus,lv,vayikra,vayiqra,vayyikra,vayyiqra', 'Bamidbar:bamidbar,bmidbar,br,nb,nm,nomb,nu,numbers', 'Devarim:de,deut,deuteronomio,deuteronomium,deuteronomy,devarim,dvarim,dt', 'Yehoshua:ios,josh,joshua,josua,joz,jsh,yehoshua,yoshua', 'Shoftim:jdgs,jg,jt,judg,judges,jue,juges,shofetim,shoftim', 'Shmuel I:1,firstsamuel,i,isam,isamuel,s,sa,samuel,samueli,shmuel,shmuela,shmueli,sm', 'Shmuel II:2,ii,iisam,iisamuel,s,sa,samuel,samuelii,secondsamuel,shmuel,shmuelb,shmuelii,sm', 'Yeshayahu:is,isaiah,isiah,yeshayah,yeshayahu', 'Yechezkel:,ez,ezec,ezekial,ezekiel,hes,yecheskel,yechezkel', 'Hoshea:ho,hosea,hoshea', 'Yoel:ioel,jl,joel,jol,yoel', 'Amos:am,amos,ams', 'Ovadiah:ab,abdija,ob,obad,obadiah,obadija,obadja,obd,ovadiah,ovadyah', 'Yonah:ion,jna,jnh,jona,jonah,yonah', 'Nachum:na,nachum,naham,nahum,nam', 'Chavakuk:chavakuk,ha,habacuc,habakkuk,habakuk,habaqquq,habaquq', 'Tzefaniah:sefanja,sofonija,soph,tsefania,tsephania,tzefaniah,tzephaniah,zefanija,zefanja,zeph,zephanja,zp', 'Chaggai:chagai,chaggai,hagai,haggai,haggay,hg,hgg', 'Zechariah:sacharja,za,zach,zacharia,zaharija,zc,zch,zech,zechariah,zecharya,zekhariah', 'Malachi:malachi,malahija,malakhi,maleachi,ml', 'Tehillim:ps,psalm,psalmen,psalmi,psalms,psg,pslm,psm,pss,salmos,sl,tehilim,tehillim,thilim,thillim', 'Mishlei:mishlei,mishley,pr,prou,proverbs,prv', 'Iyov:hi,hiob,ijob,iyov,iyyov,jb', 'Shir HaShirim:sgs,shirhashirim,sng,so,song,songofsolomon,songofsongs,sos,ss,canticles', 'Eichah:aichah,eichah,eikhah,la,lamentaciones,lamentations,lm', 'Kohelet:ec,eccl,ecclesiastes,ecl,koheles,kohelet,qo,qohelet,qoheleth,qohleth', 'Esther:ester,estera,esther', 'Daniel:da,daniel,dn', 'Ezra:esra,ezra', 'Nechemiah:ne,nechemiah,nehemia,nehemiah,nehemija,nehemyah'],
 				searchType: { book: "book of Tanakh", partPlural: "books" },
 				displayName: function (name, match) {
@@ -473,7 +474,6 @@ inject(function ($) {
 		$('#sayit-button').on('mousedown', function(){
 			repl(tElem[0], 'chat message') && $(this).trigger('click');
 		});
-		tElem.data('events').keydown.splice(0, 0, {handler:function(e){if(!e.shiftKey && e.which == 13){repl(tElem[0], 'comment');}}});
 		$($(this).parent('td').next('td').children('input')).on('mousedown', function(){
 			repl(tElem[0], 'comment') && $(tElem).trigger('submit');
 		});
