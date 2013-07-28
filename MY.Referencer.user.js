@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.4.1
+// @version      3.4.2
 // ==/UserScript==
 
 
@@ -373,10 +373,10 @@ inject(function ($) {
 			m[1] && (res = res.replace(m[0][0], m[0][1] + m[2] + m[0][6]));
 		});
 		
-		var alrt = 'There are invalid references in your '+type+'. Are you sure you want to continue?';
-		if (force || !errors || confirm(alrt)){
+		var msg = 'There are invalid references in your '+type+'. Are you sure you want to continue?';
+		if (force || !errors || confirm(msg)){
 			elem.value = res;
-			$(elem).trigger('click');
+			$(elem).trigger('keydown');//hack to get highlights to refresh
 			return true;
 		}else{
 			return false;
@@ -405,12 +405,14 @@ inject(function ($) {
 		$(elem).after(pre);
 
 		elem.id == 'input' && pre.css('padding','2px 4px');//different padding for chat
+		
 		$(elem).on('input focus mousemove scroll',function(){
 			pre.css({width:$(elem).css('width'),height:$(elem).css('height')});//for resizing.
 			pre.scrollTop($(elem).scrollTop());//for scrolling.
 		});
-		$(elem).on('input focus mousedown',function(){
-			var res = elem.value;
+		
+		$(elem).on('input focus mousedown keydown', function (){
+			var res = elem.value.replace(/[<>]/g, ' ');//Prevent later parsing of any html in the textarea
 			var matches = reference(elem.value),
 				ids = [],
 				r, cl, hl;
@@ -482,7 +484,6 @@ inject(function ($) {
 				return false;
 			}
 		}});
-		//type = /^chat\./.test(window.location.host) ? 'chat message' : 'comment';
 		$('#input').data('events').keydown.splice(0, 0, {handler:function(e){
 			if(!e.shiftKey && e.which == 13){
 				if (!repl(tElem[0], 'chat message')) {
@@ -496,7 +497,6 @@ inject(function ($) {
 		});
 	}); 
 	$(document).on('focus', '.wmd-input:not(.ref-hijacked)', function (){
-		console.log('inputfocus');
 		$(this).addClass('ref-hijacked');//add a class.
 		tHijack(this);
 		
@@ -505,7 +505,7 @@ inject(function ($) {
 		previewPane.after(clonedPane).css({'display':'none'});//append the clone, and hide the original preview 
 		
 		var t = this;
-		$(this).on('input', function(){
+		$(this).on('input focus', function(){
 			var oldText = t.value, //save the old text
 				start = t.selectionStart, //save the old cursor location
 				end = t.selectionEnd;
@@ -513,12 +513,14 @@ inject(function ($) {
 			StackExchange.MarkdownEditor.refreshAllPreviews(); //refresh the hidden preview
 			clonedPane.html(previewPane.clone(false).html()); //update the visible preview from the hidden one
 			t.value = oldText; //and undo the textarea's text
+			$(t).trigger('keydown');//hack to get highlights to refresh.
 			t.setSelectionRange(start, end); //and its cursor
 		});
 		
 		$(t).parents('form').data('events').submit.splice(0, 0, {handler : submit});
 		function submit(e){
-			if (!repl(t, 'post')){//TODO: be mechalek between questions and answers.
+			var type = /\/questions\/ask/.test(window.location.pathname) && t.id == 'wmd-input' ? 'question' : 'answer';
+			if (!repl(t, type)){//TODO: be mechalek between questions and answers.
 				e.stopImmediatePropagation();
 				return false;
 			}
