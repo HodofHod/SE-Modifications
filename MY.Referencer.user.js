@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.4.2
+// @version      3.4.3
 // ==/UserScript==
 
 
@@ -124,7 +124,7 @@ inject(function ($) {
 			CAPTURE_INDEX_OF_NAME = 1;
 		console.log(value+':'+value.match(/\d+|[a-zA-Z.'" ]+/g));
 		options = (options || '').toLowerCase();
-		if (!match || value.match(/\d+/g).length > 3) return [false, 'Bad syntax'];
+		if (!match || (value.match(/\d+/g) || []).length > 3) return [false, 'Bad syntax'];
 		searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
 		if (!searchResult[0] && searchResult[1].search(/ambiguous/) !== -1){
 			match = !!linker.regex2 && linker.regex2.exec(value);
@@ -473,29 +473,31 @@ inject(function ($) {
 			!b && $("#tt").remove();
 		});
 	}
-	$(document).on('focus', '[name="comment"]:not(.ref-hijacked), #input:not(.ref-hijacked)', function(){//Hijack comments and chats on focus.
+	$(document).on('focus', '[name="comment"]:not(.ref-hijacked)', function(){
 		$(this).addClass('ref-hijacked');//add a class.
-		var tElem = $(this);
 		tHijack(this);
-		
-		$(tElem).parents('form').data('events').submit.splice(0, 0, {handler:function(e){
-			if (!repl(tElem[0], 'comment')) {
+		$(this).parents('form').data('events').submit.splice(0, 0, {handler:function(e){
+			if (!repl(this[0], 'comment')) {
 				e.stopImmediatePropagation();
 				return false;
 			}
 		}});
+	}); 
+	$(document).on('focus', '#input:not(.ref-hijacked)', function(){
+		$(this).addClass('ref-hijacked');//add a class.
+		tHijack(this);
 		$('#input').data('events').keydown.splice(0, 0, {handler:function(e){
 			if(!e.shiftKey && e.which == 13){
-				if (!repl(tElem[0], 'chat message')) {
+				if (!repl(this[0], 'chat message')) {
 					e.stopImmediatePropagation();
 					return false;
 				}
 			}
 		}});
 		$('#sayit-button').on('mousedown', function(){
-			repl(tElem[0], 'chat message') && $(this).trigger('click');
+			repl(this[0], 'chat message') && $(this).trigger('click');
 		});
-	}); 
+	});
 	$(document).on('focus', '.wmd-input:not(.ref-hijacked)', function (){
 		$(this).addClass('ref-hijacked');//add a class.
 		tHijack(this);
