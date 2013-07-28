@@ -520,7 +520,7 @@ inject(function ($) {
 		$(t).parents('form').data('events').submit.splice(0, 0, {handler : submit});
 		function submit(e){
 			var type = /\/questions\/ask/.test(window.location.pathname) && t.id == 'wmd-input' ? 'question' : 'answer';
-			if (!repl(t, type)){//TODO: be mechalek between questions and answers.
+			if (!repl(t, type)){
 				e.stopImmediatePropagation();
 				return false;
 			}
