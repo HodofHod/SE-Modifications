@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.4.3
+// @version      3.4.4
 // ==/UserScript==
 
 
@@ -412,7 +412,7 @@ inject(function ($) {
 		});
 		
 		$(elem).on('input focus mousedown keydown', function (){
-			var res = elem.value.replace(/[<>]/g, ' ');//Prevent later parsing of any html in the textarea
+			var res = elem.value.replace(/[<>]/g, '`');//Prevent later parsing of any html in the textarea
 			var matches = reference(elem.value),
 				ids = [],
 				r, cl, hl;
@@ -437,6 +437,7 @@ inject(function ($) {
 		$(elem).on('mousemove input', function tt(e){
 			var b = false;
 			$.each($('.error, .match'), function(i, m){
+				if (e.pageY < $(m).offset().top) return false; //Mouse is above the current element, go no further.
 				if (e.pageY > $(m).offset().top && e.pageY < ($(m).offset().top + $(m).height())){
 					$.each($(m).children(), function(i, g){
 						var gOffset = $(g).offset(),
@@ -458,7 +459,7 @@ inject(function ($) {
 									'z-index':'2',
 									})
 							 .fadeIn("fast");
-							if (t.height() + e.pageY > $(document).height()) {
+							if (t.height() + e.pageY > $(document).height()) {//if the tooltip runs below the page.
 								t.css('top', ($(document).height() - t.height()) + (e.pageY - gOffset.top) - 20 + 'px');
 							}else{
 								t.css({top:(e.pageY - 10) + "px"});
@@ -488,14 +489,14 @@ inject(function ($) {
 		tHijack(this);
 		$('#input').data('events').keydown.splice(0, 0, {handler:function(e){
 			if(!e.shiftKey && e.which == 13){
-				if (!repl(this[0], 'chat message')) {
+				if (!repl(this, 'chat message')) {
 					e.stopImmediatePropagation();
 					return false;
 				}
 			}
 		}});
 		$('#sayit-button').on('mousedown', function(){
-			repl(this[0], 'chat message') && $(this).trigger('click');
+			repl($('#input')[0], 'chat message') && $(this).trigger('click');
 		});
 	});
 	$(document).on('focus', '.wmd-input:not(.ref-hijacked)', function (){
