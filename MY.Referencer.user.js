@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.4.4
+// @version      3.4.5
 // ==/UserScript==
 
 
@@ -122,7 +122,6 @@ inject(function ($) {
 			searchResult = null,
 			displayText = null,
 			CAPTURE_INDEX_OF_NAME = 1;
-		console.log(value+':'+value.match(/\d+|[a-zA-Z.'" ]+/g));
 		options = (options || '').toLowerCase();
 		if (!match || (value.match(/\d+/g) || []).length > 3) return [false, 'Bad syntax'];
 		searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
@@ -306,7 +305,7 @@ inject(function ($) {
 					res;
 
 				if (parseInt(page, 10) > mesechtos[mes][1] || page === '1' || page === '0') { //if mesechta doesn't have that page
-					return [false, '"' + page + side + '" is not a valid page for Mesechtas ' + mes + '. Please try again.'];
+					return [false, '"' + page + side + '" is not a valid page for Mesechtas ' + mes + '. Page numbers should be between 2 and ' + mesechtos[mes][1] + '. Please try again.'];
 				}
 				if (side.toLowerCase() === 'a') {
 					side = ''; //hebrewbooks is weird.
@@ -315,7 +314,7 @@ inject(function ($) {
 				res += (flags.indexOf('t') !== -1) ? '&format=text' : '&format=pdf';//text version flag is set
 				return res;
 			},
-			spellings: ['Brachos:berachos,berachot,brachos,brachot,brcht,brchs', 'Shabbos:shabbos,shabbat,shabbas,shabos,shabat,shbt,shbs', 'Eruvin:eruvin,eiruvin,ervn,er', 'Pesachim:pesachim,psachim,pesakhim,psakhim,pes,psa,pschm,ps', 'Shekalim:shekalim,shekolim,shkalim,shkolim,shk,shek', 'Yoma:yoma,yuma,ym', 'Succah:succah,sukkah,suka,sukah,sk,sc', 'Beitzah:beitzah,betzah,betza,btz', 'Rosh Hashanah:rosh,hashana,rsh,rh', 'Taanis:taanis,taanith,tanith,tanis,tns,tn', 'Megilah:megilah,mgl', 'Moed Katan:moedkatan,md,mk', 'Chagigah:chagigah,chg', 'Yevamos:yevamos,yevamot,yevamoth,yvms,yvmt', 'Kesuvos:kesuvos,kesubos,kesubot,ketubot,ketuvot,ksuvos,ksubos,ksvs,ksvt,ktbt,ks,kt', 'Nedarim:nedarim,ndrm,ndr', 'Nazir:nazir,nozir,naz,noz,nzr,nz', 'Sotah:sotah,sota,sot,so,st', 'Gitin:gitin,gittin,git,gtn,gt', 'Kiddushin:kiddushin,kidushin,kid,ki,kds,kdshn,kdsh,kd', 'Bava Kama:bavakama,babakama,bavakamma,bk,bkama', 'Bava Metzia:bavametzia,bavametziah,babametziah,babametzia,bm,bmetzia,bmetziah', 'Bava Basra:bavabasra,bavabatra,bababatra,bavabatrah,bb,bbatra,bbasra,bbatrah,bbasrah', 'Sanhedrin:sanhedrin,sn,snh,snhd,snhdrn', 'Makkos:makkos,makos,makkot,makot,mkt', 'Shevuos:shevuos,shevuot,shavuot,shavuos,shvt,shvs,shvuot,shvuos', 'Avoda Zarah:avodazarah,avodazara,avodahzara,avodahzarah,avodah,az,avd,avo,avod,av', 'Horayos:horayos,horaiot,horaios,horayot,horiyot,horaot,ho,hor,hrs,hrt,hr', 'Zevachim:zevachim,zevakhim,zvchm,zvkhm', 'Menachos:menachos,menachot,menakhos,menakhot,mncht,mnkht', 'Chulin:chulin,chullin,khulin,khullin,chl,khl,chln,khln', 'Bechoros:bechoros,bchoros,bechorot,bchorot,bcrt,bchrt,bkhrt,bc,bch,bkh', 'Erchin:erchin,erkhin,arachin,arakhin,ara,erc,erk', 'Temurah:temurah,tmurah,tmr', 'Kerisus:kerisus,krisus,keritut,kritut,kerisos,krisos,keritot,kritot,kerithoth,krithoth,kr,ker,krt,krs', 'Meilah:meilah,meila,mei,ml', 'Nidah:nidah,niddah'], 
+			spellings: ['Brachos:berachos,berachot,brachos,brachot,brcht,brchs', 'Shabbos:shabbos,shabbat,shabbas,shabos,shabat,shbt,shbs', 'Eruvin:eruvin,eiruvin,ervn,er', 'Pesachim:pesachim,psachim,pesakhim,psakhim,pes,psa,pschm,ps', 'Shekalim:shekalim,shekolim,shkalim,shkolim,shk,shek', 'Yoma:yoma,yuma,ym', 'Succah:succah,sukkah,suka,sukah,sk,sc', 'Beitzah:beitzah,betzah,betza,btz', 'Rosh Hashanah:rosh,hashana,rsh,rh', 'Taanis:taanis,taanith,tanith,tanis,tns,tn', 'Megilah:megilah,mgl', 'Moed Katan:moedkatan,md,mk', 'Chagigah:chagigah,chg', 'Yevamos:yevamos,yevamot,yevamoth,yvms,yvmt', 'Kesuvos:kesuvos,kesubos,kesubot,ketubot,ketuvot,ksuvos,ksubos,ksvs,ksvt,ktbt,ks,kt', 'Nedarim:nedarim,ndrm,ndr', 'Nazir:nazir,nozir,naz,noz,nzr,nz', 'Sotah:sotah,sota,sot,so,st', 'Gitin:gitin,gittin,git,gtn,gt', 'Kiddushin:kiddushin,kidushin,kid,ki,kds,kdshn,kdsh,kd', 'Bava Kama:bavakama,babakama,bavakamma,bk,bkama', 'Bava Metzia:bavametzia,bavametziah,babametziah,babametzia,bm,bmetziah', 'Bava Basra:bavabasra,bavabatra,bababatra,bavabatrah,bb,bbatrah,bbasrah', 'Sanhedrin:sanhedrin,sn,snh,snhd,snhdrn', 'Makkos:makkos,makos,makkot,makot,mkt', 'Shevuos:shevuos,shevuot,shavuot,shavuos,shvt,shvs,shvuot,shvuos', 'Avoda Zarah:avodazarah,avodazara,avodahzara,avodahzarah,avodah,az,avd,avo,avod,av', 'Horayos:horayos,horaiot,horaios,horayot,horiyot,horaot,ho,hor,hrs,hrt,hr', 'Zevachim:zevachim,zevakhim,zvchm,zvkhm', 'Menachos:menachos,menachot,menakhos,menakhot,mncht,mnkht', 'Chulin:chulin,chullin,khulin,khullin,chl,khl,chln,khln', 'Bechoros:bechoros,bchoros,bechorot,bchorot,bcrt,bchrt,bkhrt,bc,bch,bkh', 'Erchin:erchin,erkhin,arachin,arakhin,ara,erc,erk', 'Temurah:temurah,tmurah,tmr', 'Kerisus:kerisus,krisus,keritut,kritut,kerisos,krisos,keritot,kritot,kerithoth,krithoth,kr,ker,krt,krs', 'Meilah:meilah,mei,ml', 'Nidah:nidah,niddah'], 
 			searchType: { book: "tractate of Gemara", partPlural: "tractates" },
 			displayName: function (name, match, isUntouched) { return name + " " + match[2] + (isUntouched ? match[3] : match[3].toLowerCase()); }
 		});
@@ -381,27 +380,27 @@ inject(function ($) {
 		}else{
 			return false;
 		}
-			
 	}
+	
 	function tHijack(elem){
 		var pre = $('<pre>'+elem.value+'</pre>');
 		pre.css({
-				color:'transparent',
-				border:'none',
-				padding:$(elem).css('padding'),
-				opacity:'.5',
-				position:'absolute',
-				top:$(elem).offset().top - $(elem).parent().offset().top + 'px',
-				'font-size':$(elem).css('font-size'),
-				'font-family':$(elem).css('font-family'),
-				'line-height':$(elem).css('line-height'),
-				'text-align':'left',
-				'pointer-events':'none',
-				'background-color':'transparent',
-				'white-space':'pre-wrap',
-				'overflow-y':'hidden',
-				})
-				.css({padding:'+=1'});
+			color:'transparent',
+			border:'none',
+			padding:$(elem).css('padding'),
+			opacity:'.5',
+			position:'absolute',
+			top:$(elem).offset().top - $(elem).parent().offset().top + 'px',
+			'font-size':$(elem).css('font-size'),
+			'font-family':$(elem).css('font-family'),
+			'line-height':$(elem).css('line-height'),
+			'text-align':'left',
+			'pointer-events':'none',
+			'background-color':'transparent',
+			'white-space':'pre-wrap',
+			'overflow-y':'hidden',
+			})
+			.css({padding:'+=1'});
 		$(elem).after(pre);
 
 		elem.id == 'input' && pre.css('padding','2px 4px');//different padding for chat
@@ -431,14 +430,16 @@ inject(function ($) {
 			});
 		});
 		
-		$(elem).on('mouseout', function tt(e){
+		$(elem).on('mouseout', function(){
 			$('#tt').remove();
 		});
+		
 		$(elem).on('mousemove input', function tt(e){
 			var b = false;
 			$.each($('.error, .match'), function(i, m){
-				if (e.pageY < $(m).offset().top) return false; //Mouse is above the current element, go no further.
-				if (e.pageY > $(m).offset().top && e.pageY < ($(m).offset().top + $(m).height())){
+				//If Mouse is above the current element, go no further.
+				if (e.pageY < $(m).offset().top) return false; 
+				if (e.pageY < ($(m).offset().top + $(m).height())){
 					$.each($(m).children(), function(i, g){
 						var gOffset = $(g).offset(),
 							gWidth  = $(g).width(),
@@ -446,34 +447,36 @@ inject(function ($) {
 						if (e.pageX >= gOffset.left && e.pageX <= (gOffset.left + gWidth) && e.pageY > gOffset.top && e.pageY < (gOffset.top + gHeight)) {
 							console.log('AAAH!! A MOUSE!!!');
 							$('#tt').is('p') || $("body").append("<p id='tt'>"+ $(g).parent().data('msg') +"</p>");
-							var t = $('#tt');
-							t.css({
-									top:'0px',
-									left:(e.pageX + 20) + "px",
-									position:'absolute',
-									border:'1px solid #333',
-									background:'#f7f5d1',
-									padding:'2px 5px',
-									'max-width':'300px',
-									'overflow-wrap':'break-word',
-									'z-index':'2',
-									})
-							 .fadeIn("fast");
-							if (t.height() + e.pageY > $(document).height()) {//if the tooltip runs below the page.
-								t.css('top', ($(document).height() - t.height()) + (e.pageY - gOffset.top) - 20 + 'px');
-							}else{
-								t.css({top:(e.pageY - 10) + "px"});
-							}
 							b = true;
-							return false;
+							return false;//break out of the .each loop
 						}
 					});
 				}
 				if (b) return false;
 			});
-			!b && $("#tt").remove();
+			if (b){
+				var t = $('#tt');
+				t.css({
+					left:(e.pageX + 20) + "px",
+					position:'absolute',
+					border:'1px solid #333',
+					background:'#f7f5d1',
+					padding:'2px 5px',
+					'max-width':'300px',
+					'overflow-wrap':'break-word',
+					})
+				 .fadeIn("fast");
+				if (t.height() + e.pageY > $(document).height()) {//if the tooltip runs below the page.
+					t.css('top', ($(document).height() - t.height()) + (e.pageY - gOffset.top) - 20 + 'px');
+				}else{
+					t.css({top:(e.pageY - 10) + "px"});
+				}
+			}else{
+				$("#tt").remove();
+			}
 		});
 	}
+	
 	$(document).on('focus', '[name="comment"]:not(.ref-hijacked)', function(){
 		$(this).addClass('ref-hijacked');//add a class.
 		tHijack(this);
@@ -483,23 +486,23 @@ inject(function ($) {
 				return false;
 			}
 		}});
-	}); 
+	});
+	
 	$(document).on('focus', '#input:not(.ref-hijacked)', function(){
 		$(this).addClass('ref-hijacked');//add a class.
 		tHijack(this);
 		$('#input').data('events').keydown.splice(0, 0, {handler:function(e){
-			if(!e.shiftKey && e.which == 13){
-				if (!repl(this, 'chat message')) {
-					e.stopImmediatePropagation();
-					return false;
-				}
+			if(!e.shiftKey && e.which == 13 && repl(this, 'chat message')){
+				e.stopImmediatePropagation();
+				return false;
 			}
 		}});
 		$('#sayit-button').on('mousedown', function(){
 			repl($('#input')[0], 'chat message') && $(this).trigger('click');
 		});
 	});
-	$(document).on('focus', '.wmd-input:not(.ref-hijacked)', function (){
+	
+	$(document).on('focus', '.wmd-input:not(.ref-hijacked)', function(){
 		$(this).addClass('ref-hijacked');//add a class.
 		tHijack(this);
 		
@@ -508,7 +511,7 @@ inject(function ($) {
 		previewPane.after(clonedPane).css({'display':'none'});//append the clone, and hide the original preview 
 		
 		var t = this;
-		$(this).on('input focus', function(){
+		$(this).on('input', function(){
 			var oldText = t.value, //save the old text
 				start = t.selectionStart, //save the old cursor location
 				end = t.selectionEnd;
@@ -516,17 +519,20 @@ inject(function ($) {
 			StackExchange.MarkdownEditor.refreshAllPreviews(); //refresh the hidden preview
 			clonedPane.html(previewPane.clone(false).html()); //update the visible preview from the hidden one
 			t.value = oldText; //and undo the textarea's text
-			$(t).trigger('keydown');//hack to get highlights to refresh.
 			t.setSelectionRange(start, end); //and its cursor
+			$(t).trigger('keydown');//hack to get highlights to refresh.
 		});
 		
 		$(t).parents('form').data('events').submit.splice(0, 0, {handler : submit});
 		function submit(e){
 			var type = /\/questions\/ask/.test(window.location.pathname) && t.id == 'wmd-input' ? 'question' : 'answer';
 			if (!repl(t, type)){
-				e.stopImmediatePropagation();
+				e.stopImmediatePropagation();//prevent SE's bindings.
 				return false;
 			}
 		}
+	});
+	$(window).load(function(){
+		$('textarea').trigger('focus') && $('textarea').trigger('input');
 	});
 });
