@@ -6,7 +6,7 @@
 // @match        http://chat.stackoverflow.com/*
 // @match        http://chat.askubuntu.com/*
 // @author       @HodofHod
-// @version      1.2
+// @version      1.3
 // ==/UserScript==
 
 function inject(f) {
@@ -36,11 +36,11 @@ function bidi(){
 
 function followReply(){
     $('.reply-info').click(function(){
-        anchor = this.href.match(/#\d+$/)[0];
-        if ($('#message-' + anchor.slice(1)).length){
+        var anchor = this.href.match(/#\d+$/)[0],
+            msg = $('#message-' + anchor.slice(1));
+        if (msg.length){
             this.href = anchor;
             $('.highlight').removeClass('highlight');
-            var msg = $('#message-' + anchor.slice(1));
             msg.addClass('highlight');
             $('html, body').animate({ scrollTop: msg.offset().top }, 'fast')
         }
