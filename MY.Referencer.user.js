@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.4.6
+// @version      3.5.0
 // ==/UserScript==
 
 
@@ -159,7 +159,7 @@ inject(function ($) {
 			titles_found = [], //keep track of which titles.
 			word,
 			found = false,
-			san = title.toLowerCase().replace(/['._*]/g,'');
+			san = title.toLowerCase().replace(/['._*]/g, '');
 			title_words = (san.match(/[0-9]/g) || []).concat(san.match(/[a-zA-Z]+/g));
 		redo = redo === undefined ? 0 : redo; //if redo isn't passed, default to 0.
 		for (var wordi = 0; wordi < title_words.length; wordi++) { //iterate through each word in input
@@ -179,7 +179,6 @@ inject(function ($) {
 				word = '[,:]' + word.replace(/^(ve|v|u|ha|u)/, '');
 				break;
 			case 4:
-				word = word.slice(0, 3);
 				break; 
 			}
 			if (['1', '2', 'i', 'ii'].indexOf(title_words[wordi]) !== -1) {//special case for multi-volumes
@@ -187,7 +186,7 @@ inject(function ($) {
 			} 
 			word = new RegExp(word);//turn word into a regex for searching
 			
-			if (titles_found.length === 0) { //if we haven't found any matches yet from previous words
+			if (redo == 4 || titles_found.length === 0) { //if we haven't found any matches yet from previous words
 				for (var syni = 0; syni < spellings.length; syni++) { //iterate through different titles
 					if (word.test(spellings[syni])) { //check if the word is in the synonyms
 						counter++;
@@ -205,15 +204,39 @@ inject(function ($) {
 				}
 			}
 			if (titles_found.length === 1) { //only one title matched/left, so we know we've got the right one
-				return [true, spellings[titles_found[0]].slice(0, spellings[titles_found[0]].indexOf(':'))];
+				return [true].concat(spellings[titles_found[0]].match(/^.+(?=:)/));
 			}
 		}
 
-		if (!found) { //No match :( (Technically, this if is not needed; if anything has been found we already returned)
+		if (!found) { //No match :( (Redundant; if anything has been found we already returned)
 			var t = searchInfo.book,
 				p = searchInfo.partPlural;
-			if (redo < 4) { //no matches, but we haven't retried with out prefixes and partial matches.
+			if (redo < 3) { //no matches, but we haven't retried with out prefixes and partial matches.
 				return search(title, spellings, searchInfo, redo + 1); //then we'll try
+			} else if (redo == 3){
+				var all = [];
+				$.each(title_words, function(i, word){
+					all.push(word);
+					while (word.length > 3){
+						all.push(word = word.slice(0,-1));
+					}
+				});
+				titles_found = search(all.join(' '), spellings, searchInfo, 4);
+				if (titles_found[0] === true){
+					return titles_found; //search returned unambiguously.
+				}else{
+					var title_string = titles_found.join(','),
+						max = [0, false];
+					$.each(titles_found, function(i, title){
+						occurrences = title_string.match(RegExp(title, "g")).length;
+						if (occurrences > max[0]) max = [occurrences, title];
+						if (occurrences == max[0]) max = [occurrences, false];
+					});
+					max[1] && console.log(max + spellings[max[1]].match(/^.+(?=:)/));
+					if (max[1]) return [true, spellings[max[1]].match(/^.+(?=:)/)];
+				}
+			}else if (redo == 4){
+				return titles_found;
 			}
 			if (titles_found.length > 1) {//ambiguous. multiple matches found, no point in retrying
 				var titles = '';
@@ -249,7 +272,7 @@ inject(function ($) {
 					chpt = parseInt(chpt, 10);
 					cid = map[book][0] + chpt - 1;
 					if ([8171, 8170].indexOf(cid) !== -1) { cid = (cid === 8170 ? 8171 : 8170); } //Bereishis' chapters are not all sequential
-					if (cid >= 8177 && cid <= 8245) { cid += 31; }							 //These two lines adjust for that
+					if (cid >= 8177 && cid <= 8245) { cid += 31; } //These two lines adjust for that
 					url = 'http://www.chabad.org/library/bible_cdo/aid/' + cid;
 					if (flags.indexOf('r') !== -1) { url += "#showrashi=true"; } //Rashi flag is set?
 					if (vrs) { //Verse is specified?
@@ -267,8 +290,7 @@ inject(function ($) {
 					var map = {'Tzefaniah': [16200, 3, '21'], 'Hoshea': [16155, 14, '13'], 'Nachum': [16194, 3, '19'], 'Michah': [16187, 7, '18'], 'Shoftim': [15809, 21, '07'], 'Melachim II': [15907, 25, '09b'], 'Tehillim': [16222, 150, '26'], 'Nechemiah': [16508, 13, '35b'], 'Kohelet': [16462, 12, '31'], 'Yirmiyahu': [15998, 52, '11'], 'Amos': [16173, 9, '15'], 'Zechariah': [16205, 14, '23'], 'Melachim I': [15885, 22, '09a'], 'Divrei Hayamim II': [16550, 36, '25b'], 'Shmuel I': [15830, 31, '08a'], 'Yeshayahu': [15932, 66, '10'], 'Shmuel II': [15861, 24, '08b'], 'Yonah': [16183, 4, '17'], 'Rus': [16453, 4, '29'], 'Shir HaShirim': [16445, 8, '30'], 'Vayikra': [9902, 27, '03'], 'Ezra': [16498, 10, '35a'], 'Esther': [16474, 10, '33'], 'Yehoshua': [15785, 24, '06'], 'Yechezkel': [16099, 48, '12'], 'Iyov': [16403, 42, '27'], 'Divrei Hayamim I': [16521, 29, '25a'], 'Mishlei': [16372, 31, '28'], 'Daniel': [16484, 12, '34'], 'Devarim': [9965, 34, '05'], 'Yoel': [16169, 4, '14'], 'Chavakuk': [16197, 3, '20'], 'Bamidbar': [9929, 36, '04'], 'Chaggai': [16203, 2, '22'], 'Shemot': [9862, 40, '02'], 'Malachi': [16219, 3, '24'], 'Bereishit': [8165, 50, '01'], 'Eichah': [16457, 5, '32'], 'Ovadiah': [16182, 1, '16']
 							  },
 						chpt = match[2],
-						vrs = match[3] || '',
-						res;
+						vrs = match[3] || '';
 
 					flags = flags.toLowerCase(); //more matching purposes
 					if (chpt === '0') { //If the chapter number is 0, then someone's trying to cheat me!
@@ -278,15 +300,12 @@ inject(function ($) {
 					if (chpt > map[book][1]) { //Stop trying to sneak fake chapters in, aright?
 						return [false,'"' + chpt + '" is not a valid chapter for ' + book + '. \n\nThere are only ' + map[book][1] + ' chapters in ' + book + '\n\nPlease try again.'];
 					}
-					if (flags.indexOf('m') !== -1) { //Mechon Mamre flag is set
-						res = mechonMamreT(book, chpt, vrs, map);
-					} else { //Default to Chabad.org
-						res = chabadT(book, chpt, vrs, flags, map);
-					}
-					return res;
+					return (flags.indexOf('m') !== -1) //Mechon Mamre flag is set?
+						? mechonMamreT(book, chpt, vrs, map)
+						: chabadT(book, chpt, vrs, flags, map); //Default to Chabad.org
 				},
 				//nameOverrides: {"Esther" : "Ester" },
-				spellings: ['Divrei Hayamim I:1,ch,chron,chroniclesi,cr,dh,divreihayamim,divreihayamimi,firstchronicles,i,ichr,ichronicles', 'Melachim I:1,firstkgs,firstkings,i,ikgs,ikings,k,kg,ki,kings,kingsi,melachim,melachimi,mlachima,stkings', 'Divrei Hayamim II:2,ch,chron,chroniclesii,cr,dh,divreihayamim,divreihayamimii,ii,iichr,iichronicles,secondchronicles', 'Melachim II:2,ii,iikgs,iikings,k,kg,ki,kings,kingsii,melachim,melachimii,mlachimb,ndkings,secondkgs,secondkings', 'Bereishit:beraishis,beraishit,berayshis,bereishis,bereishit,bereshit,braishis,braishit,brayshis,brayshit,breishis,breishit,ge,genesis,geneza,gn', 'Yirmiyahu:je,jeremia,jeremiah,jeremija,jr,yeremiyah,yeremiyahu,yirmiyahu', 'Michah:mch,mi,micah,micha,michah,miha,miq', 'Rus:rt,rth,ru,rus,ruta,ruth', 'Shemot:ex,exd,exod,exodus,sh,shemos,shemoth,shmos,shmot', 'Vayikra:lb,le,leu,leviticus,lv,vayikra,vayiqra,vayyikra,vayyiqra', 'Bamidbar:bamidbar,bmidbar,br,nb,nm,nomb,nu,numbers', 'Devarim:de,deut,deuteronomio,deuteronomium,deuteronomy,devarim,dvarim,dt', 'Yehoshua:ios,josh,joshua,josua,joz,jsh,yehoshua,yoshua', 'Shoftim:jdgs,jg,jt,judg,judges,jue,juges,shofetim,shoftim', 'Shmuel I:1,firstsamuel,i,isam,isamuel,s,sa,samuel,samueli,shmuel,shmuela,shmueli,sm', 'Shmuel II:2,ii,iisam,iisamuel,s,sa,samuel,samuelii,secondsamuel,shmuel,shmuelb,shmuelii,sm', 'Yeshayahu:is,isaiah,isiah,yeshayah,yeshayahu', 'Yechezkel:,ez,ezec,ezekial,ezekiel,hes,yecheskel,yechezkel', 'Hoshea:ho,hosea,hoshea', 'Yoel:ioel,jl,joel,jol,yoel', 'Amos:am,amos,ams', 'Ovadiah:ab,abdija,ob,obad,obadiah,obadija,obadja,obd,ovadiah,ovadyah', 'Yonah:ion,jna,jnh,jona,jonah,yonah', 'Nachum:na,nachum,naham,nahum,nam', 'Chavakuk:chavakuk,ha,habacuc,habakkuk,habakuk,habaqquq,habaquq', 'Tzefaniah:sefanja,sofonija,soph,tsefania,tsephania,tzefaniah,tzephaniah,zefanija,zefanja,zeph,zephanja,zp', 'Chaggai:chagai,chaggai,hagai,haggai,haggay,hg,hgg', 'Zechariah:sacharja,za,zach,zacharia,zaharija,zc,zch,zech,zechariah,zecharya,zekhariah', 'Malachi:malachi,malahija,malakhi,maleachi,ml', 'Tehillim:ps,psalm,psalmen,psalmi,psalms,psg,pslm,psm,pss,salmos,sl,tehilim,tehillim,thilim,thillim', 'Mishlei:mishlei,mishley,pr,prou,proverbs,prv', 'Iyov:hi,hiob,ijob,iyov,iyyov,jb', 'Shir HaShirim:sgs,shirhashirim,sng,so,song,songofsolomon,songofsongs,sos,ss,canticles', 'Eichah:aichah,eichah,eikhah,la,lamentaciones,lamentations,lm', 'Kohelet:ec,eccl,ecclesiastes,ecl,koheles,kohelet,qo,qohelet,qoheleth,qohleth', 'Esther:ester,estera,esther', 'Daniel:da,daniel,dn', 'Ezra:esra,ezra', 'Nechemiah:ne,nechemiah,nehemia,nehemiah,nehemija,nehemyah'],
+				spellings: ['Divrei Hayamim I:1,ch,chron,chroniclesi,cr,dh,divreihayamim,divreihayamimi,firstchronicles,i,ichr,ichronicles', 'Melachim I:1,firstkgs,firstkings,i,ikgs,ikings,k,kg,ki,kings,kingsi,melachim,melachimi,mlachima,stkings', 'Divrei Hayamim II:2,ch,chron,chroniclesii,cr,dh,divreihayamim,divreihayamimii,ii,iichr,iichronicles,secondchronicles', 'Melachim II:2,ii,iikgs,iikings,k,kg,ki,kings,kingsii,melachim,melachimii,mlachimb,ndkings,secondkgs,secondkings', 'Bereishit:beraishis,beraishit,berayshis,bereishis,bereishit,bereshit,braishis,braishit,brayshis,brayshit,breishis,breishit,ge,genesis,geneza,gn', 'Yirmiyahu:je,jeremia,jeremiah,jeremija,jr,yeremiyah,yeremiyahu,yirmiyahu', 'Michah:mch,mi,micah,micha,michah,miha,miq', 'Rus:rt,rth,ru,rus,ruta,ruth', 'Shemot:ex,exd,exod,exodus,sh,shemos,shemot,shmos,shmot', 'Vayikra:lb,le,leu,leviticus,lv,vayikra,vayiqra,vayyikra,vayyiqra', 'Bamidbar:bamidbar,bmidbar,br,nb,nm,nomb,nu,numbers', 'Devarim:de,deut,deuteronomio,deuteronomium,deuteronomy,devarim,dvarim,dt', 'Yehoshua:ios,josh,joshua,josua,joz,jsh,yehoshua,yoshua', 'Shoftim:jdgs,jg,jt,judg,judges,jue,juges,shofetim,shoftim', 'Shmuel I:1,firstsamuel,i,isam,isamuel,s,sa,samuel,samueli,shmuel,shmuela,shmueli,sm', 'Shmuel II:2,ii,iisam,iisamuel,s,sa,samuel,samuelii,secondsamuel,shmuel,shmuelb,shmuelii,sm', 'Yeshayahu:is,isaiah,isiah,yeshayah,yeshayahu', 'Yechezkel:,ez,ezec,ezekial,ezekiel,hes,yecheskel,yechezkel', 'Hoshea:ho,hosea,hoshea', 'Yoel:ioel,jl,joel,jol,yoel', 'Amos:am,amos,ams', 'Ovadiah:ab,abdija,ob,obad,obadiah,obadija,obadja,obd,ovadiah,ovadyah', 'Yonah:ion,jna,jnh,jona,jonah,yonah', 'Nachum:na,nachum,naham,nahum,nam', 'Chavakuk:chavakuk,ha,habacuc,habakkuk,habakuk,habaqquq,habaquq', 'Tzefaniah:sefanja,sofonija,soph,tsefania,tsephania,tzefaniah,tzephaniah,zefanija,zefanja,zeph,zephanja,zp', 'Chaggai:chagai,chaggai,hagai,haggai,haggay,hg,hgg', 'Zechariah:sacharja,za,zach,zacharia,zaharija,zc,zch,zech,zechariah,zecharya,zekhariah', 'Malachi:malachi,malahija,malakhi,maleachi,ml', 'Tehillim:ps,psalm,psalmen,psalmi,psalms,psg,pslm,psm,pss,salmos,sl,tehilim,tehillim,thilim,thillim', 'Mishlei:mishlei,mishley,pr,prou,proverbs,prv', 'Iyov:hi,hiob,ijob,iyov,iyyov,jb', 'Shir HaShirim:sgs,shirhashirim,sng,so,song,songofsolomon,songofsongs,sos,ss,canticles', 'Eichah:aichah,eichah,eikhah,la,lamentaciones,lamentations,lm', 'Kohelet:ec,eccl,ecclesiastes,ecl,koheles,kohelet,qo,qohelet,qoheleth,qohleth', 'Esther:ester,estera,esther', 'Daniel:da,daniel,dn', 'Ezra:esra,ezra', 'Nechemiah:ne,nechemiah,nehemia,nehemiah,nehemija,nehemyah'],
 				searchType: { book: "book of Tanakh", partPlural: "books" },
 				displayName: function (name, match) {
 					var verse = match[3] ? ":" + match[3] : '';
@@ -307,11 +326,9 @@ inject(function ($) {
 				if (parseInt(page, 10) > mesechtos[mes][1] || page === '1' || page === '0') { //if mesechta doesn't have that page
 					return [false, '"' + page + side + '" is not a valid page for Mesechtas ' + mes + '. Page numbers should be between 2 and ' + mesechtos[mes][1] + '. Please try again.'];
 				}
-				if (side.toLowerCase() === 'a') {
-					side = ''; //hebrewbooks is weird.
-				}
-				res = 'http://hebrewbooks.org/shas.aspx?mesechta=' + mesechtos[mes][0] + '&daf=' + page + side;
-				res += (flags.indexOf('t') !== -1) ? '&format=text' : '&format=pdf';//text version flag is set
+				if (side.toLowerCase() === 'a') side = ''; //hebrewbooks is weird.
+				res = 'http://hebrewbooks.org/shas.aspx?mesechta=' + mesechtos[mes][0] + '&daf=' + page + side + '&format=';
+				res += (flags.indexOf('t') !== -1) ? 'text' : 'pdf';//text version flag is set?
 				return res;
 			},
 			spellings: ['Brachos:berachos,berachot,brachos,brachot,brcht,brchs', 'Shabbos:shabbos,shabbat,shabbas,shabos,shabat,shbt,shbs', 'Eruvin:eruvin,eiruvin,ervn,er', 'Pesachim:pesachim,psachim,pesakhim,psakhim,pes,psa,pschm,ps', 'Shekalim:shekalim,shekolim,shkalim,shkolim,shk,shek', 'Yoma:yoma,yuma,ym', 'Succah:succah,sukkah,suka,sukah,sk,sc', 'Beitzah:beitzah,betzah,betza,btz', 'Rosh Hashanah:rosh,hashana,rsh,rh', 'Taanis:taanis,taanith,tanith,tanis,tns,tn', 'Megilah:megilah,mgl', 'Moed Katan:moedkatan,md,mk', 'Chagigah:chagigah,chg', 'Yevamos:yevamos,yevamot,yevamoth,yvms,yvmt', 'Kesuvos:kesuvos,kesubos,kesubot,ketubot,ketuvot,ksuvos,ksubos,ksvs,ksvt,ktbt,ks,kt', 'Nedarim:nedarim,ndrm,ndr', 'Nazir:nazir,nozir,naz,noz,nzr,nz', 'Sotah:sotah,sota,sot,so,st', 'Gitin:gitin,gittin,git,gtn,gt', 'Kiddushin:kiddushin,kidushin,kid,ki,kds,kdshn,kdsh,kd', 'Bava Kama:bavakama,babakama,bavakamma,bk,bkama', 'Bava Metzia:bavametzia,bavametziah,babametziah,babametzia,bm,bmetziah', 'Bava Basra:bavabasra,bavabatra,bababatra,bavabatrah,bb,bbatrah,bbasrah', 'Sanhedrin:sanhedrin,sn,snh,snhd,snhdrn', 'Makkos:makkos,makos,makkot,makot,mkt', 'Shevuos:shevuos,shevuot,shavuot,shavuos,shvt,shvs,shvuot,shvuos', 'Avoda Zarah:avodazarah,avodazara,avodahzara,avodahzarah,avodah,az,avd,avo,avod,av', 'Horayos:horayos,horaiot,horaios,horayot,horiyot,horaot,ho,hor,hrs,hrt,hr', 'Zevachim:zevachim,zevakhim,zvchm,zvkhm', 'Menachos:menachos,menachot,menakhos,menakhot,mncht,mnkht', 'Chulin:chulin,chullin,khulin,khullin,chl,khl,chln,khln', 'Bechoros:bechoros,bchoros,bechorot,bchorot,bcrt,bchrt,bkhrt,bc,bch,bkh', 'Erchin:erchin,erkhin,arachin,arakhin,ara,erc,erk', 'Temurah:temurah,tmurah,tmr', 'Kerisus:kerisus,krisus,keritut,kritut,kerisos,krisos,keritot,kritot,kerithoth,krithoth,kr,ker,krt,krs', 'Meilah:meilah,mei,ml', 'Nidah:nidah,niddah'], 
@@ -327,9 +344,9 @@ inject(function ($) {
 			},
 
 				mechonMamreMT = function (topic, chpt, law, mtmap) {
-					if (chpt < 10) { chpt = '0' + chpt; }
+					chpt < 10 && (chpt = '0' + chpt);
 					var res = mtmap[topic][0] + chpt + '.htm';
-					if (law) { res += '#' + law; }
+					law && (res += '#' + law);
 					return 'http://www.mechon-mamre.org/i/' + res;
 				};
 			return {
@@ -339,19 +356,19 @@ inject(function ($) {
 					var mtmap = {"De'ot": ['12', 7, '9103', ['14', '40', '42', '43', '44', '45', '46', '47']], "Chometz U'Matzah": ['35', 8, '937', ['298', '300', '301', '302', '303', '304', '305', '306', '307']], 'Zechiyah uMattanah': ['c2', 12, '136', ['2850', '5795', '5796', '5797', '5798', '5799', '5800', '5801', '5802', '5803', '5805', '5806', '5807']], "Tefillin, Mezuzah, v'Sefer Torah": ['23', 10, '925', ['369', '417', '423', '424', '425', '427', '428', '429', '430', '431', '432']], 'Avel': ['e4', 14, '11818', ['78', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '94', '95']], 'Gerushin': ['42', 13, '9577', ['04', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18']], "Kri'at Shema": ['21', 4, '91295', ['1', '2', '3', '4', '5']], "Me'ilah": ['89', 8, '10629', ['22', '28', '30', '31', '32', '33', '34', '35', '36']], 'Tefilah uBirkat Kohanim': ['22', 15, '9201', ['53', '61', '62', '65', '66', '67', '68', '69', '71', '72', '73', '74', '77', '78', '79', '80']], 'Bechorot': ['93', 8, '1062', ['867', '894', '895', '896', '897', '898', '899', '900', '901']], 'Naarah Besulah': ['44', 3, '96063', ['2', '4', '5', '6']], 'Kilaayim': ['71', 10, '9866', ['88', '90', '91', '92', '93', '94', '95', '96', '97', '98', '89']], 'Melachim uMilchamot': ['e5', 12, '11883', ['43', '45', '46', '47', '48', '49', '50', '52', '53', '54', '55', '56', '57']], 'Sheluchin veShuttafin': ['c4', 10, '136', ['2852', '3711', '3712', '3723', '3760', '3786', '3791', '3792', '3793', '3796', '3799']], 'Megillah vChanukah': ['3a', 4, '95200', ['5', '6', '7', '8', '9']], 'Eruvin': ['32', 8, '935', ['286', '300', '303', '304', '306', '307', '308', '309', '310']], 'Issurei Biah': ['51', 22, '9606', ['44', '47', '48', '49', '51', '52', '53', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '69', '70']], "To'en veNit'an": ['d4', 16, '11', ['52032', '52041', '52047', '52053', '52055', '52056', '52058', '67618', '67619', '67620', '68076', '68077', '68078', '68080', '68081', '68082', '68083']], 'Tzitzis': ['24', 3, '93634', ['0', '1', '2', '3']], 'Korban Pesach': ['91', 10, '10628', ['65', '74', '75', '80', '81', '82', '83', '84', '85', '86', '87']], 'Shevitat Yom Tov': ['34', 8, '9360', ['34', '35', '36', '37', '38', '39', '40', '41', '42']], 'Biat Hamikdash': ['83', 9, '10082', ['36', '42', '43', '44', '45', '46', '47', '48', '49', '50']], 'Issurei Mizbeiach': ['84', 7, '10082', ['39', '51', '52', '53', '54', '55', '56', '57']], 'Rotseah uShmirat Nefesh': ['b5', 13, '10889', ['16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29']], 'Temidin uMusafim': ['86', 10, '10132', ['52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62']], 'Shegagot': ['94', 15, '1062', ['868', '902', '903', '904', '905', '907', '908', '909', '911', '912', '913', '914', '915', '916', '917', '918']], "Tum'at Okhalin": ['a6', 16, '15253', ['71', '74', '81', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '94', '95']], 'Yesodey HaTorah': ['11', 10, '9049', ['59', '60', '62', '69', '79', '80', '82', '91', '92', '93', '96']], 'Edut': ['e2', 22, '117', ['2722', '2769', '2770', '2771', '2772', '2773', '2774', '2775', '2776', '2777', '2778', '8799', '8800', '8801', '8802', '8803', '8804', '8805', '8806', '8807', '8808', '8809', '8810']], 'Terumot': ['73', 15, '9920', ['25', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41']], 'Teshuvah': ['15', 10, '911', ['887', '888', '891', '896', '898', '903', '905', '908', '910', '913', '914']], 'Nedarim': ['62', 13, '9738', ['79', '80', '81', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92']], "Ma'achalot Assurot": ['52', 17, '9682', ['55', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73']], 'Shekalim': ['37', 4, '9468', ['88', '89', '90', '91', '93']], 'Avadim': ['c5', 9, '136', ['2853', '3800', '2873', '3806', '3808', '3811', '3812', '3813', '3818', '3819']], 'Kelim': ['a7', 28, '1525', ['573', '793', '794', '795', '796', '797', '798', '799', '800', '801', '802', '803', '815', '817', '818', '819', '820', '821', '822', '823', '824', '825', '826', '827', '829', '831', '832', '833', '834']], "Tum'at Tsara'at": ['a3', 16, '1524', ['492', '493', '497', '500', '502', '507', '510', '511', '514', '516', '517', '518', '521', '523', '524', '527', '530']], 'Nezirut': ['63', 10, '9835', ['84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '94']], 'Seder HaTefilah': ['27', 5, '15080', ['40', '41', '42', '43', '44', '45']], 'Pesulei Hamukdashim': ['87', 19, '10208', ['44', '47', '48', '49', '50', '51', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '65']], "Shofar, Sukkah, v'Lulav": ['36', 8, '946', ['093', '094', '095', '096', '097', '098', '099', '105', '106']], 'Maaserot': ['74', 14, '9970', ['69', '72', '73', '74', '75', '76', '77', '78', '79', '80', '81', '82', '83', '84', '85']], 'Chagigah': ['92', 3, '10628', ['66', '88', '90', '93']], 'Maaser Sheini': ['75', 11, '9970', ['71', '86', '87', '88', '89', '90', '91', '92', '93', '94', '95', '96']], 'Sechirut': ['d1', 13, '13686', ['57', '62', '64', '66', '67', '68', '69', '70', '71', '72', '74', '75', '76', '77']], 'Mechussarey Kapparah': ['95', 5, '1062', ['862', '869', '870', '871', '919', '920']], 'Shechenim': ['53', 14, '13628', ['51', '55', '58', '59', '60', '61', '63', '64', '66', '67', '68', '69', '70', '71', '72']], 'Beis Habechirah': ['81', 8, '1007', ['192', '194', '195', '196', '197', '198', '199', '200', '193']], 'Mikvot': ['a8', 11, '15260', ['62', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75']], 'Shechitah': ['d2', 14, '9718', ['24', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40']], 'Avodat Yom HaKippurim': ['88', 5, '10629', ['21', '23', '24', '25', '26', '27']], 'Kli Hamikdash': ['82', 10, '10082', ['22', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35']], 'Ishut': ['41', 25, '952', ['873', '874', '875', '876', '878', '879', '880', '881', '882', '883', '884', '885', '886', '887', '888', '889', '890', '891', '892', '893', '894', '895', '896', '897', '899', '900']], 'Temurah': ['96', 4, '1061', ['798', '799', '844', '855', '857']], 'Shvuot': ['61', 12, '9738', ['61', '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74']], 'Arachim vaCharamim': ['64', 8, '983', ['595', '596', '597', '598', '599', '600', '601', '602', '603']], 'Kiddush HaChodesh': ['38', 19, '9479', ['15', '18', '19', '20', '21', '22', '23', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '42', '43']], 'Mechirah': ['c1', 30, '136', ['2849', '3894', '3896', '3898', '3903', '3906', '3911', '3912', '3921', '3928', '3935', '3936', '3941', '3942', '3946', '3951', '3954', '3955', '3957', '3958', '3959', '3960', '3963', '3965', '3967', '3969', '3970', '3971', '3977', '3980', '3981']], 'Nehalot': ['d5', 11, '11705', ['29', '30', '31', '32', '33', '34', '35', '37', '38', '39', '40', '41']], 'Berachot': ['25', 11, '9276', ['47', '67', '70', '71', '72', '73', '74', '75', '76', '77', '78', '79']], "Metamme'ey Mishkav uMoshav": ['a4', 13, '15245', ['32', '34', '35', '42', '44', '45', '46', '49', '78', '79', '80', '85', '87', '88']], "Tum'at Met": ['a1', 25, '1517', ['144', '151', '153', '161', '168', '169', '171', '172', '177', '186', '187', '188', '190', '192', '195', '200', '202', '204', '206', '218', '223', '228', '235', '236', '238', '241']], 'Shevitat Asor': ['33', 3, '93602', ['5', '6', '7', '8']], 'Talmud Torah': ['13', 7, '91', ['0970', '0973', '0974', '0975', '0977', '0979', '0980', '1561']], 'Malveh veLoveh': ['d3', 27, '11', ['59433', '59438', '59439', '59440', '59441', '59442', '59443', '59444', '59445', '59447', '59449', '59450', '59451', '59452', '59453', '59454', '59455', '61173', '61174', '61175', '61176', '61179', '61180', '61181', '61182', '61183', '61184', '61185']], "Sanhedrin veha'Onashin HaMesurin lahem": ['e1', 26, '11727', ['21', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48', '49']], 'Mamrim': ['e3', 7, '11818', ['43', '52', '53', '54', '55', '56', '57', '58']], "Gezelah va'Avedah": ['b3', 18, '1088', ['884', '885', '886', '887', '888', '889', '890', '891', '892', '893', '894', '895', '896', '897', '898', '899', '900', '901', '902']], 'Shabbos': ['31', 30, '935', ['196', '197', '201', '202', '203', '204', '206', '207', '208', '210', '211', '218', '219', '221', '222', '223', '237', '238', '239', '240', '241', '242', '243', '244', '245', '247', '248', '249', '250', '251', '256']], 'Avodat Kochavim': ['14', 12, '9123', ['48', '59', '60', '61', '62', '63', '64', '65', '67', '68', '69', '70', '71']], 'Nizkei Mammon': ['b1', 14, '6829', ['65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76', '77', '78', '80']], "Ta'aniyot": ['39', 5, '95199', ['3', '5', '6', '7', '8', '9']], 'Chovel uMazzik': ['b4', 8, '10889', ['06', '08', '09', '10', '11', '12', '13', '14', '15']], 'Yibbum vChalitzah': ['43', 8, '9606', ['18', '19', '20', '21', '22', '23', '24', '25', '26']], "She'elah uFikkadon": ['c3', 8, '11520', ['77', '86', '87', '88', '89', '90', '91', '94', '96']], 'Milah': ['26', 3, '932', ['220', '325', '327', '330']], 'Shemita': ['77', 13, '10071', ['57', '61', '62', '64', '65', '67', '68', '70', '71', '73', '74', '76', '77', '78']], 'Bikkurim': ['76', 12, '10025', ['26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38']], 'Maaseh HaKorbanot': ['85', 19, '10170', ['09', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '48']], "She'ar Avot HaTum'ah": ['a5', 20, '15252', ['14', '16', '26', '29', '30', '31', '32', '34', '36', '37', '39', '40', '41', '43', '46', '47', '48', '49', '50', '53', '55']], 'Matnot Aniyiim': ['72', 10, '986', ['699', '702', '703', '704', '705', '706', '707', '708', '709', '710', '711']], 'Parah Adummah': ['a2', 15, '1517', ['250', '254', '255', '256', '259', '261', '264', '300', '304', '305', '308', '314', '319', '321', '323', '327']], 'Sotah': ['45', 4, '9606', ['37', '38', '39', '40', '41']], 'Genevah': ['b2', 9, '10888', ['54', '66', '68', '70', '72', '77', '73', '74', '75', '76']], 'Haggadah': ['35', 1, '94417', ['6']]
 						},
 						chpt = match[2] || 0, //if no chapter specfied, default to 0
-						law = chpt && match[3] ? match[3] : '',
-						res;
+						law = chpt && match[3] ? match[3] : '';
 
-					if (chpt) { chpt = parseInt(chpt, 10); } //if chpt specified, convert to int
-					if (law) { law = parseInt(law, 10); } //same for law
+					chpt && (chpt = parseInt(chpt, 10)); //if chpt specified, convert to int
+					law && (law = parseInt(law, 10)); //same for law
 
 					if (chpt > mtmap[topic][1]) {
 						return [false, '"' + chpt + '" is not a valid chapter for Hilchot ' + topic + '. \n\nThere are only ' + (mtmap[topic][1]) + ' chapters in Hilchot' + topic + '\n\nPlease try again.'];
 					}
-					res = (flags.indexOf('e') !== -1) ? chabadMT(topic, chpt, mtmap) : mechonMamreMT(topic, chpt, law, mtmap);
-					return res;
+					return (flags.indexOf('e') !== -1) 
+						? chabadMT(topic, chpt, mtmap) 
+						: mechonMamreMT(topic, chpt, law, mtmap);
 				},
-				spellings: ['Yesodey HaTorah:yesodei,yisodei,yisodey,hatorah,hatora,yht,yt,yis', "De'ot:deot,deos,deyos,deios,deyot,deiot,daot,daos", 'Talmud Torah:talmud,torah,tt', 'Avodat Kochavim:avodah,avodat,avodas,kochavim,chukot,chukos,goim,hagoim,ak,zarah,goy,az', 'Teshuvah:teshuvah,tshuvah,tsh', "Kri'at Shema:krias,kriat,kriyat,kriyas,shema,shma,ks,krsh", 'Tefilah uBirkat Kohanim:tefilah,tfilah,tefillah,birkat,birkas,birchas,birchat,kohanim,cohanim,tbk', "Tefillin, Mezuzah, v'Sefer Torah:,tefillin,tefilin,tfilin,mezuzah,mzuzah,sefer,torah,stam", 'Tzitzis:tzitzis,tzizit,tsitsit,tsitsis,sisis,sisit', 'Berachot:berachot,berachos,brachos,brachot', 'Milah:milah,bris,brit', 'Seder HaTefilah:seder,siddur,sidur,hatefilah,hatfilah,tfilah,tefillah', 'Shabbos:shabbat,shabat,shabbos,shabes,shabbes,sh', 'Eruvin:eruvin,eiruvin,er', 'Shevitat Asor:shvisas,shevisas,shevitat,shvitat,asor', 'Shevitat Yom Tov:shvisas,shevisas,shevitat,shvitat,yomtov,yt', "Chometz U'Matzah:chametz,chamets,chometz,ham,matza,massa,masa,matsa,matzo,chm,cm", 'Haggadah:hagada,haggadah,hagadah', "Shofar, Sukkah, v'Lulav:,shofar,sukkah,succah,sukah,succa,lulav", 'Shekalim:sheqalim,shekalim,shkalim,shekolim,shek', 'Kiddush HaChodesh:hodesh,hachodesh,hahodesh,hakhodesh,kidush,kiddush,khc', "Ta'aniyot:taaniyos,taanios,taaniyot,taaniot,tanios,taniyos,taanis,taanit,tanis,taan,taniyot", 'Megillah vChanukah:mg,megila,mgila,megillah,chanukah,chanukkah,hanukkah,hanukka,channuka,han,mgvch,mgch', 'Ishut:ishut,ishus,eshus', 'Gerushin:gerushin,geirushin,gittin,gitin', 'Yibbum vChalitzah:yibbum,yibum,chalitzah,halitzah,chaliza,chalizah,halissa', 'Naarah Besulah:naarah,narah,betulah,bsulah,besulah', 'Sotah:sotah,soda', 'Issurei Biah:issurei,isurei,isurey,issurey,biah,biyah,ib,isub', "Ma'achalot Assurot:maachalot,machalot,maachalos,machalos,assurot,asurot,assuros,asuros,ma,maacha", 'Shechitah:shechitah,shehita,shehitah', 'Sechirut:sechirut,sechirus,sachir,schirus,schirut', "She'elah uFikkadon:sheailah,sheeilah,sheelah,shailah,shaylah,sheaila,fikkadon,pikadon,piqadon", 'Malveh veLoveh:malveh,loveh', "To'en veNit'an:toen,toain,nitan,nitaan", 'Nehalot:nachalos,nachlos,nachlot,nahalot,nahlot,nachalaos,nehalot', 'Kilaayim:kilaayim,kilaim', 'Matnot Aniyiim:matanos,aniyim,tzedaka,mattanot,mattanos,matnot,matnos,aniyiim', 'Terumot:terumos,terumot,ter', 'Maaserot:maaserot,maaseros,mayseros,maser,maas', 'Maaser Sheini:maaser,maser,mayser,sheni,sheini,neta,revai,kerem,msvnr,msnr,ms', 'Bikkurim:bikkurim,bikurim,shar,shaar,matnot,matnos,matanos,matanot,kehunah,shebgevulin,shebgvulin,bikk', 'Shemita:shemitta,shemitah,shmitah,shmitta,yovel,yoivel,yoival,sy,shy', 'Shvuot:shvuot,shvuos,shevuos,shevuot', 'Nedarim:neder,ndr,nedarim', 'Nezirut:nazir,nezerut,nezirut,naz,nz', 'Arachim vaCharamim:arachim,arachin,erkin,erchin,charamot,charamos,haramim,charamim,cherem,arch,arvch,charamin', 'Beis Habechirah:beit,beis,bet,bes,habechirah,habchirah,habekhirah,bh', 'Kli Hamikdash:kli,klei,kley,hamikdash,hamikdosh,mikdosh,haovdim,bo,ba', 'Biat Hamikdash:biat,bias,hamikdash,hamikdosh', 'Issurei Mizbeiach:issurei,isurei,issurey,isurey,issure,mizbeiach,mizbeyach,mizbeyakh', 'Temidin uMusafim:tmidin,temidin,temidim,tmidim,tamidim,tamidin,musafin,musafim', 'Maaseh HaKorbanot:maseh,maaseh,mayseh,hakorbonos,hakorbanot,hakorbanos', 'Pesulei Hamukdashim:pesulei,pesuley,hamukdashim', 'Avodat Yom HaKippurim:avodat,avodas,avoidas,yom,hakippurim,hakipurim,kippurim,kipur,ayk,yk', "Me'ilah:meilah", "Sanhedrin veha'Onashin HaMesurin lahem:sanhedrin,haonshin,hamesurin,lahem", 'Edut:edus,eduth,edhuth,eidim', 'Mamrim:mamrim,mamrin', 'Avel:uvel,aveilus,aveilut,avelus,aveluth', 'Melachim uMilchamot:melachim,melech,mashiach,melochim,mlochim,mlachim,milchamot,milchamteihem,milchamosehem,milchamoseihem,milchamotehem,milchamoteihem,milchomosehem,milchomoseihem,milhamotehem,milhamoteihem', 'Korban Pesach:korban,karban,pesah,pesach,pesakh', 'Chagigah:chagigah,hagigah', 'Bechorot:bechorot,bechoros,bchorot,bchoros', 'Shegagot:shegagot,shegagos,shgagot,shgagos', 'Mechussarey Kapparah:mechussarey,mechusarei,mechussarei,kapparah,kaparah,mk', 'Temurah:temurah,tmurah', "Tum'at Met:tumas,tumat,met,mes,meit,meis,mais,mait", 'Parah Adummah:parah,poroh,adumah,adummah', "Tum'at Tsara'at:tumas,tumat,tzaraas,tzoras,tzaras,tzaraat,tzarat,tsarat,tsaraat", "Metamme'ey Mishkav uMoshav:metammey,metammeey,metammei,metamei,metamey,mtamei,mtamey,mishkav,mishkov,moshav,mmm", "She'ar Avot HaTum'ah:shear,shar,shaar,avot,avos,hatumah,hatumaa,tumah,sat", "Tum'at Okhalin:tumas,tumat,okhalin,ochalin,oichlin,oichlim,to", 'Kelim:keilim,kelim,ke', 'Mikvot:mikvaot,mikvot,mikvos,mikvaos,mikvah,mkv', 'Nizkei Mammon:nizkei,nizkey,niskei,niskey,mamon,mammon,mamoin,mumoin,nm', 'Genevah:genevah,geneivah,geneiva,gneva,gneivah,gnevah,gne', "Gezelah va'Avedah:gezelah,gezeilah,gzeilah,gzelah,avedah,aveidah,ga,gva", 'Chovel uMazzik:chovel,choivel,choyvel,mazzik,mazik', 'Rotseah uShmirat Nefesh:rotseach,rotzeach,rotseah,rotzeah,rotzeiach,shmirat,shmiras,shemirat,shemiras,nefesh,nafesh,rotz,rusn,rsn', 'Mechirah:mechirah,mehirah,mchirah,mekhirah,mch', 'Zechiyah uMattanah:zechiyah,zekhiyah,zechiah,mattanah,matanah,zech,zch,zm', 'Shechenim:shechenim,shekhenim,shehenim', 'Sheluchin veShuttafin:sheluchin,shluchin,sheluchim,shelukhin,shluchim,shuttafin,shutafin,shutfin,ss,svs', 'Avadim:avadim,avodim,av,avd'],
+				spellings: ['Yesodey HaTorah:yesodei,yisodei,yisodey,hatorah,hatora,yht,yt,yis', "De'ot:deot,deos,deyos,deios,deyot,deiot,daot,daos", 'Talmud Torah:talmud,torah,tt', 'Avodat Kochavim:avodah,avodat,avodas,kochavim,chukot,chukos,goim,hagoim,ak,zarah,goy,az', 'Teshuvah:teshuvah,tshuvah,tsh', "Kri'at Shema:krias,kriat,kriyat,kriyas,shema,shma,ks,krsh", 'Tefilah uBirkat Kohanim:tefilah,tfilah,tefillah,birkat,birkas,birchas,birchat,kohanim,cohanim,tbk', "Tefillin, Mezuzah, v'Sefer Torah:,tefillin,tefilin,tfilin,mezuzah,mzuzah,sefer,torah,stam", 'Tzitzis:tzitzis,tzizit,tsitsit,tsitsis,sisis,sisit', 'Berachot:berachot,berachos,brachos,brachot', 'Milah:milah,bris,brit', 'Seder HaTefilah:seder,siddur,sidur,hatefilah,hatfilah,tfilah,tefillah', 'Shabbos:shabbat,shabat,shabbos,shabes,shabbes,sh', 'Eruvin:eruvin,eiruvin,er', 'Shevitat Asor:shvisas,shevisas,shevitat,shvitat,asor', 'Shevitat Yom Tov:shvisas,shevisas,shevitat,shvitat,yomtov,yt', "Chometz U'Matzah:chametz,chamets,chometz,ham,matza,massa,masa,matsa,matzo,chm,cm", 'Haggadah:hagada,haggadah,hagadah', "Shofar, Sukkah, v'Lulav:,shofar,sukkah,succah,sukah,succa,lulav", 'Shekalim:sheqalim,shekalim,shkalim,shekolim,shek', 'Kiddush HaChodesh:hodesh,hachodesh,hahodesh,hakhodesh,kidush,kiddush,khc', "Ta'aniyot:taaniyos,taanios,taaniyot,taaniot,tanios,taniyos,taanis,taanit,tanis,taan,taniyot", 'Megillah vChanukah:mg,megila,mgila,megillah,chanukah,chanukkah,hanukkah,hanukka,channuka,han,mgvch,mgch', 'Ishut:ishut,ishus,eshus', 'Gerushin:gerushin,geirushin,gittin,gitin', 'Yibbum vChalitzah:yibbum,yibum,chalitzah,halitzah,chaliza,chalizah,halissa', 'Naarah Besulah:naarah,narah,betulah,bsulah,besulah', 'Sotah:sotah,soda', 'Issurei Biah:issurei,isurei,isurey,issurey,biah,biyah,ib,isub', "Ma'achalot Assurot:maachalot,machalot,maachalos,machalos,assurot,asurot,assuros,asuros,ma,maacha", 'Shechitah:shechitah,shehita,shehitah', 'Sechirut:sechirut,sechirus,sachir,schirus,schirut', "She'elah uFikkadon:sheailah,sheeilah,sheelah,shailah,shaylah,sheaila,fikkadon,pikadon,piqadon", 'Malveh veLoveh:malveh,loveh', "To'en veNit'an:toen,toain,nitan,nitaan", 'Nehalot:nachalos,nachlos,nachlot,nahalot,nahlot,nachalaos,nehalot', 'Kilaayim:kilaayim,kilaim', 'Matnot Aniyiim:matanos,aniyim,tzedaka,mattanot,mattanos,matnot,matnos,aniyiim', 'Terumot:terumos,terumot,ter', 'Maaserot:maaserot,maaseros,mayseros,maser,maas', 'Maaser Sheini:maaser,maser,mayser,sheni,sheini,neta,revai,kerem,msvnr,msnr,ms', "Bikkurim v'Shar Matnot Kehuna Sheb'gvulin:bikkurim,bikurim,shar,shaar,matnot,matnos,matanos,matanot,kehunah,shebgevulin,shebgvulin,bikk", 'Shemita:shemitta,shemitah,shmitah,shmitta,yovel,yoivel,yoival,sy,shy', 'Shvuot:shvuot,shvuos,shevuos,shevuot', 'Nedarim:neder,ndr,nedarim', 'Nezirut:nazir,nezerut,nezirut,naz,nz', 'Arachim vaCharamim:arachim,arachin,erkin,erchin,charamot,charamos,haramim,charamim,cherem,arch,arvch,charamin', 'Beis Habechirah:beit,beis,bet,bes,habechirah,habchirah,habekhirah,bh', 'Kli Hamikdash:kli,klei,kley,hamikdash,hamikdosh,mikdosh,haovdim,bo,ba', 'Biat Hamikdash:biat,bias,hamikdash,hamikdosh', 'Issurei Mizbeiach:issurei,isurei,issurey,isurey,issure,mizbeiach,mizbeyach,mizbeyakh', 'Temidin uMusafim:tmidin,temidin,temidim,tmidim,tamidim,tamidin,musafin,musafim', 'Maaseh HaKorbanot:maseh,maaseh,mayseh,hakorbonos,hakorbanot,hakorbanos', 'Pesulei Hamukdashim:pesulei,pesuley,hamukdashim', 'Avodat Yom HaKippurim:avodat,avodas,avoidas,yom,hakippurim,hakipurim,kippurim,kipur,ayk,yk', "Me'ilah:meilah", "Sanhedrin veha'Onashin HaMesurin lahem:sanhedrin,haonshin,hamesurin,lahem", 'Edut:edus,eduth,edhuth,eidim', 'Mamrim:mamrim,mamrin', 'Avel:uvel,aveilus,aveilut,avelus,aveluth', 'Melachim uMilchamot:melachim,melech,mashiach,melochim,mlochim,mlachim,milchamot,milchamteihem,milchamosehem,milchamoseihem,milchamotehem,milchamoteihem,milchomosehem,milchomoseihem,milhamotehem,milhamoteihem', 'Korban Pesach:korban,karban,pesah,pesach,pesakh', 'Chagigah:chagigah,hagigah', 'Bechorot:bechorot,bechoros,bchorot,bchoros', 'Shegagot:shegagot,shegagos,shgagot,shgagos', 'Mechussarey Kapparah:mechussarey,mechusarei,mechussarei,kapparah,kaparah,mk', 'Temurah:temurah,tmurah', "Tum'at Met:tumas,tumat,met,mes,meit,meis,mais,mait", 'Parah Adummah:parah,poroh,adumah,adummah', "Tum'at Tsara'at:tumas,tumat,tzaraas,tzoras,tzaras,tzaraat,tzarat,tsarat,tsaraat", "Metamme'ey Mishkav uMoshav:metammey,metammeey,metammei,metamei,metamey,mtamei,mtamey,mishkav,mishkov,moshav,mmm", "She'ar Avot HaTum'ah:shear,shar,shaar,avot,avos,hatumah,hatumaa,tumah,sat", "Tum'at Okhalin:tumas,tumat,okhalin,ochalin,oichlin,oichlim,to", 'Kelim:keilim,kelim,ke', 'Mikvot:mikvaot,mikvot,mikvos,mikvaos,mikvah,mkv', 'Nizkei Mammon:nizkei,nizkey,niskei,niskey,mamon,mammon,mamoin,mumoin,nm', 'Genevah:genevah,geneivah,geneiva,gneva,gneivah,gnevah,gne', "Gezelah va'Avedah:gezelah,gezeilah,gzeilah,gzelah,avedah,aveidah,ga,gva", 'Chovel uMazzik:chovel,choivel,choyvel,mazzik,mazik', 'Rotseah uShmirat Nefesh:rotseach,rotzeach,rotseah,rotzeah,rotzeiach,shmirat,shmiras,shemirat,shemiras,nefesh,nafesh,rotz,rusn,rsn', 'Mechirah:mechirah,mehirah,mchirah,mekhirah,mch', 'Zechiyah uMattanah:zechiyah,zekhiyah,zechiah,mattanah,matanah,zech,zch,zm', 'Shechenim:shechenim,shekhenim,shehenim', 'Sheluchin veShuttafin:sheluchin,shluchin,sheluchim,shelukhin,shluchim,shuttafin,shutafin,shutfin,ss,svs', 'Avadim:avadim,avodim,av,avd'],
 				searchType: { book: "part of Rambam", partPlural: "topics" },
 				displayName: function (inputName, match, isUntouched) {
 					var name = "" + (isUntouched ?  "" : "Rambam, Hilchot ") + inputName,
@@ -447,34 +464,32 @@ inject(function ($) {
 						if (e.pageX >= gOffset.left && e.pageX <= (gOffset.left + gWidth) && e.pageY > gOffset.top && e.pageY < (gOffset.top + gHeight)) {
 							console.log('AAAH!! A MOUSE!!!');
 							$('#tt').is('p') || $("body").append("<p id='tt'>"+ $(g).parent().data('msg') +"</p>");
+							var t = $('#tt');
+							t.css({
+									top:'0px',
+									left:(e.pageX + 20) + "px",
+									position:'absolute',
+									border:'1px solid #333',
+									background:'#f7f5d1',
+									padding:'2px 5px',
+									'max-width':'300px',
+									'overflow-wrap':'break-word',
+									'z-index':'2',
+									})
+							 .fadeIn("fast");
+							if (t.height() + e.pageY > $(document).height()) {//if the tooltip runs below the page.
+								t.css('top', ($(document).height() - t.height()) + (e.pageY - gOffset.top) - 20 + 'px');
+							}else{
+								t.css({top:(e.pageY - 10) + "px"});
+							}
 							b = true;
-							return false;//break out of the .each loop
+							return false;
 						}
 					});
 				}
 				if (b) return false;
 			});
-			if (b){
-				var t = $('#tt');
-				t.css({
-					left:(e.pageX + 20) + "px",
-					position:'absolute',
-					border:'1px solid #333',
-					background:'#f7f5d1',
-					padding:'2px 5px',
-					'max-width':'300px',
-					'overflow-wrap':'break-word',
-					'z-index':'2',//for chat
-					})
-				 .fadeIn("fast");
-				if (t.height() + e.pageY > $(document).height()) {//if the tooltip runs below the page.
-					t.css('top', ($(document).height() - t.height()) + (e.pageY - gOffset.top) - 20 + 'px');
-				}else{
-					t.css({top:(e.pageY - 10) + "px"});
-				}
-			}else{
-				$("#tt").remove();
-			}
+			!b && $("#tt").remove();
 		});
 	}
 	
@@ -532,8 +547,5 @@ inject(function ($) {
 				return false;
 			}
 		}
-	});
-	$(window).load(function(){
-		$('textarea').trigger('focus') && $('textarea').trigger('input');
 	});
 });
