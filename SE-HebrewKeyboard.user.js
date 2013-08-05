@@ -6,7 +6,7 @@
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.1
+// @version       0.1.2
 // ==/UserScript==
 
 //Thanks: @Manishearth for the inject() function, and James Montagne for the draggability.
