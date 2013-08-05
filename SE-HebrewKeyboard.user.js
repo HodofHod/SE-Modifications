@@ -3,6 +3,7 @@
 // @description   Adds a Hebrew Keyboard to StackExchange's post editor
 // @match         http://judaism.stackexchange.com/*
 // @match         http://meta.judaism.stackexchange.com/*
+// @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
 // @version       0.1
