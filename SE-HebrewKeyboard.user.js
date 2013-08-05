@@ -139,7 +139,7 @@ inject(function HBKeyboard() {
             var start = wmd.selectionStart,
                 end = wmd.selectionEnd,
                 text = wmd.value,
-                res = text.slice(0, start) + this.innerText.slice(-1) + text.slice(end);
+                res = text.slice(0, start) + $(this).text().slice(-1) + text.slice(end);
             $(wmd).val(res).trigger('input');
             wmd.setSelectionRange(start + 1, start + 1);
         });
