@@ -3,6 +3,8 @@
 // @description   Adds a Hebrew Keyboard to StackExchange's post editor
 // @match         http://judaism.stackexchange.com/*
 // @match         http://meta.judaism.stackexchange.com/*
+// @match         http://hermeneutics.stackexchange.com/*
+// @match         http://meta.hermeneutics.stackexchange.com/*
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
@@ -40,7 +42,7 @@ inject(function HBKeyboard() {
 		});
 		
 		if (window.location.host == "chat.stackexchange.com" && 
-			$('#footer-logo a').attr('href') == "http://judaism.stackexchange.com"){
+			$('#footer-logo a').attr('href').match(/judaism|hermeneutics/)){
 			var btn = '<button class="button" id="hbk-toggle" title="Hebrew Keyboard">&#x2328;</button>',
 				kb = createKeyboard($('#input')[0]);
 			kb.css({
