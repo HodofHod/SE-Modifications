@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.5.0
+// @version      3.5.1
 // ==/UserScript==
 
 
@@ -232,7 +232,6 @@ inject(function ($) {
 						if (occurrences > max[0]) max = [occurrences, title];
 						if (occurrences == max[0]) max = [occurrences, false];
 					});
-					max[1] && console.log(max + spellings[max[1]].match(/^.+(?=:)/));
 					if (max[1]) return [true, spellings[max[1]].match(/^.+(?=:)/)];
 				}
 			}else if (redo == 4){
@@ -526,6 +525,10 @@ inject(function ($) {
 			clonedPane = previewPane.clone().attr('id', 'wmd-preview-hij');//clone the preview and change the clone's id
 		previewPane.after(clonedPane).css({'display':'none'});//append the clone, and hide the original preview 
 		
+		$(this).focus(function(){
+			StackExchange.MarkdownEditor.refreshAllPreviews();
+			clonedPane.html(previewPane.clone(false).html());
+		}
 		var t = this;
 		$(this).on('input', function(){
 			var oldText = t.value, //save the old text
@@ -538,7 +541,6 @@ inject(function ($) {
 			t.setSelectionRange(start, end); //and its cursor
 			$(t).trigger('keydown');//hack to get highlights to refresh.
 		});
-		
 		$(t).parents('form').data('events').submit.splice(0, 0, {handler : submit});
 		function submit(e){
 			var type = /\/questions\/ask/.test(window.location.pathname) && t.id == 'wmd-input' ? 'question' : 'answer';
