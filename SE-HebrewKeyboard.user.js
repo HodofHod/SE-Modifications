@@ -118,7 +118,7 @@ inject(function HBKeyboard() {
             margin: '0px 0px',
             width: '100%',
             height: '100%',
-            'font-family': 'FrankRuehl, New Peninim, Arial, sans-serif',
+            'font-family': 'FrankRuehl, New Peninim, New Peninim MT, Arial, sans-serif',
             'font-size': '140%',
             'min-width': '26px',
             'min-height': '25px'
