@@ -528,7 +528,7 @@ inject(function ($) {
 		$(this).focus(function(){
 			StackExchange.MarkdownEditor.refreshAllPreviews();
 			clonedPane.html(previewPane.clone(false).html());
-		}
+		});
 		var t = this;
 		$(this).on('input', function(){
 			var oldText = t.value, //save the old text
