@@ -8,7 +8,7 @@
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.1.2
+// @version       0.1.4
 // ==/UserScript==
 
 //Thanks: @Manishearth for the inject() function, and James Montagne for the draggability.
@@ -61,17 +61,17 @@ inject(function HBKeyboard() {
 			nek = ["שׁ", "שׂ", "וְ", "וֱ", "וֲ", "וֳ", "וִ", "וֵ", "וֶ", "וַ", "וָ", "וֹ", "וֻ", "וּ"],
 			x = $(wmd).offset().left + $(wmd).outerWidth(),
 			y = $(wmd).offset().top,
-			kb = $('<div class="keyboard"></div>').appendTo($("body"));
+			kb = $('<div class="hbkeyboard"></div>').appendTo($("body"));
 			
         $.each(alpha.concat(nek), function (i, letter) {
-            kb.append('<button type="button" class="key">' + letter + '</button>');
+            kb.append('<button type="button" class="hbkey">' + letter + '</button>');
         });
         kb.children('button:lt(8)').wrapAll('<div class="first row">');
         kb.children('button:lt(10)').wrapAll('<div class="second row">');
         kb.children('button:lt(9)').wrapAll('<div class="third row">');
         kb.children('button:lt(14)').wrapAll('<div class="fourth row">');
-        kb.children('.first.row').prepend('<button type="button" class="key">&amp;rlm;&rlm;</button>');
-        kb.find('.key').wrap('<li class="keyli"></li>');
+        kb.children('.first.row').prepend('<button type="button" class="hbkey">&amp;rlm;&rlm;</button>');
+        kb.find('.hbkey').wrap('<li class="keyli"></li>');
 
 
         kb.css({
@@ -114,13 +114,12 @@ inject(function HBKeyboard() {
         $('.fourth').css({
             height: '34%'
         });
-        $('.key').css({
+        $('.hbkey').css({
             margin: '0px 0px',
             width: '100%',
             height: '100%',
-            'font-family': 'FrankRuehl',
-            'font-size': '130%',
-            'padding': '3px',
+            'font-family': 'FrankRuehl, New Peninim, Arial, sans-serif',
+            'font-size': '140%',
             'min-width': '26px',
             'min-height': '25px'
         });
@@ -130,14 +129,14 @@ inject(function HBKeyboard() {
             float: 'none',
             height: 'auto',
         });
-        $('.fourth.row .key').css({
-            'font-size': '150%',
+        $('.fourth.row .hbkey').css({
+            'font-size': '170%',
             padding: '2px',
             'min-height': '30px',
             'min-width': '20px'
         });
 
-        kb.find('.key').click(function () {
+        kb.find('.hbkey').click(function () {
             var start = wmd.selectionStart,
                 end = wmd.selectionEnd,
                 text = wmd.value,
@@ -158,7 +157,7 @@ inject(function HBKeyboard() {
         x: 0,
         y: 0
     };
-    $(document).on('mousedown', '.keyboard', function (e) {
+    $(document).on('mousedown', '.hbkeyboard', function (e) {
         if (!drag.state) {
             drag.elem = this;
             drag.x = e.pageX;
