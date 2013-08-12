@@ -10,10 +10,11 @@
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.2
+// @version       0.2.2
 // ==/UserScript==
 
 //Thanks: @Manishearth for the inject() function, and James Montagne for the draggability.
+//Thanks to all who've helped debug and discuss, especially the Mac users, nebech.
 
 function inject(f) {
     var script = document.createElement('script');
@@ -92,7 +93,7 @@ inject(function HBKeyboard() {
             kb = $('<div class="hbkeyboard"></div>').appendTo($("body"));
 
         $.each(alpha.split('').concat(nek), function (i, letter) {
-            kb.append('<button type="button" class="hbkey" data-t="' + letter + '">' + letter + '</button>');
+            kb.append('<button type="button" class="hbkey" data-t="' + letter.slice(-1) + '">' + letter + '</button>');
         });
 
         kb.children('button:lt(8)').wrapAll('<div class="first row">');
@@ -135,6 +136,7 @@ inject(function HBKeyboard() {
             'vertical-align': 'top'
         });
         $('.fourth.row .hbkey').css({
+            direction:'rtl',
             padding: '0',
             width: '20px',
             'font-size': '26px'
@@ -200,8 +202,8 @@ inject(function HBKeyboard() {
             docCookies.setItem('rlmSetting', $('#rlm').prop('checked'));
         });         
         
-        $('#rlm').prop('checked', docCookies.getItem('rlmSetting') == "false" ? false : true).change();
-        $('#layout').prop('checked', docCookies.getItem('layoutSetting') == "false" ? false : true).change();
+        $('#rlm').prop('checked', docCookies.getItem('rlmSetting') == "true" ?  true : false).change();
+        $('#layout').prop('checked', docCookies.getItem('layoutSetting') == "true" ? true : false).change();
         return kb;
     }
     
