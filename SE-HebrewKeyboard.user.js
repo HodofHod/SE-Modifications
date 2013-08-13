@@ -10,7 +10,7 @@
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.2.2
+// @version       0.2.3
 // ==/UserScript==
 
 //Thanks: @Manishearth for the inject() function, and James Montagne for the draggability.
@@ -156,8 +156,7 @@ inject(function HBKeyboard() {
                 text = wmd.value,
                 res = text.slice(0, start) + $(this).data('t') + text.slice(end),
                 len = $(this).data('t').length;
-            $(wmd).val(res).trigger('input');
-            
+            $(wmd).val(res).trigger('input').focus();
             wmd.setSelectionRange(start + len, start + len);
         });
 
