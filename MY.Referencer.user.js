@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.5.1
+// @version      3.5.3
 // ==/UserScript==
 
 
@@ -493,8 +493,17 @@ inject(function ($) {
 	}
 	
 	$(document).on('focus', '[name="comment"]:not(.ref-hijacked)', function(){
-		$(this).addClass('ref-hijacked');//add a class.
-		tHijack(this);
+		var tArea = $(this).addClass('ref-hijacked'),
+			clonedArea = tArea.clone().attr('name', 'cmt-hij').val(tArea.val());//clone the textarea and change the clone's name to prevent conflicts. Add the textareas text to the clone, in case the comment's being edited.
+		tArea.after(clonedArea).css({'display':'none'});//append the clone, and hide the original textarea 
+		tHijack(clonedArea[0]);
+		
+		clonedArea.on('input keydown', function(){
+			tArea.val($(this).val());
+			repl(tArea[0], 'comment', true);
+			tArea.trigger('keyup');//get charCounter to update.
+		}).on('keypress', function(e){e.which == 13 && tArea.trigger('submit');});
+		
 		$(this).parents('form').data('events').submit.splice(0, 0, {handler:function(e){
 			if (!repl(this[0], 'comment')) {
 				e.stopImmediatePropagation();
@@ -525,12 +534,8 @@ inject(function ($) {
 			clonedPane = previewPane.clone().attr('id', 'wmd-preview-hij');//clone the preview and change the clone's id
 		previewPane.after(clonedPane).css({'display':'none'});//append the clone, and hide the original preview 
 		
-		$(this).focus(function(){
-			StackExchange.MarkdownEditor.refreshAllPreviews();
-			clonedPane.html(previewPane.clone(false).html());
-		});
 		var t = this;
-		$(this).on('input', function(){
+		$(this).on('input focus', function(){
 			var oldText = t.value, //save the old text
 				start = t.selectionStart, //save the old cursor location
 				end = t.selectionEnd;
