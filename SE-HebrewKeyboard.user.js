@@ -10,7 +10,7 @@
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.3
+// @version       0.3.1
 // ==/UserScript==
 
 //Thanks: @Manishearth for the inject() function, and James Montagne for the draggability.
@@ -159,8 +159,11 @@ inject(function HBKeyboard() {
             var start = t.selectionStart,
                 end = t.selectionEnd,
                 text = t.value,
-                res = text.slice(0, start) + $(this).data('t') + text.slice(end),
-                len = $(this).data('t').length;
+				chr = $(this).data('t');
+				
+			if (chr === '‏' && $('#rlm').is(':checked') && t.id !== 'input') chr = '&rlm;';//special case for rlm.
+            var res = text.slice(0, start) + chr + text.slice(end),
+                len = chr.length;
             $(t).val(res).trigger('input').focus();
             t.setSelectionRange(start + len, start + len);
         });
@@ -198,11 +201,6 @@ inject(function HBKeyboard() {
         });
         
         $('#rlm').change(function(){
-            if(currentTextfield.attr('id') !== 'input'){//not chat
-                var r = $('.first .hbkey:first'),
-                    rv = $(this).is(':checked') ? '&rlm;' : '‏';//it's there, trust me
-                r.data('t', rv);
-            }
             docCookies.setItem('rlmSetting', $('#rlm').prop('checked'));
         });         
         
