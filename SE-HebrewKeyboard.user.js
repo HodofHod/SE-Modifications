@@ -10,7 +10,7 @@
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.2.3
+// @version       0.3
 // ==/UserScript==
 
 //Thanks: @Manishearth for the inject() function, and James Montagne for the draggability.
@@ -39,57 +39,61 @@ inject(function HBKeyboard() {
             return (new RegExp("(?:^|;\\s*)" + escape(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
         },
     };
-  $(document).ready(function(){
-        $(document).on('focus', '.wmd-input.processed:visible', function(){
-            var lastel = $(this).prev().find('.wmd-button').not(".wmd-help-button").filter(":last");
-            if (lastel.attr('class').indexOf("hbk-toggle") !== -1) return true;
-
-            var kb = createKeyboard(this).hide(),
-                btn = '<li class="wmd-button hbk-toggle" title="Hebrew Keyboard"><span>&#x2328;</span></li>';
-
-            btn = $(btn).css("left", lastel.css("left")).css("left", "+=25").insertAfter(lastel);
-            $('.hbk-toggle span').css({
-                'font-size': '150%',
+	
+	var currentTextfield = $('textarea, input[type=text]');
+    $(document).ready(function(){
+        $(document).on('focus', 'textarea, input[type=text]', function(){
+			currentTextfield = $(this);
+		});
+		
+        if (window.location.host == "chat.stackexchange.com" && 
+            $('#footer-logo a').attr('href').match(/judaism|hermeneutics|hebrew/)){ //Chat
+            var btn = $('<button class="button" id="hbk-toggle" title="Hebrew Keyboard"><span>א</span></button>');
+                //kb = createKeyboard(),
+            btn.appendTo($("#chat-buttons"));
+        } else { //not Chat
+            var btn = $('<button id="hbk-toggle" title="Hebrew Keyboard"><span>א</span></button>');
+			btn.css({
+				position: 'fixed',
+				bottom: '10px',
+				left: '10px',
+				border: 'dotted 1px',
+				cursor: 'pointer',
+				'font-size': '150%'
+			}).appendTo($('body'))
+		}
+		var wh = $(window).height(),
+			ww = $(window).width(),
+			kb = createKeyboard().css({
+									position:'fixed',
+									'z-index':'2'
+								}).hide();
+		$('#hbk-toggle span').css({
                 'padding': '3px',
                 'text-align': 'center',
-                'background-image': "none"
+                'background-image': "none",
+				'font-weight':'bolder'
             });
-            btn.on('click', function () {
-                kb.toggle();
-            });
-        });
-        
-        if (window.location.host == "chat.stackexchange.com" && 
-            $('#footer-logo a').attr('href').match(/judaism|hermeneutics|hebrew/)){
-            var btn = '<button class="button" id="hbk-toggle" title="Hebrew Keyboard">&#x2328;</button>',
-                kb = createKeyboard($('#input')[0]),
-                wh = $(window).height(),
-                ww = $(window).width();
-            kb.css({
-                position:'fixed',
-                'z-index':'2',
-                top: '-=' + kb.outerHeight() + 'px'
-            }).hide();
-            $(btn).appendTo($("#chat-buttons"))
-                  .on('click', function(){kb.toggle();});
-            
-            $(window).resize(function(){
-                kb.css({
-                    top: '+=' + ($(window).height() - wh) + 'px',
-                    left: '+=' + ($(window).width() - ww) + 'px',
-                });
-                wh = $(window).height();
-                ww = $(window).width();
-            });
-        }
+		$(window).resize(function(){
+			kb.css({
+				top: '+=' + ($(window).height() - wh) + 'px',
+				left: '+=' + ($(window).width() - ww) + 'px',
+			});
+			wh = $(window).height();
+			ww = $(window).width();
+		});
+		
+		btn.on('click', function () {
+			kb.toggle();
+		})
     });
     
-    function createKeyboard(wmd) {
+    function createKeyboard() {
         var stand = "קראטוןםפשדגכעיחלךףזסבהנמצתץ",
             alpha = "חזוהדגבאסןנםמלךכיטתשרקץצףפע",
             nek = ["שׁ", "שׂ", "וְ", "וֱ", "וֲ", "וֳ", "וִ", "וֵ", "וֶ", "וַ", "וָ", "וֹ", "וֻ", "וּ"],
-            x = $(wmd).offset().left + $(wmd).outerWidth(),
-            y = $(wmd).offset().top,
+			x = 10,
+			y = 20,
             kb = $('<div class="hbkeyboard"></div>').appendTo($("body"));
 
         $.each(alpha.split('').concat(nek), function (i, letter) {
@@ -151,13 +155,14 @@ inject(function HBKeyboard() {
         
         /* Event handling for buttons and checkboxes*/
         kb.find('.hbkey').click(function () {
-            var start = wmd.selectionStart,
-                end = wmd.selectionEnd,
-                text = wmd.value,
+			t = currentTextfield[0];
+            var start = t.selectionStart,
+                end = t.selectionEnd,
+                text = t.value,
                 res = text.slice(0, start) + $(this).data('t') + text.slice(end),
                 len = $(this).data('t').length;
-            $(wmd).val(res).trigger('input').focus();
-            wmd.setSelectionRange(start + len, start + len);
+            $(t).val(res).trigger('input').focus();
+            t.setSelectionRange(start + len, start + len);
         });
 
         $('#setbutton, #closebutton')
@@ -193,7 +198,7 @@ inject(function HBKeyboard() {
         });
         
         $('#rlm').change(function(){
-            if($(wmd).attr('id') !== 'input'){
+            if(currentTextfield.attr('id') !== 'input'){//not chat
                 var r = $('.first .hbkey:first'),
                     rv = $(this).is(':checked') ? '&rlm;' : '‏';//it's there, trust me
                 r.data('t', rv);
