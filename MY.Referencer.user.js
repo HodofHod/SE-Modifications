@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.5.4
+// @version      3.5.5
 // ==/UserScript==
 
 
@@ -539,10 +539,11 @@ inject(function ($) {
 			this.setSelectionRange(start, end); //and its cursor
 			highlight(this);
 		});
+		var t = this;
 		$(this).parents('form').data('events').submit.splice(0, 0, {handler : submit});
 		function submit(e){
-			var type = /\/questions\/ask/.test(window.location.pathname) && this.id == 'wmd-input' ? 'question' : 'answer';
-			if (!repl(this, type)){
+			var type = /\/questions\/ask/.test(window.location.pathname) && t.id == 'wmd-input' ? 'question' : 'answer';
+			if (!repl(t, type)){
 				e.stopImmediatePropagation();//prevent SE's bindings.
 				return false;
 			}
