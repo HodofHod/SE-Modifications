@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.5.3
+// @version      3.5.4
 // ==/UserScript==
 
 
@@ -391,11 +391,31 @@ inject(function ($) {
 		var msg = 'There are invalid references in your '+type+'. Are you sure you want to continue?';
 		if (force || !errors || confirm(msg)){
 			elem.value = res;
-			$(elem).trigger('keydown');//hack to get highlights to refresh
+			highlight(elem);
 			return true;
 		}else{
 			return false;
 		}
+	}
+	
+	function highlight(elem){
+		var res = $(elem).val().replace(/[<>]/g, '`');//Prevent later parsing of any html in the textarea when .html() is called
+		var matches = reference($(elem).val()),
+			ids = [],
+			r, cl, hl;
+		$.each(matches, function(i, m){
+			ids.push(['.grp'+i, m[2].replace(/\n/g, '<br>')]);
+			r = m[0][2];
+			cl = m[1] ? 'match' : 'error';
+			hl = '<span class="'+cl+'"><span class="grp'+i+'">'+ r.match(/[\[a-zA-Z'\]]+|[0-9]+|[.,;:'*_ ]/g).join('</span>'+'<span class="grp'+i+'">') + '</span></span>';
+			res = res.replace(m[0][0], m[0][1] + hl  + m[0][6]);
+		});
+		$(elem).next('pre').html(res);
+		$('.error').css('background-color','pink');
+		$('.match').css('background-color','lightgreen');
+		$.each(ids, function(i, id){
+			$(id[0]).parent().data('msg', id[1]);
+		});
 	}
 	
 	function tHijack(elem){
@@ -414,7 +434,7 @@ inject(function ($) {
 			'pointer-events':'none',
 			'background-color':'transparent',
 			'white-space':'pre-wrap',
-			'overflow-y':'hidden',
+			'overflow':'hidden',
 			})
 			.css({padding:'+=1'});
 		$(elem).after(pre);
@@ -426,31 +446,10 @@ inject(function ($) {
 			pre.scrollTop($(elem).scrollTop());//for scrolling.
 		});
 		
-		$(elem).on('input focus mousedown keydown', function(){
-			var res = elem.value.replace(/[<>]/g, '`');//Prevent later parsing of any html in the textarea
-			var matches = reference(elem.value),
-				ids = [],
-				r, cl, hl;
-			$.each(matches, function(i, m){
-				ids.push(['.grp'+i, m[2].replace(/\n/g, '<br>')]);
-				r = m[0][2];
-				cl = m[1] ? 'match' : 'error';
-				hl = '<span class="'+cl+'"><span class="grp'+i+'">'+ r.match(/[\[a-zA-Z'\]]+|[0-9]+|[.,;:'*_ ]/g).join('</span>'+'<span class="grp'+i+'">') + '</span></span>';
-				res = res.replace(m[0][0], m[0][1] + hl  + m[0][6]);
-			});
-			pre.html(res);
-			$('.error').css('background-color','pink');
-			$('.match').css('background-color','lightgreen');
-			$.each(ids, function(i, id){
-				$(id[0]).parent().data('msg', id[1]);
-			});
-		});
+		$(elem).on('input focus mousedown keydown', function(){highlight(this);});
+		$(elem).on('mouseout', function(e){$('#tt').remove();});//remove tooltip if mouse leaves box. Can't rely on mousemove.
 		
-		$(elem).on('mouseout', function(e){
-			$('#tt').remove();
-		});
-		
-		$(elem).on('mousemove input', function tt(e){
+		$(elem).on('mousemove input', function (e){
 			var b = false;
 			$.each($('.error, .match'), function(i, m){
 				//If Mouse is above the current element, go no further.
@@ -461,7 +460,6 @@ inject(function ($) {
 							gWidth  = $(g).width(),
 							gHeight = $(g).height();
 						if (e.pageX >= gOffset.left && e.pageX <= (gOffset.left + gWidth) && e.pageY > gOffset.top && e.pageY < (gOffset.top + gHeight)) {
-							console.log('AAAH!! A MOUSE!!!');
 							$('#tt').is('p') || $("body").append("<p id='tt'>"+ $(g).parent().data('msg') +"</p>");
 							var t = $('#tt');
 							t.css({
@@ -493,21 +491,17 @@ inject(function ($) {
 	}
 	
 	$(document).on('focus', '[name="comment"]:not(.ref-hijacked)', function(){
-		var tArea = $(this).addClass('ref-hijacked'),
-			clonedArea = tArea.clone().attr('name', 'cmt-hij').val(tArea.val());//clone the textarea and change the clone's name to prevent conflicts. Add the textareas text to the clone, in case the comment's being edited.
-		tArea.after(clonedArea).css({'display':'none'});//append the clone, and hide the original textarea 
-		tHijack(clonedArea[0]);
-		
-		clonedArea.on('input keydown', function(){
-			tArea.val($(this).val());
-			repl(tArea[0], 'comment', true);
-			tArea.trigger('keyup');//get charCounter to update.
-		}).on('keypress', function(e){e.which == 13 && tArea.trigger('submit');});
-		
+		$(this).addClass('ref-hijacked');//add a class.
+		tHijack(this);
 		$(this).parents('form').data('events').submit.splice(0, 0, {handler:function(e){
 			if (!repl(this[0], 'comment')) {
-				e.stopImmediatePropagation();
-				return false;
+				e.stopImmediatePropagation(); //prevent submit
+				return false; //prevent page reload
+			}else if ($(this[0]).val().length > 600){
+				$(this[0]).trigger('charCounterUpdate');//update char counter
+				$(this).find('.text-counter').hide(100,function(){$(this).show(100)}); //simulate a rejected submission.
+				e.stopImmediatePropagation(); //prevent submit
+				return false; //prevent page reload
 			}
 		}});
 	});
@@ -534,22 +528,21 @@ inject(function ($) {
 			clonedPane = previewPane.clone().attr('id', 'wmd-preview-hij');//clone the preview and change the clone's id
 		previewPane.after(clonedPane).css({'display':'none'});//append the clone, and hide the original preview 
 		
-		var t = this;
 		$(this).on('input focus', function(){
-			var oldText = t.value, //save the old text
-				start = t.selectionStart, //save the old cursor location
-				end = t.selectionEnd;
-			repl(t, '', true); //replace the text in the textarea, ignoring errors
+			var oldText = this.value, //save the old text
+				start = this.selectionStart, //save the old cursor location
+				end = this.selectionEnd;
+			repl(this, '', true); //replace the text in the textarea, ignoring errors
 			StackExchange.MarkdownEditor.refreshAllPreviews(); //refresh the hidden preview
 			clonedPane.html(previewPane.clone(false).html()); //update the visible preview from the hidden one
-			t.value = oldText; //and undo the textarea's text
-			t.setSelectionRange(start, end); //and its cursor
-			$(t).trigger('keydown');//hack to get highlights to refresh.
+			this.value = oldText; //and undo the textarea's text
+			this.setSelectionRange(start, end); //and its cursor
+			highlight(this);
 		});
-		$(t).parents('form').data('events').submit.splice(0, 0, {handler : submit});
+		$(this).parents('form').data('events').submit.splice(0, 0, {handler : submit});
 		function submit(e){
-			var type = /\/questions\/ask/.test(window.location.pathname) && t.id == 'wmd-input' ? 'question' : 'answer';
-			if (!repl(t, type)){
+			var type = /\/questions\/ask/.test(window.location.pathname) && this.id == 'wmd-input' ? 'question' : 'answer';
+			if (!repl(this, type)){
 				e.stopImmediatePropagation();//prevent SE's bindings.
 				return false;
 			}
