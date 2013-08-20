@@ -3,6 +3,7 @@
 * [Mi Yodeya Referencer](https://github.com/HodofHod/SE-Modifications/raw/master/MY.Referencer.user.js)  
 * [SE Hebrew Keyboard](https://github.com/HodofHod/SE-Modifications/raw/master/SE-HebrewKeyboard.user.js)  
 * [Chat Mods](https://github.com/HodofHod/SE-Modifications/raw/master/ChatMods.user.js)  
+* [SE Tag Suggestions](https://github.com/HodofHod/SE-Modifications/raw/master/SE-SuggestTags.user.js)
 
 ##Chrome
 
