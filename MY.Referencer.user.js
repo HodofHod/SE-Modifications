@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.5.5
+// @version      3.5.6
 // ==/UserScript==
 
 
@@ -528,7 +528,11 @@ inject(function ($) {
 			clonedPane = previewPane.clone().attr('id', 'wmd-preview-hij');//clone the preview and change the clone's id
 		previewPane.after(clonedPane).css({'display':'none'});//append the clone, and hide the original preview 
 		
-		$(this).on('input focus', function(){
+		$(this).focus(function(){
+			StackExchange.MarkdownEditor.refreshAllPreviews();
+			clonedPane.html(previewPane.clone(false).html());
+	    });
+		$(this).on('input', function(){// if you trigger this onfocus, you will have conflicts with SE's lists and image insertions.
 			var oldText = this.value, //save the old text
 				start = this.selectionStart, //save the old cursor location
 				end = this.selectionEnd;
