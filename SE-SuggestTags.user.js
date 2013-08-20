@@ -15,7 +15,7 @@
 // @match         http://stackapps.com/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.2
+// @version       0.2.2
 // ==/UserScript==
 
 //TODO Expand to inlcude other sites, including css sizes and colors
@@ -158,9 +158,8 @@ inject(function (){
 	if (document.location.pathname.match('^/questions/ask|^/posts/\\d+/edit')){
 		create();
 	}else if (document.location.pathname.match('^/questions/')){
-		$(document).on('focus', '.tag-editor input:not(.sug-hijacked)', function(){
+		$(document).on('focus', '.wmd-input:not(.ref-hijacked), .tag-editor input:not(.sug-hijacked)', function(){
 			create();
 		});
 	}
 });
-
