@@ -1,18 +1,18 @@
 // ==UserScript==
 // @name          SE Tag Suggestions
 // @description   Suggest related tags when asking or editing questions.
-// @match         http://*.stackexchange.com/questions/*
-// @match         http://stackoverflow.com/questions/*
-// @match         http://meta.stackoverflow.com/questions/*
-// @match         http://superuser.com/questions/*
-// @match         http://meta.superuser.com/questions/*
-// @match         http://serverfault.com/questions/*
-// @match         http://meta.serverfault.com/questions/*
-// @match         http://askubuntu.com/questions/*
-// @match         http://meta.askubuntu.com/questions/*
-// @match         http://answers.onstartups.com/questions/*
-// @match         http://meta.answers.onstartups.com/questions/*
-// @match         http://stackapps.com/questions/*
+// @match         http://*.stackexchange.com/*
+// @match         http://stackoverflow.com/*
+// @match         http://meta.stackoverflow.com/*
+// @match         http://superuser.com/*
+// @match         http://meta.superuser.com/*
+// @match         http://serverfault.com/*
+// @match         http://meta.serverfault.com/*
+// @match         http://askubuntu.com/*
+// @match         http://meta.askubuntu.com/*
+// @match         http://answers.onstartups.com/*
+// @match         http://meta.answers.onstartups.com/*
+// @match         http://stackapps.com/*
 // @author        HodofHod
 // @namespace     HodofHod
 // @version       0.2
@@ -89,13 +89,16 @@ inject(function (){
 		return $('.other .sug-status').remove() && $('.other .suggestion').slideDown('slow');
 	}
 	function similarQs(){
-		var qs = (document.location.pathname.match('^/questions/ask')
-			? $('.answer-summary a:even')
-			: $('.sidebar-related .spacer a:odd')).map(function(){return this.href.match(/\/(\d+)\//)[1];}).get(),
+		var path = document.location.pathname,
+			qs = (path.match('^/questions/ask')
+				? $('.answer-summary a:even')
+				: $('.sidebar-related .spacer a:odd')).map(function(){return this.href.match(/\/(\d+)\//)[1];}).get(),
 			site = document.location.host.replace(/\.stackexchange|\.com/g,''),
 			url = 'https://api.stackexchange.com/2.1/questions/' + qs.join('%3B') + '?order=desc&sort=activity&site='+site+'&filter=!LSzbU-PGQA0-8ToXqAh)2k';
 		
-		if (!qs.length){
+		if (path.match('^/posts/\\d+/edit')){//get related questions tags the other way.
+			url = 'http://api.stackexchange.com/2.1/questions/' + path.match('\\d+') +'/related?order=desc&sort=activity&site='+site+'&filter=!0UYesycZx0XJ(5m_lVK6cAR4n';
+		}else if (!qs.length){
 			return failed('No similar questions found') && false;
 		}
 		$.getJSON(url, function(data){
@@ -152,13 +155,12 @@ inject(function (){
 		return res;
 	}
 	
-	if (document.location.pathname.match('^/questions/ask')){
+	if (document.location.pathname.match('^/questions/ask|^/posts/\\d+/edit')){
 		create();
-	}else{
+	}else if (document.location.pathname.match('^/questions/')){
 		$(document).on('focus', '.tag-editor input:not(.sug-hijacked)', function(){
 			create();
 		});
 	}
-	
 });
 
