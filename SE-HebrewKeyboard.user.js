@@ -10,7 +10,7 @@
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.3.1
+// @version       0.3.2
 // ==/UserScript==
 
 //Thanks: @Manishearth for the inject() function, and James Montagne for the draggability.
@@ -79,6 +79,7 @@ inject(function HBKeyboard() {
 				top: '+=' + ($(window).height() - wh) + 'px',
 				left: '+=' + ($(window).width() - ww) + 'px',
 			});
+			if (kb.css('top') < '0px') kb.css('top','0px');
 			wh = $(window).height();
 			ww = $(window).width();
 		});
@@ -107,9 +108,11 @@ inject(function HBKeyboard() {
         kb.children('.first.row').prepend('<button type="button" class="hbkey" data-t="&rlm;">&amp;rlm;</button>');
         kb.prepend('<div style="position:relative; height:20px"><button type="button" id="setbutton" data-t="">Settings</button><button type="button" id="closebutton" data-t="">x</button></div>');
         kb.prepend('<span style="position:absolute; top:0; right:0; color:transparent">בס"ד</span>');
-        $('<div class="kbsettings"><div><input type="checkbox" id="layout">Use standard layout</div><div><input type="checkbox" id="rlm">Insert &amp;rlm; as text (posts only)</div></div>').appendTo(kb).hide();
+        $('<div class="kbsettings" style="text-align:left;"><div><input type="checkbox" id="layout">Use standard layout</div><div><input type="checkbox" id="rlm">Insert &amp;rlm; as text (posts only)</div></div>').appendTo(kb).hide();
 
         /* CSS For Keyboard and buttons */
+		$('.kbsettings input').css('margin-left','5px');
+		
         kb.css({
             position: 'absolute',
             border: 'dotted 1px',
@@ -241,6 +244,7 @@ inject(function HBKeyboard() {
                 left: (cur_offset.left + delta.x),
                 top: (cur_offset.top + delta.y)
             });
+			if ($(drag.elem).css('top') < '0px') $(drag.elem).css('top','0px');
             drag.x = e.pageX;
             drag.y = e.pageY;
         }
