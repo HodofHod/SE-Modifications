@@ -123,7 +123,7 @@ inject(function ($) {
 			displayText = null,
 			CAPTURE_INDEX_OF_NAME = 1;
 		options = (options || '').toLowerCase();
-		if (!match || (value.match(/\d+/g) || []).length > 3) return [false, 'Bad syntax'];
+		if (!match) return [false, 'Bad syntax'];
 		searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
 		if (!searchResult[0] && searchResult[1].search(/ambiguous/) !== -1){
 			match = !!linker.regex2 && linker.regex2.exec(value);
@@ -315,7 +315,7 @@ inject(function ($) {
 		}()));
 
 		register("g", {
-			regex: /^([a-zA-Z'" .*_]{2,})[;.,\s:]+(\d{1,3})([ab])(?:-(\d+)?(a|b))?$/
+			regex: /^([a-zA-Z'" .*_]{2,})[;.,\s:]+(\d{1,3})([ab])(?:-(\d+)?(a|b))?$/i,
 			link: function (mes, match, flags) {
 				var mesechtos = {'Chulin': [31, 141], 'Eruvin': [3, 104], 'Horayos': [28, 13], 'Rosh Hashanah': [9, 34], 'Shekalim': [5, 22], 'Menachos': [30, 110], 'Megilah': [11, 31], 'Bechoros': [32, 60], 'Brachos': [1, 63], 'Gitin': [19, 89], 'Taanis': [10, 30], 'Moed Katan': [12], 'Beitzah': [8, 39], 'Bava Kama': [21, 118], 'Kesuvos': [15, 112], 'Sanhedrin': [24, 112], 'Nazir': [17, 65], 'Kiddushin': [20, 81], 'Pesachim': [4, 120], 'Bava Basra': [23, 175], 'Sotah': [18, 48], 'Bava Metzia': [22, 118], 'Yoma': [6, 87], 'Succah': [7, 55], 'Meilah': [36, 21], 'Shabbos': [2, 156], 'Erchin': [33, 33], 'Nedarim': [16, 90], 'Shevuos': [26, 48], 'Temurah': [34, 33], 'Kerisus': [35, 27], 'Zevachim': [29, 119], 'Makkos': [25, 23], 'Avoda Zarah': [27, 75], 'Nidah': [37, 72], 'Chagigah': [13, 26], 'Yevamos': [14, 122]
 					},
