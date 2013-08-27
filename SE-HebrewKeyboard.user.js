@@ -10,8 +10,33 @@
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.3.2
+// @version       0.3.3
 // ==/UserScript==
+
+
+/* 
+The MIT License (MIT)
+
+Copyright (c) 2013  HodofHod (https://github.com/HodofHod, http://judaism.stackexchange.com/users/883/hodofhod)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. 
+*/
 
 //Thanks: @Manishearth for the inject() function, and James Montagne for the draggability.
 //Thanks to all who've helped debug and discuss, especially the Mac users, nebech.
@@ -101,18 +126,17 @@ inject(function HBKeyboard() {
             kb.append('<button type="button" class="hbkey" data-t="' + letter.slice(-1) + '">' + letter + '</button>');
         });
 
-        kb.children('button:lt(8)').wrapAll('<div class="first row">');
-        kb.children('button:lt(10)').wrapAll('<div class="second row">');
-        kb.children('button:lt(9)').wrapAll('<div class="third row">');
-        kb.children('button:lt(14)').wrapAll('<div class="fourth row">');
-        kb.children('.first.row').prepend('<button type="button" class="hbkey" data-t="&rlm;">&amp;rlm;</button>');
+        kb.children('button:lt(8)').wrapAll('<div class="first kbrow">');
+        kb.children('button:lt(10)').wrapAll('<div class="second kbrow">');
+        kb.children('button:lt(9)').wrapAll('<div class="third kbrow">');
+        kb.children('button:lt(14)').wrapAll('<div class="fourth kbrow">');
+        kb.children('.first.kbrow').prepend('<button type="button" class="hbkey" data-t="&rlm;">&amp;rlm;</button>');
         kb.prepend('<div style="position:relative; height:20px"><button type="button" id="setbutton" data-t="">Settings</button><button type="button" id="closebutton" data-t="">x</button></div>');
         kb.prepend('<span style="position:absolute; top:0; right:0; color:transparent">בס"ד</span>');
-        $('<div class="kbsettings" style="text-align:left;"><div><input type="checkbox" id="layout">Use standard layout</div><div><input type="checkbox" id="rlm">Insert &amp;rlm; as text (posts only)</div></div>').appendTo(kb).hide();
+        $('<div class="kbsettings" style="text-align:left;"><div><input type="checkbox" id="keylayout">Use standard layout</div><div><input type="checkbox" id="rlm">Insert &amp;rlm; as text (posts only)</div></div>').appendTo(kb).hide();
 
         /* CSS For Keyboard and buttons */
-		$('.kbsettings input').css('margin-left','5px');
-		
+	$('.kbsettings input').css('margin-left','5px');
         kb.css({
             position: 'absolute',
             border: 'dotted 1px',
@@ -122,7 +146,7 @@ inject(function HBKeyboard() {
             top: y,
             'background-color': 'rgba(241, 241, 241, 1)'
         });
-        $('.row').css({
+        $('.kbrow').css({
             position: 'relative',
             'white-space': 'nowrap',
             'text-align': 'right'
@@ -142,7 +166,7 @@ inject(function HBKeyboard() {
             'font-size': '20px',
             'vertical-align': 'top'
         });
-        $('.fourth.row .hbkey').css({
+        $('.fourth.kbrow .hbkey').css({
             direction:'rtl',
             padding: '0',
             width: '20px',
@@ -195,12 +219,12 @@ inject(function HBKeyboard() {
                 kb.fadeToggle('medium');
             });
 
-        $('#layout').change(function(){
+        $('#keylayout').change(function(){
             var layout = $(this).prop('checked') ? stand : alpha;
             $('.hbkey').slice(1, 28).each(function (index) {
                 $(this).data('t', layout[index]).text(layout[index]);
             });
-            docCookies.setItem('layoutSetting', $('#layout').prop('checked'));
+            docCookies.setItem('layoutSetting', $('#keylayout').prop('checked'));
         });
         
         $('#rlm').change(function(){
@@ -208,7 +232,7 @@ inject(function HBKeyboard() {
         });         
         
         $('#rlm').prop('checked', docCookies.getItem('rlmSetting') == "true" ?  true : false).change();
-        $('#layout').prop('checked', docCookies.getItem('layoutSetting') == "true" ? true : false).change();
+        $('#keylayout').prop('checked', docCookies.getItem('layoutSetting') == "true" ? true : false).change();
         return kb;
     }
     
