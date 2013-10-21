@@ -10,7 +10,7 @@
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.3.3
+// @version       0.4.0
 // ==/UserScript==
 
 
@@ -71,10 +71,9 @@ inject(function HBKeyboard() {
 			currentTextfield = $(this);
 		});
 		
-        if (window.location.host == "chat.stackexchange.com" && 
+        if (window.location.host === "chat.stackexchange.com" && 
             $('#footer-logo a').attr('href').match(/judaism|hermeneutics|hebrew/)){ //Chat
             var btn = $('<button class="button" id="hbk-toggle" title="Hebrew Keyboard"><span>א</span></button>');
-                //kb = createKeyboard(),
             btn.appendTo($("#chat-buttons"));
         } else { //not Chat
             var btn = $('<button id="hbk-toggle" title="Hebrew Keyboard"><span>א</span></button>');
@@ -85,14 +84,11 @@ inject(function HBKeyboard() {
 				border: 'dotted 1px',
 				cursor: 'pointer',
 				'font-size': '150%'
-			}).appendTo($('body'))
+			}).appendTo($('body'));
 		}
 		var wh = $(window).height(),
 			ww = $(window).width(),
-			kb = createKeyboard().css({
-									position:'fixed',
-									'z-index':'2'
-								}).hide();
+			kb = createKeyboard().hide();
 		$('#hbk-toggle span').css({
                 'padding': '3px',
                 'text-align': 'center',
@@ -111,7 +107,7 @@ inject(function HBKeyboard() {
 		
 		btn.on('click', function () {
 			kb.toggle();
-		})
+		});
     });
     
     function createKeyboard() {
@@ -136,15 +132,18 @@ inject(function HBKeyboard() {
         $('<div class="kbsettings" style="text-align:left;"><div><input type="checkbox" id="keylayout">Use standard layout</div><div><input type="checkbox" id="rlm">Insert &amp;rlm; as text (posts only)</div></div>').appendTo(kb).hide();
 
         /* CSS For Keyboard and buttons */
-	$('.kbsettings input').css('margin-left','5px');
+        $('html > head').append($('<style>.hbkey:active{border: 1px solid lightgray !important}</style>'));
+		$('.kbsettings input').css('margin','5px');
         kb.css({
-            position: 'absolute',
-            border: 'dotted 1px',
+            position: 'fixed',
+            border: '1px dotted',
             padding: '4px',
-            width: '280px',
+            width: '310px',
             left: x,
             top: y,
-            'background-color': 'rgba(241, 241, 241, 1)'
+            direction: 'ltr',
+            'z-index': '2',
+            'background-color': 'rgb(241, 241, 241)'
         });
         $('.kbrow').css({
             position: 'relative',
@@ -152,25 +151,29 @@ inject(function HBKeyboard() {
             'text-align': 'right'
         });
         $('.first, .third').css({
-            right: '15px'
+            right: '20px'
         });
+        $('.second').css('right', '10px');
         $('.fourth').css({ //nekudos row
             'text-align': 'center'
         });
         $('.hbkey').css({
-            margin: '0px 0px',
+            margin: '1px',
             display: 'inline-block',
             width: '26px',
+            border: 'none',
             'min-height': '25px',
             'font-family': 'FrankRuehl, New Peninim MT, Arial, sans-serif',
             'font-size': '20px',
-            'vertical-align': 'top'
+            'vertical-align': 'top',
+            'box-shadow': '1px 1px 2px 1px gray'
         });
         $('.fourth.kbrow .hbkey').css({
             direction:'rtl',
             padding: '0',
             width: '20px',
-            'font-size': '26px'
+            'font-size': '25px',
+            'min-height': '27px'
         });
         $('.first .hbkey:first').css({//&rlm; button
             width:'54px',
@@ -208,7 +211,7 @@ inject(function HBKeyboard() {
         $('#setbutton') //Settings button
             .css('left',0)
             .click(function () {
-                $(this).text($(this).text() == "Settings" ? "Keyboard" : "Settings");
+                $(this).text($(this).text() === "Settings" ? "Keyboard" : "Settings");
                 $('.first, .second, .third, .fourth').slideToggle();
                 $('.kbsettings').slideToggle();
             });
@@ -231,8 +234,8 @@ inject(function HBKeyboard() {
             docCookies.setItem('rlmSetting', $('#rlm').prop('checked'));
         });         
         
-        $('#rlm').prop('checked', docCookies.getItem('rlmSetting') == "true" ?  true : false).change();
-        $('#keylayout').prop('checked', docCookies.getItem('layoutSetting') == "true" ? true : false).change();
+        $('#rlm').prop('checked', docCookies.getItem('rlmSetting') === "true" ?  true : false).change();
+        $('#keylayout').prop('checked', docCookies.getItem('layoutSetting') === "true" ? true : false).change();
         return kb;
     }
     
@@ -244,11 +247,11 @@ inject(function HBKeyboard() {
         x: 0,
         y: 0,
         state: false
-    };
-    var delta = {
-        x: 0,
-        y: 0
-    };
+    },
+        delta = {
+            x: 0,
+            y: 0
+        };
     $(document).on('mousedown', '.hbkeyboard', function (e) {
         if (!drag.state) {
             drag.elem = this;
