@@ -8,9 +8,10 @@
 // @match         http://hermeneutics.stackexchange.com/*
 // @match         http://meta.hermeneutics.stackexchange.com/*
 // @match         http://chat.stackexchange.com/rooms/*
+// @match         http://*/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.4.0
+// @version       0.4.1
 // ==/UserScript==
 
 
@@ -132,7 +133,7 @@ inject(function HBKeyboard() {
         $('<div class="kbsettings" style="text-align:left;"><div><input type="checkbox" id="keylayout">Use standard layout</div><div><input type="checkbox" id="rlm">Insert &amp;rlm; as text (posts only)</div></div>').appendTo(kb).hide();
 
         /* CSS For Keyboard and buttons */
-        $('html > head').append($('<style>.hbkey:active{border: 1px solid lightgray !important}</style>'));
+        $('html > head').append($('<style>.hbkey:active{border: 1px solid lightgray !important;}</style>'));
 		$('.kbsettings input').css('margin','5px');
         kb.css({
             position: 'fixed',
@@ -162,11 +163,12 @@ inject(function HBKeyboard() {
             display: 'inline-block',
             width: '26px',
             border: 'none',
-            'min-height': '25px',
+            height: '25px',
             'font-family': 'FrankRuehl, New Peninim MT, Arial, sans-serif',
             'font-size': '20px',
             'vertical-align': 'top',
-            'box-shadow': '1px 1px 2px 1px gray'
+            'box-shadow': '1px 1px 2px 1px gray',
+            'background-color':'inherit',//Mac Chrome
         });
         $('.fourth.kbrow .hbkey').css({
             direction:'rtl',
