@@ -8,7 +8,6 @@
 // @match         http://hermeneutics.stackexchange.com/*
 // @match         http://meta.hermeneutics.stackexchange.com/*
 // @match         http://chat.stackexchange.com/rooms/*
-// @match         http://*/*
 // @author        HodofHod
 // @namespace     HodofHod
 // @version       0.4.1
