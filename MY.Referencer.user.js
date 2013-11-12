@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.5.8
+// @version      3.6.0
 // ==/UserScript==
 
 
@@ -44,15 +44,15 @@ link() calls search() to find the canonicalName, then calls linker.link() to gen
 
 register(prefix, linker) should be called to register each linker with a prefix.  A linker is expected to have:
 	{
-		regex: /^.*$/i,							 // a regular expression to match on
+		regex: /^.*$/i,                             // a regular expression to match on
 
 		spellings: ["canonicalName:spelling1, sp2"],// An array of strings. See @HodofHod for more info
 
-		searchType: {							   // human-readable text to fill in here:
-			book : "string",						//	  "we couldn't figure out which " + {{book}} + " you were trying to link to.
-			partPlural : "strings"				  //	  "... seemed ambiguous to our system, and could have referred to multiple " + {{partPlural}} + ".
+		searchType: {                               // human-readable text to fill in here:
+			book : "string",                        //      "we couldn't figure out which " + {{book}} + " you were trying to link to.
+			partPlural : "strings"                  //      "... seemed ambiguous to our system, and could have referred to multiple " + {{partPlural}} + ".
 		},
-		nameOverrides: {							// an optional property to override
+		nameOverrides: {                            // an optional property to override
 			"canonicalName" : "userPreferredName"   // specific canonical names in `l`-flagged links
 		}
 		displayName: function (name, match, isUntouched),
@@ -103,11 +103,11 @@ inject(function ($) {
 	function reference(t) {//takes a string. returns array, [match_object, true/false, replacement/error]
 		var match,
 			matches = [],
-			regex = new RegExp("(\\(|\\s|^)(\\[\\s*(" + prefixes.join("|") + ")[;,. :-]" +
+			regex = new RegExp("(^|[^`])(\\[\\s*(" + prefixes.join("|") + ")[;,. :-]" +
 							   "([^\\]\\[]+?)" +
-							   "(?:[;.,\\s:-]+([a-z]{0,4}))?\\s*\\])($|[\\s,\?.;:\\)])", "mig");
+							   "(?:[\\.\\s:]+([a-z]{0,4}))?\\s*\\])", "mig");//More permissive before flags in prep for ranges
 		$.each(t.split('\n'), function (i, line){
-			while (line.indexOf('	') !== 0 && (match = regex.exec(line)) !== null) {
+			while (line.indexOf('    ') !== 0 && (match = regex.exec(line)) !== null) {
 				if (!d[match]) {
 					d[match] = link(registrations[match[3]], match[4], match[5]);
 				}
@@ -141,6 +141,7 @@ inject(function ($) {
 			if (untouched || addLink) {
 				if (untouched) { // u means use the name the user passed in
 					displayText = linker.displayName(match[CAPTURE_INDEX_OF_NAME], match, true);
+					//displayText = value; Starting to work on ranges...
 				} else { // l always means add link with text
 					var fixedName = searchResult[1];
 					if(linker.nameOverrides !== undefined) {
@@ -309,6 +310,7 @@ inject(function ($) {
 				searchType: { book: "book of Tanakh", partPlural: "books" },
 				displayName: function (name, match) {
 					var verse = match[3] ? ":" + match[3] : '';
+					//var verse = (match[3] ? ":" + match[3] : '') + (match[4] ? '-' + match[4] : ''); Prepping for ranges
 					return name + " " + match[2] + verse;
 				}
 			};
@@ -321,8 +323,9 @@ inject(function ($) {
 					},
 					page = match[2],
 					side = match[3],
-					rangePage = match[4],
-					rangeSide = match[5];
+					rangePage = match[4],//Prepping for ranges; doesn't do anything (yet)
+					rangeSide = match[5],// ""
+					res;
 
 				if (parseInt(page, 10) > mesechtos[mes][1] || page === '1' || page === '0') { //if mesechta doesn't have that page
 					return [false, '"' + page + side + '" is not a valid page for Mesechtas ' + mes + '. Page numbers should be between 2 and ' + mesechtos[mes][1] + '. Please try again.'];
@@ -334,7 +337,9 @@ inject(function ($) {
 			},
 			spellings: ['Brachos:berachos,berachot,brachos,brachot,brcht,brchs', 'Shabbos:shabbos,shabbat,shabbas,shabos,shabat,shbt,shbs', 'Eruvin:eruvin,eiruvin,ervn,er', 'Pesachim:pesachim,psachim,pesakhim,psakhim,pes,psa,pschm,ps', 'Shekalim:shekalim,shekolim,shkalim,shkolim,shk,shek', 'Yoma:yoma,yuma,ym', 'Succah:succah,sukkah,suka,sukah,sk,sc', 'Beitzah:beitzah,betzah,betza,btz', 'Rosh Hashanah:rosh,hashana,rsh,rh', 'Taanis:taanis,taanith,tanith,tanis,tns,tn', 'Megilah:megilah,mgl', 'Moed Katan:moedkatan,md,mk', 'Chagigah:chagigah,chg', 'Yevamos:yevamos,yevamot,yevamoth,yvms,yvmt', 'Kesuvos:kesuvos,kesubos,kesubot,ketubot,ketuvot,ksuvos,ksubos,ksvs,ksvt,ktbt,ks,kt', 'Nedarim:nedarim,ndrm,ndr', 'Nazir:nazir,nozir,naz,noz,nzr,nz', 'Sotah:sotah,sota,sot,so,st', 'Gitin:gitin,gittin,git,gtn,gt', 'Kiddushin:kiddushin,kidushin,kid,ki,kds,kdshn,kdsh,kd', 'Bava Kama:bavakama,babakama,bavakamma,bk,bkama', 'Bava Metzia:bavametzia,bavametziah,babametziah,babametzia,bm,bmetziah', 'Bava Basra:bavabasra,bavabatra,bababatra,bavabatrah,bb,bbatrah,bbasrah', 'Sanhedrin:sanhedrin,sn,snh,snhd,snhdrn', 'Makkos:makkos,makos,makkot,makot,mkt', 'Shevuos:shevuos,shevuot,shavuot,shavuos,shvt,shvs,shvuot,shvuos', 'Avoda Zarah:avodazarah,avodazara,avodahzara,avodahzarah,avodah,az,avd,avo,avod,av', 'Horayos:horayos,horaiot,horaios,horayot,horiyot,horaot,ho,hor,hrs,hrt,hr', 'Zevachim:zevachim,zevakhim,zvchm,zvkhm', 'Menachos:menachos,menachot,menakhos,menakhot,mncht,mnkht', 'Chulin:chulin,chullin,khulin,khullin,chl,khl,chln,khln', 'Bechoros:bechoros,bchoros,bechorot,bchorot,bcrt,bchrt,bkhrt,bc,bch,bkh', 'Erchin:erchin,erkhin,arachin,arakhin,ara,erc,erk', 'Temurah:temurah,tmurah,tmr', 'Kerisus:kerisus,krisus,keritut,kritut,kerisos,krisos,keritot,kritot,kerithoth,krithoth,kr,ker,krt,krs', 'Meilah:meilah,mei,ml', 'Nidah:nidah,niddah'], 
 			searchType: { book: "tractate of Gemara", partPlural: "tractates" },
-			displayName: function (name, match, isUntouched) { return name + " " + match[2] + (isUntouched ? match[3] : match[3].toLowerCase()); }
+			displayName: function (name, match) { 
+				return name + " " + match[2] + match[3].toLowerCase() + (match[5] ? '-' + (match[4] || '') + match[5] : '');
+			}
 		});
 
 		register("mt", (function () {
@@ -387,7 +392,7 @@ inject(function ($) {
 			errors = false;
 		$.each(matches, function(i, m){
 			if (!m[1]) errors = true;
-			m[1] && (res = res.replace(m[0][0], m[0][1] + m[2] + m[0][6]));
+			m[1] && (res = res.replace(m[0][0], m[0][1] + m[2]));
 		});
 		
 		var msg = 'There are invalid references in your '+type+'. Are you sure you want to continue?';
@@ -409,8 +414,8 @@ inject(function ($) {
 			ids.push(['.grp'+i, m[2].replace(/\n/g, '<br>')]);
 			r = m[0][2];
 			cl = m[1] ? 'match' : 'error';
-			hl = '<span class="'+cl+'"><span class="grp'+i+'">'+ r.match(/[\[a-zA-Z'\]]+|[0-9]+|[.,;:'*_ ]/g).join('</span>'+'<span class="grp'+i+'">') + '</span></span>';
-			res = res.replace(m[0][0], m[0][1] + hl  + m[0][6]);
+			hl = '<span class="'+cl+'"><span class="grp'+i+'">'+ r.match(/[\[a-zA-Z'\]]+|[0-9]+|[.,;:'*_ -]/g).join('</span>'+'<span class="grp'+i+'">') + '</span></span>';
+			res = res.replace(m[0][0], m[0][1] + hl);
 		});
 		$(elem).next('pre').html(res);
 		$('.error').css('background-color','pink');
@@ -437,19 +442,24 @@ inject(function ($) {
 			'background-color':'transparent',
 			'white-space':'pre-wrap',
 			'overflow':'hidden',
+			'max-height':'none',
 			})
 			.css({padding:'+=1'});
 		$(elem).after(pre);
 
-		elem.id == 'input' && pre.css('padding','2px 4px');//different padding for chat
+		elem.id == 'input' && pre.css('padding','2px 3px');//different padding for chat
 		
 		$(elem).on('input focus mousemove scroll',function(){
-			pre.css({width:$(elem).css('width'),height:$(elem).css('height')});//for resizing.
+			pre.width($(elem).width()).height($(elem).height());//for resizing.
 			pre.scrollTop($(elem).scrollTop());//for scrolling.
 		});
 		
-		$(elem).on('input focus mousedown keydown', function(){highlight(this);});
-		$(elem).on('mouseout', function(e){$('#tt').remove();});//remove tooltip if mouse leaves box. Can't rely on mousemove.
+		$(elem).on('input focus mousedown keydown', function(){
+			highlight(this);
+		});
+		$(elem).on('mouseout', function(e){
+			$('#tt').remove();
+		});//remove tooltip if mouse leaves box. Can't rely on mousemove.
 		
 		$(elem).on('mousemove input', function (e){
 			var b = false;
@@ -533,7 +543,7 @@ inject(function ($) {
 		$(this).focus(function(){
 			StackExchange.MarkdownEditor.refreshAllPreviews();
 			clonedPane.html(previewPane.clone(false).html());
-	    });
+		});
 		$(this).on('input', function(){// if you trigger this onfocus, you will have conflicts with SE's lists and image insertions.
 			var oldText = this.value, //save the old text
 				start = this.selectionStart, //save the old cursor location
