@@ -322,7 +322,7 @@ inject(function ($) {
 				var mesechtos = {'Chulin': [31, 142],'Eruvin': [3, 105],'Horayos': [28, 14],'Rosh Hashanah': [9, 35],'Shekalim': [5, 22],'Menachos': [30, 110],'Megilah': [11, 32],'Bechoros': [32, 61],'Brachos': [1, 64],'Gitin': [19, 90],'Taanis': [10, 31],'Moed Katan': [12,29],'Beitzah': [8, 40],'Bava Kama': [21, 119],'Kesuvos': [15, 112],'Sanhedrin': [24, 113],'Nazir': [17, 66],'Kiddushin': [20, 82],'Pesachim': [4, 121],'Bava Basra': [23, 176],'Sotah': [18, 49],'Bava Metzia': [22, 119],'Yoma': [6, 88],'Succah': [7, 56],'Meilah': [36, 22],'Shabbos': [2, 157],'Erchin': [33, 34],'Nedarim': [16, 91],'Shevuos': [26, 49],'Temurah': [34, 34],'Kerisus': [35, 28],'Zevachim': [29, 120],'Makkos': [25, 24],'Avoda Zarah': [27, 76],'Nidah': [37, 73],'Chagigah': [13, 27],'Yevamos': [14, 122]
 					},
 					page = match[2],
-					side = match[3],
+					side = match[3].toLowerCase(), //Capitals break HB links.
 					rangePage = match[4],//Prepping for ranges; doesn't do anything (yet)
 					rangeSide = match[5],// ""
 					res;
@@ -330,7 +330,7 @@ inject(function ($) {
 				if (parseInt(page, 10) > mesechtos[mes][1] || page === '1' || page === '0') { //if mesechta doesn't have that page
 					return [false, '"' + page + side + '" is not a valid page for Mesechtas ' + mes + '. Page numbers should be between 2 and ' + mesechtos[mes][1] + '. Please try again.'];
 				}
-				if (side.toLowerCase() === 'a') side = ''; //hebrewbooks is weird.
+				if (side === 'a') side = ''; //hebrewbooks is weird.
 				res = 'http://hebrewbooks.org/shas.aspx?mesechta=' + mesechtos[mes][0] + '&daf=' + page + side + '&format=';
 				res += (flags.indexOf('t') !== -1) ? 'text' : 'pdf';//text version flag is set?
 				return res;
@@ -453,11 +453,10 @@ inject(function ($) {
 			pre.width($(elem).width()).height($(elem).height());//for resizing.
 			pre.scrollTop($(elem).scrollTop());//for scrolling.
 		});
-		
 		$(elem).on('input focus mousedown keydown', function(){
 			highlight(this);
 		});
-		$(elem).on('mouseout', function(e){
+		$(elem).on('mouseout', function(){
 			$('#tt').remove();
 		});//remove tooltip if mouse leaves box. Can't rely on mousemove.
 		
@@ -544,7 +543,7 @@ inject(function ($) {
 			StackExchange.MarkdownEditor.refreshAllPreviews();
 			clonedPane.html(previewPane.clone(false).html());
 		});
-		$(this).on('input', function(){// if you trigger this onfocus, you will have conflicts with SE's lists and image insertions.
+		$(this).on('input mousedown', function(){// if you use focus, you will have conflicts with SE's lists and image insertions.
 			var oldText = this.value, //save the old text
 				start = this.selectionStart, //save the old cursor location
 				end = this.selectionEnd;
