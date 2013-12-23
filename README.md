@@ -1,8 +1,10 @@
 B"H
 
-##SidebarScrollbar
+##Chat Mods
 
-This script adds a scrollbar to the right sidebar in StackExchange chat rooms. This allows one to scroll through all the starred messages even when they get hidden behind the footer.
+ - This script adds a scrollbar to the right sidebar in StackExchange chat rooms. This allows one to scroll through all the starred messages even when they get hidden behind the footer.
+ - Fixes bi-directional issues in starred chat messages. ([Described here](http://meta.judaism.stackexchange.com/q/1322/883).)
+ - In transcripts, adds the ability to follow chat replies without reloading the page. ([Described here](http://meta.stackoverflow.com/q/161071/168660).)
 
 ##Mi Yodeya Referencer
 
