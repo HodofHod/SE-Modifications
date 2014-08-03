@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.7.0
+// @version      3.8.0
 // ==/UserScript==
 
 
@@ -121,18 +121,26 @@ inject(function ($) {
 		var match = linker.regex.exec(value),
 			searchResult = null,
 			displayText = null,
-			CAPTURE_INDEX_OF_NAME = 1;
+			CAPTURE_INDEX_OF_NAME = 1,
+			url;
 		options = (options || '').toLowerCase();
 		if (!match) return [false, 'Bad syntax'];
-		searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
-		if (!searchResult[0] && searchResult[1].search(/ambiguous/) !== -1){
-			match = !!linker.regex2 && linker.regex2.exec(value);
-			(match) && (searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType));
-		}
-		if (!searchResult[0]) return searchResult;
-	
 		
-		var url = linker.link(searchResult[1], match, options);//returns either url, or [false, error_message]
+		//some books, like kitzur, aren't referenced by section name, so no spelling search needed.
+		if (linker.spellings){
+			searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType);
+			if (!searchResult[0] && searchResult[1].search(/ambiguous/) !== -1){
+				match = !!linker.regex2 && linker.regex2.exec(value);
+				(match) && (searchResult = search(match[CAPTURE_INDEX_OF_NAME], linker.spellings, linker.searchType));
+			}
+			if (!searchResult[0]) return searchResult;
+	
+			url = linker.link(searchResult[1], match, options);//returns either url, or [false, error_message]
+		} else {
+			searchResult = ['', '']; //No search result for kitzur-like books. TODO: Bypass using searchResult at all for these books, to make code less confusing.
+			url = linker.link(match, options);//returns either url, or [false, error_message]
+		}
+		
 		if (url[0]) {
 			url = [true, url];
 			var addLink = options.indexOf("l") !== -1,
@@ -209,7 +217,7 @@ inject(function ($) {
 			}
 		}
 
-		if (!found) { //No match :( (Redundant; if anything has been found we already returned)
+		if (!found) { //No match :( (Redundant condition; if anything has been found we already returned, it's only here for readability. So for you, basically. So you better appreciate it.)
 			var t = searchInfo.book,
 				p = searchInfo.partPlural;
 			if (redo < 3) { //no matches, but we haven't retried with out prefixes and partial matches.
@@ -307,29 +315,29 @@ inject(function ($) {
 				},
 				//nameOverrides: {"Esther" : "Ester" },
 				spellings: [
-					'Divrei Hayamim I:1,ch,chron,chroniclesi,cr,dh,divreihayamim,divreihayamimi,firstchronicles,i,ichr,ichronicles', 
-					'Melachim I:1,firstkgs,firstkings,i,ikgs,ikings,k,kg,ki,kings,kingsi,melachim,melachimi,mlachima,stkings', 
+					'Divrei Hayamim I:1,ch,chron,chroniclesi,cr,dh,divreihayamim,divreihayamimi,firstchronicles,i,ichr,ichronicles',
+					'Melachim I:1,firstkgs,firstkings,i,ikgs,ikings,k,kg,ki,kings,kingsi,melachim,melachimi,mlachima,stkings',
 					'Divrei Hayamim II:2,ch,chron,chroniclesii,cr,dh,divreihayamim,divreihayamimii,ii,iichr,iichronicles,secondchronicles',
-					'Melachim II:2,ii,iikgs,iikings,k,kg,ki,kings,kingsii,melachim,melachimii,mlachimb,ndkings,secondkgs,secondkings', 
-					'Bereishit:beraishis,beraishit,berayshis,bereishis,bereishit,bereshit,braishis,braishit,brayshis,brayshit,breishis,breishit,ge,genesis,geneza,gn', 
-					'Yirmiyahu:je,jeremia,jeremiah,jeremija,jr,yeremiyah,yeremiyahu,yirmiyahu', 'Michah:mch,mi,micah,micha,michah,miha,miq', 
-					'Rus:rt,rth,ru,rus,ruta,ruth', 'Shemot:ex,exd,exod,exodus,sh,shemos,shemot,shmos,shmot', 
-					'Vayikra:lb,le,leu,leviticus,lv,vayikra,vayiqra,vayyikra,vayyiqra', 'Bamidbar:bamidbar,bmidbar,br,nb,nm,nomb,nu,numbers', 
+					'Melachim II:2,ii,iikgs,iikings,k,kg,ki,kings,kingsii,melachim,melachimii,mlachimb,ndkings,secondkgs,secondkings',
+					'Bereishit:beraishis,beraishit,berayshis,bereishis,bereishit,bereshit,braishis,braishit,brayshis,brayshit,breishis,breishit,ge,genesis,geneza,gn',
+					'Yirmiyahu:je,jeremia,jeremiah,jeremija,jr,yeremiyah,yeremiyahu,yirmiyahu', 'Michah:mch,mi,micah,micha,michah,miha,miq',
+					'Rus:rt,rth,ru,rus,ruta,ruth', 'Shemot:ex,exd,exod,exodus,sh,shemos,shemot,shmos,shmot',
+					'Vayikra:lb,le,leu,leviticus,lv,vayikra,vayiqra,vayyikra,vayyiqra', 'Bamidbar:bamidbar,bmidbar,br,nb,nm,nomb,nu,numbers',
 					'Devarim:de,deut,deuteronomio,deuteronomium,deuteronomy,devarim,dvarim,dt', 'Chaggai:chagai,chaggai,hagai,haggai,haggay,hg,hgg',
-					'Yehoshua:ios,josh,joshua,josua,joz,jsh,yehoshua,yoshua', 'Shoftim:jdgs,jg,jt,judg,judges,jue,juges,shofetim,shoftim', 
-					'Shmuel I:1,firstsamuel,i,isam,isamuel,s,sa,samuel,samueli,shmuel,shmuela,shmueli,sm', 
-					'Shmuel II:2,ii,iisam,iisamuel,s,sa,samuel,samuelii,secondsamuel,shmuel,shmuelb,shmuelii,sm', 
-					'Yeshayahu:is,isa,isaiah,isiah,yeshayah,yeshayahu', 'Yechezkel:,ez,ezec,ezekial,ezekiel,hes,yecheskel,yechezkel', 
-					'Hoshea:ho,hosea,hoshea', 'Yoel:ioel,jl,joel,jol,yoel', 'Amos:am,amos,ams', 
-					'Ovadiah:ab,abdija,ob,obad,obadiah,obadija,obadja,obd,ovadiah,ovadyah', 'Yonah:ion,jna,jnh,jona,jonah,yonah', 
-					'Nachum:na,nachum,naham,nahum,nam', 'Chavakuk:chavakuk,ha,habacuc,habakkuk,habakuk,habaqquq,habaquq', 
-					'Tzefaniah:sefanja,sofonija,soph,tsefania,tsephania,tzefaniah,tzephaniah,zefanija,zefanja,zeph,zephanja,zp', 
-					'Zechariah:sacharja,za,zach,zacharia,zaharija,zc,zch,zech,zechariah,zecharya,zekhariah', 
+					'Yehoshua:ios,josh,joshua,josua,joz,jsh,yehoshua,yoshua', 'Shoftim:jdgs,jg,jt,judg,judges,jue,juges,shofetim,shoftim',
+					'Shmuel I:1,firstsamuel,i,isam,isamuel,s,sa,samuel,samueli,shmuel,shmuela,shmueli,sm',
+					'Shmuel II:2,ii,iisam,iisamuel,s,sa,samuel,samuelii,secondsamuel,shmuel,shmuelb,shmuelii,sm',
+					'Yeshayahu:is,isa,isaiah,isiah,yeshayah,yeshayahu', 'Yechezkel:,ez,ezec,ezekial,ezekiel,hes,yecheskel,yechezkel',
+					'Hoshea:ho,hosea,hoshea', 'Yoel:ioel,jl,joel,jol,yoel', 'Amos:am,amos,ams',
+					'Ovadiah:ab,abdija,ob,obad,obadiah,obadija,obadja,obd,ovadiah,ovadyah', 'Yonah:ion,jna,jnh,jona,jonah,yonah',
+					'Nachum:na,nachum,naham,nahum,nam', 'Chavakuk:chavakuk,ha,habacuc,habakkuk,habakuk,habaqquq,habaquq',
+					'Tzefaniah:sefanja,sofonija,soph,tsefania,tsephania,tzefaniah,tzephaniah,zefanija,zefanja,zeph,zephanja,zp',
+					'Zechariah:sacharja,za,zach,zacharia,zaharija,zc,zch,zech,zechariah,zecharya,zekhariah',
 					'Malachi:malachi,malahija,malakhi,maleachi,ml', 'Eichah:aichah,eichah,eikhah,la,lamentaciones,lamentations,lm',
-					'Tehillim:ps,psalm,psalmen,psalmi,psalms,psg,pslm,psm,pss,salmos,sl,tehilim,tehillim,thilim,thillim', 
-					'Mishlei:mishlei,mishley,pr,prou,proverbs,prv', 'Iyov:hi,hiob,ijob,iyov,iyyov,jb', 
-					'Shir HaShirim:sgs,shirhashirim,sng,so,song,songofsolomon,songofsongs,sos,ss,canticles',  
-					'Kohelet:ec,eccl,ecclesiastes,ecl,koheles,kohelet,qo,qohelet,qoheleth,qohleth', 'Esther:ester,estera,esther', 
+					'Tehillim:ps,psalm,psalmen,psalmi,psalms,psg,pslm,psm,pss,salmos,sl,tehilim,tehillim,thilim,thillim',
+					'Mishlei:mishlei,mishley,pr,prou,proverbs,prv', 'Iyov:hi,hiob,ijob,iyov,iyyov,jb',
+					'Shir HaShirim:sgs,shirhashirim,sng,so,song,songofsolomon,songofsongs,sos,ss,canticles',
+					'Kohelet:ec,eccl,ecclesiastes,ecl,koheles,kohelet,qo,qohelet,qoheleth,qohleth', 'Esther:ester,estera,esther',
 					'Daniel:da,daniel,dn', 'Ezra:esra,ezra', 'Nechemiah:ne,nechemiah,nehemia,nehemiah,nehemija,nehemyah,nchemyah,nchemia,nhemiah'],
 				searchType: { book: "book of Tanakh", partPlural: "books" },
 				displayName: function (name, match) {
@@ -340,87 +348,99 @@ inject(function ($) {
 			};
 		}()));
 
-		register("g", {
-			regex: /^([a-zA-Z'" .*_]{2,})[;.,\s:]+(\d{1,3})([ab])(?:-(\d+)?(a|b))?$/i,
-			link: function (mes, match, flags) {
-				var mesechtos = {
-					'Chulin': [31, 142],'Eruvin': [3, 105],'Horayos': [28, 14],'Rosh Hashanah': [9, 35],
-					'Shekalim': [5, 22],'Menachos': [30, 110],'Megilah': [11, 32],'Bechoros': [32, 61],
-					'Brachos': [1, 64],'Gitin': [19, 90],'Taanis': [10, 31],'Moed Katan': [12,29],
-					'Beitzah': [8, 40],'Bava Kama': [21, 119],'Kesuvos': [15, 112],'Sanhedrin': [24, 113],
-					'Nazir': [17, 66],'Kiddushin': [20, 82],'Pesachim': [4, 121],'Bava Basra': [23, 176],
-					'Sotah': [18, 49],'Bava Metzia': [22, 119],'Yoma': [6, 88],'Succah': [7, 56],
-					'Meilah': [36, 22],'Shabbos': [2, 157],'Erchin': [33, 34],'Nedarim': [16, 91],
-					'Shevuos': [26, 49],'Temurah': [34, 34],'Kerisus': [35, 28],'Zevachim': [29, 120],
-					'Makkos': [25, 24],'Avoda Zarah': [27, 76],'Nidah': [37, 73],'Chagigah': [13, 27],'Yevamos': [14, 122],
-					//[book id, startPage, firstDaf, lastDaf]
-					"Tamid": [9661, 56, "28b", "33a"],
-					"Kinim": [14304, 477, "22a", "25a"],
-					"Midos": [22420, 2, "34a", "37b"],
-					},
-					page = parseInt(match[2], 10),
-					side = match[3].toLowerCase(), //Capitals break HB links.
-					rangePage = match[4],//Prepping for ranges; doesn't do anything (yet)
-					rangeSide = match[5],// ""
-					res;
-				//
-				if (["Tamid", "Kinim", "Midos"].indexOf(mes) !== -1){
-					//check if page is between firstDaf and lastDaf
-					var mesechta = mesechtos[mes],
-						firstDaf = parseInt(mesechta[2].split(/[ab]/)[0], 10),
-						firstAmud = mesechta[2].substr(-1),
-						lastDaf = parseInt(mesechta[3].split(/[ab]/)[0], 10),
-						lastAmud = mesechta[3].substr(-1);
-					if (!(page > firstDaf && page < lastDaf) &&
-						!(page == firstDaf && (side == firstAmud || firstAmud == 'a')) &&
-						!(page == lastDaf && (side == lastAmud || lastAmud == 'b'))){
-						console.log([page, side, firstDaf, firstAmud, lastDaf, lastAmud]);
-						return [false, '"' + page + side + '" is not a valid page for Mesechtas ' + mes + 
-								'. Page numbers should be between ' + mesechta[2] + ' and ' + mesechta[3] + '. Please try again.'];
-					}
-					var pageIncrement = (((page - firstDaf) * 2) - (firstAmud == "b")) + (side == "b");
-					res = "http://hebrewbooks.org/pdfpager.aspx?req=";
-					res += mesechta[0] + "&pgnum=" + (mesechta[1] + pageIncrement);
-				}else{
-					if (page > mesechtos[mes][1] || page === 1 || page === 0) { //if mesechta doesn't have that page
-						return [false, '"' + page + side + '" is not a valid page for Mesechtas ' + mes + '. Page numbers should be between 2 and ' + mesechtos[mes][1] + '. Please try again.'];
-					}
-					if (side === 'a') side = ''; //hebrewbooks is weird.
-					res = 'http://hebrewbooks.org/shas.aspx?mesechta=' + mesechtos[mes][0] + '&daf=' + page + side + '&format=';
-					res += (flags.indexOf('t') !== -1) ? 'text' : 'pdf';//text version flag is set?
-				}
-				//special cases
-				if (mes == "Gitin" && page == 90 && side == "b"){ res = "http://hebrewbooks.org/pdfpager.aspx?req=37961&pgnum=191"; }
-				if (mes == "Midos" && page == 34 && side == "a"){ res = "http://hebrewbooks.org/pdfpager.aspx?req=22420&pgnum=1"; }
-				
-				return res;
-			},
-			spellings: [
-				'Brachos:berachos,berachot,brachos,brachot,brcht,brchs', 'Shabbos:shabbos,shabbat,shabbas,shabos,shabat,shbt,shbs', 
-				'Eruvin:eruvin,eiruvin,ervn,er', 'Pesachim:pesachim,psachim,pesakhim,psakhim,pes,psa,pschm,ps', 
-				'Shekalim:shekalim,shekolim,shkalim,shkolim,shk,shek', 'Yoma:yoma,yuma,ym', 'Succah:succah,sukkah,suka,sukah,sk,sc',
-				'Beitzah:beitzah,betzah,betza,btz', 'Rosh Hashanah:rosh,hashana,rsh,rh', 'Taanis:taanis,taanith,tanith,tanis,tns,tn',
-				'Megilah:megilah,mgl', 'Moed Katan:moedkatan,md,mk', 'Chagigah:chagigah,chg', 
-				'Yevamos:yevamos,yevamot,yevamoth,yvms,yvmt', 'Kesuvos:kesuvos,kesubos,kesubot,ketubot,ketuvot,ksuvos,ksubos,ksvs,ksvt,ktbt,ks,kt', 
-				'Nedarim:nedarim,ndrm,ndr', 'Nazir:nazir,nozir,naz,noz,nzr,nz', 'Sotah:sotah,sota,sot,so,st', 
-				'Gitin:gitin,gittin,git,gtn,gt', 'Kiddushin:kiddushin,kidushin,kid,ki,kds,kdshn,kdsh,kd', 
-				'Bava Kama:bavakama,babakama,bavakamma,bk,bkama', 
-				'Bava Metzia:bavametzia,bavametziah,babametziah,babametzia,bm,bmetziah', 
-				'Bava Basra:bavabasra,bavabatra,bababatra,bavabatrah,bb,bbatrah,bbasrah', 'Sanhedrin:sanhedrin,sn,snh,snhd,snhdrn', 
-				'Makkos:makkos,makos,makkot,makot,mkt', 'Shevuos:shevuos,shevuot,shavuot,shavuos,shvt,shvs,shvuot,shvuos', 
-				'Avoda Zarah:avodazarah,avodazara,avodahzara,avodahzarah,avodah,az,avd,avo,avod,av', 
-				'Horayos:horayos,horaiot,horaios,horayot,horiyot,horaot,ho,hor,hrs,hrt,hr', 'Zevachim:zevachim,zevakhim,zvchm,zvkhm', 
-				'Menachos:menachos,menachot,menakhos,menakhot,mncht,mnkht', 'Chulin:chulin,chullin,khulin,khullin,chl,khl,chln,khln',
-				'Bechoros:bechoros,bchoros,bechorot,bchorot,bcrt,bchrt,bkhrt,bc,bch,bkh', 
-				'Erchin:erchin,erkhin,arachin,arakhin,ara,erc,erk', 'Temurah:temurah,tmurah,tmr', 
-				'Kerisus:kerisus,krisus,keritut,kritut,kerisos,krisos,keritot,kritot,kerithoth,krithoth,kr,ker,krt,krs', 
-				'Meilah:meilah,mei,ml', 'Nidah:nidah,niddah', 
-				'Kinim:kinim,kinnim,knm', 'Midos:midos,middos,midoth,middoth,mds,mdt', 'Tamid:tamid,tomid,tmd'], 
-			searchType: { book: "tractate of Gemara", partPlural: "tractates" },
-			displayName: function (name, match) { 
-				return name + " " + match[2] + match[3].toLowerCase() + (match[5] ? '-' + (match[4] || '') + match[5] : '');
+		register("g", (function(){
+			function evalPage(page) { 
+				var res = parseInt(page.split(/[ab]/)[0]) * 2;
+				res += (page.substr(-1) == "b")
+				return  res;
 			}
-		});
+			function checkValidPage(page, lastPage, firstPage){
+				var pageVal = evalPage(page),
+					lastPageVal = evalPage(lastPage),
+					firstPageVal = evalPage(firstPage || "2a");
+				return pageVal >= firstPageVal && pageVal <= lastPageVal;
+			}
+			return {
+				regex: /^([a-zA-Z'" .*_]{2,})[;.,\s:]+(\d{1,3})([ab])(?:-(\d+)?(a|b))?$/i,
+				link: function (mes, match, flags) {
+					var mesechtos = {
+							"Brachos"    :[ 1, "64a" ], "Shabbos"   :[ 2, "157b"], "Eruvin"       :[ 3, "105a"],
+							"Pesachim"   :[ 4, "121b"], "Shekalim"  :[ 5, "22b" ], "Yoma"         :[ 6, "88a" ],
+							"Succah"     :[ 7, "56b" ], "Beitzah"   :[ 8, "40b" ], "Rosh Hashanah":[ 9, "35b" ],
+							"Taanis"     :[10, "31a" ], "Megilah"   :[11, "32a" ], "Moed Katan"   :[12, "29a" ],
+							"Chagigah"   :[13, "27a" ], "Yevamos"   :[14, "122b"], "Kesuvos"      :[15, "112b"],
+							"Nedarim"    :[16, "91b" ], "Nazir"     :[17, "66b" ], "Sotah"        :[18, "49b" ],
+							"Gitin"      :[19, "90b" ], "Kiddushin" :[20, "82b" ], "Bava Kama"    :[21, "119b"],
+							"Bava Metzia":[22, "119a"], "Bava Basra":[23, "176b"], "Sanhedrin"    :[24, "113b"],
+							"Makkos"     :[25, "24b" ], "Shevuos"   :[26, "49b" ], "Avoda Zarah"  :[27, "76b" ],
+							"Horayos"    :[28, "14a" ], "Zevachim"  :[29, "120b"], "Menachos"     :[30, "110a"],
+							"Chulin"     :[31, "142a"], "Bechoros"  :[32, "61a" ], "Erchin"       :[33, "34a" ],
+							"Temurah"    :[34, "34a" ], "Kerisus"   :[35, "28b" ], "Meilah"       :[36, "37b" ],
+							"Nidah"      :[37, "73a" ],
+							//[book id, startPage, firstDaf, lastDaf]
+							"Tamid": [9661, 56, "28b", "33a"],
+							"Kinim": [14304, 477, "22a", "25a"],
+							"Midos": [22420, 2, "34a", "37b"],
+						},
+						page = parseInt(match[2], 10),
+						side = match[3].toLowerCase(), //Capitals break HB links.
+						rangePage = match[4],//Prepping for ranges; doesn't do anything (yet)
+						rangeSide = match[5],// ""	
+						mesechta = mesechtos[mes],
+						res;
+					
+					if (["Tamid", "Kinim", "Midos"].indexOf(mes) !== -1){
+						var firstPage = mesechta[2],
+							lastPage  = mesechta[3];
+						//check if page is between firstPage and lastPage
+						if (!checkValidPage(page+side, lastPage, firstPage)) {
+							return [false, '"' + page + side + '" is not a valid page for Mesechtas ' + mes + 
+									'. Page numbers should be between ' + firstPage + ' and ' + lastPage + '. Please try again.'];
+						} else {
+							var pageIncrement = evalPage(page+side) - evalPage(firstPage);
+							res = "http://hebrewbooks.org/pdfpager.aspx?req=";
+							res += mesechta[0] + "&pgnum=" + (mesechta[1] + pageIncrement);
+						}
+					} else {
+						if (!checkValidPage(page+side, mesechta[1])) {
+							return [false, '"' + page + side + '" is not a valid page for Mesechtas ' + mes + '. Page numbers should be between 2 and ' + mesechta[1] + '. Please try again.'];
+						}
+						if (side === 'a') side = ''; //hebrewbooks is weird.
+						res = 'http://hebrewbooks.org/shas.aspx?mesechta=' + mesechta[0] + '&daf=' + page + side + '&format=';
+						res += (flags.indexOf('t') !== -1) ? 'text' : 'pdf';//text version flag is set?
+					}
+					//special cases
+					if (mes == "Gitin" && page == 90 && side == "b"){ res = "http://hebrewbooks.org/pdfpager.aspx?req=37961&pgnum=191"; }
+					if (mes == "Midos" && page == 34 && side == "a"){ res = "http://hebrewbooks.org/pdfpager.aspx?req=22420&pgnum=1"; }
+					
+					return res;
+				},
+				spellings: ['Brachos:berachos,berachot,brachos,brachot,brcht,brchs', 'Shabbos:shabbos,shabbat,shabbas,shabos,shabat,shbt,shbs', 
+							'Eruvin:eruvin,eiruvin,ervn,er', 'Pesachim:pesachim,psachim,pesakhim,psakhim,pes,psa,pschm,ps', 
+							'Shekalim:shekalim,shekolim,shkalim,shkolim,shk,shek', 'Yoma:yoma,yuma,ym', 'Succah:succah,sukkah,suka,sukah,sk,sc',
+							'Beitzah:beitzah,betzah,betza,btz', 'Rosh Hashanah:rosh,hashana,rsh,rh', 'Taanis:taanis,taanith,tanith,tanis,tns,tn',
+							'Megilah:megilah,mgl', 'Moed Katan:moedkatan,md,mk', 'Chagigah:chagigah,chg', 
+							'Yevamos:yevamos,yevamot,yevamoth,yvms,yvmt', 'Kesuvos:kesuvos,kesubos,kesubot,ketubot,ketuvot,ksuvos,ksubos,ksvs,ksvt,ktbt,ks,kt', 
+							'Nedarim:nedarim,ndrm,ndr', 'Nazir:nazir,nozir,naz,noz,nzr,nz', 'Sotah:sotah,sota,sot,so,st', 
+							'Gitin:gitin,gittin,git,gtn,gt', 'Kiddushin:kiddushin,kidushin,kid,ki,kds,kdshn,kdsh,kd', 
+							'Bava Kama:bavakama,babakama,bavakamma,bk,bkama', 
+							'Bava Metzia:bavametzia,bavametziah,babametziah,babametzia,bm,bmetziah', 
+							'Bava Basra:bavabasra,bavabatra,bababatra,bavabatrah,bb,bbatrah,bbasrah', 'Sanhedrin:sanhedrin,sn,snh,snhd,snhdrn', 
+							'Makkos:makkos,makos,makkot,makot,mkt', 'Shevuos:shevuos,shevuot,shavuot,shavuos,shvt,shvs,shvuot,shvuos', 
+							'Avoda Zarah:avodazarah,avodazara,avodahzara,avodahzarah,avodah,az,avd,avo,avod,av', 
+							'Horayos:horayos,horaiot,horaios,horayot,horiyot,horaot,ho,hor,hrs,hrt,hr', 'Zevachim:zevachim,zevakhim,zvchm,zvkhm', 
+							'Menachos:menachos,menachot,menakhos,menakhot,mncht,mnkht', 'Chulin:chulin,chullin,khulin,khullin,chl,khl,chln,khln',
+							'Bechoros:bechoros,bchoros,bechorot,bchorot,bcrt,bchrt,bkhrt,bc,bch,bkh', 
+							'Erchin:erchin,erkhin,arachin,arakhin,ara,erc,erk', 'Temurah:temurah,tmurah,tmr', 
+							'Kerisus:kerisus,krisus,keritut,kritut,kerisos,krisos,keritot,kritot,kerithoth,krithoth,kr,ker,krt,krs', 
+							'Meilah:meilah,mei,ml', 'Nidah:nidah,niddah', 
+							'Kinim:kinim,kinnim,knm', 'Midos:midos,middos,midoth,middoth,mds,mdt', 'Tamid:tamid,tomid,tmd'], 
+				searchType: { book: "tractate of Gemara", partPlural: "tractates" },
+				displayName: function (name, match) { 
+					return name + " " + match[2] + match[3].toLowerCase() + (match[5] ? '-' + (match[4] || '') + match[5] : '');
+				}
+			};
+		}()));
 
 		register("mt", (function () {
 			var chabadMT = function (topic, chpt, mtmap) {
@@ -461,6 +481,43 @@ inject(function ($) {
 						chapter = match[2] ? " " + match[2] : "",
 						law = match[2] && match[3] ? ":" + match[3] : "";
 					return name + chapter + law;
+				}
+			};
+		}()));
+		
+		register("ksa", (function(){
+			return {
+				regex: /^(\d+)(?:[;.,\s:])(\d+)/i,
+				link: function(match, flags){
+					var siman_lengths = [7, 9, 8, 6, 17, 11, 8, 6, 21, 26, 25, 15, 5, 8, 13, 5, 10,
+							22, 14, 12, 10, 10, 30, 12, 8, 22, 5, 13, 21, 9, 7, 27, 14, 16, 9, 28, 13, 15, 3,
+							21, 10, 23, 7, 18, 23, 46, 22, 10, 16, 16, 15, 18, 6, 9, 5, 7, 7, 14, 21, 15, 10,
+							18, 5, 4, 30, 12, 11, 12, 9, 5, 5, 23, 11, 4, 14, 23, 24, 11, 10, 93, 5, 13, 6,
+							19, 8, 7, 24, 18, 6, 23, 18, 10, 5, 27, 18, 15, 15, 37, 5, 22, 6, 7, 14, 21, 2,
+							8, 3, 7, 9, 15, 17, 6, 9, 13, 6, 18, 13, 11, 12, 11, 11, 17, 5, 22, 8, 4, 18, 16,
+							23, 6, 17, 5, 31, 15, 22, 10, 13, 10, 26, 3, 23, 10, 22, 9, 26, 4, 5, 4, 13, 17,
+							7, 17, 16, 7, 12, 3, 8, 4, 10, 6, 20, 14, 8, 10, 16, 5, 15, 6, 3, 2, 3, 3, 4, 3,
+							6, 8, 15, 5, 15, 16, 22, 16, 7, 11, 6, 4, 5, 5, 6, 3, 6, 10, 14, 12, 14, 22, 13,
+							16, 17, 11, 7, 16, 5, 10, 9, 11, 7, 15, 8, 9, 15, 5, 5, 3, 3, 3, 3, 2, 9, 10, 8],
+						siman = parseInt(match[1], 10),
+						sif = parseInt(match[2], 10) || 0,
+						url = 'http://www.yonanewman.org/kizzur/kizzur';
+						
+					if (sif > siman_lengths[siman - 1]){
+						return [false, '"There are only ' + siman_lengths[siman -1 ] + ' laws in Chapter ' + siman + '\n\nPlease try again.'];
+					}
+					if (siman == 80){
+						siman += sif <= 31 ? 'a' : (sif <= 62 ? 'b' : 'c');
+					}
+					return url + siman + '.html' + (sif ? '#' + sif : '');
+				},
+				spellings: false,
+				searchType: false,
+				displayName: function (unusedSectionName, match, isUntouched) {
+					var name = (isUntouched ?  "" : "Kitzur Shulchan Aruch "),
+						siman = parseInt(match[1], 10),
+						sif = parseInt(match[2], 10); //if no match[1], parseInt returns NaN
+					return name + siman + (sif ? ':' + sif : '');
 				}
 			};
 		}()));
