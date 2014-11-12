@@ -665,11 +665,12 @@ inject(function ($) {
 				right: -500,
 				height: "100%",
 				width: 500,
+				"z-index":10,
 				"text-align": "left",
 				"overflow-y": "auto",
 				"background-color": "rgba(234, 234, 234, 0.84)",
 			}).appendTo('body');
-			
+			$panel.append('<style>#reference-help-panel ul{margin-left:30px; list-style:disc;}</style>');
 			$close = $('<a id="referencer-panel-close" style="position:absolute;right:10px;top:10px;">Close</a>');
 			$close.appendTo($panel);
 			$close.click(closeHelpPanel);
