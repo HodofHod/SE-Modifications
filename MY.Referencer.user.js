@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      3.8.0
+// @version      3.8.2
 // ==/UserScript==
 
 
@@ -151,7 +151,7 @@ inject(function ($) {
 					displayText = linker.displayName(match[CAPTURE_INDEX_OF_NAME], match, true);
 					//displayText = value; Starting to work on ranges...
 				} else { // l always means add link with text
-					var fixedName = searchResult[1];
+					var fixedName = searchResult[1]; 
 					if(linker.nameOverrides !== undefined) {
 						fixedName = linker.nameOverrides[searchResult[1]] || searchResult[1];
 					}
@@ -487,7 +487,7 @@ inject(function ($) {
 		
 		register("ksa", (function(){
 			return {
-				regex: /^(\d+)(?:[;.,\s:])(\d+)/i,
+				regex: /^(\d+)(?:[;.,\s:](\d+))?/i,
 				link: function(match, flags){
 					var siman_lengths = [7, 9, 8, 6, 17, 11, 8, 6, 21, 26, 25, 15, 5, 8, 13, 5, 10,
 							22, 14, 12, 10, 10, 30, 12, 8, 22, 5, 13, 21, 9, 7, 27, 14, 16, 9, 28, 13, 15, 3,
@@ -590,15 +590,26 @@ inject(function ($) {
 			pre.width($(elem).width()).height($(elem).height());//for resizing.
 			pre.scrollTop($(elem).scrollTop());//for scrolling.
 		});
+		var helpCount = 0;
+		$(elem).on('input', function(e){
+			//check for help
+			newHelpCount = ($(this).val().match(/\[h\]|\[help\]/g) || []).length;
+			if (newHelpCount > helpCount) {
+				showHelpPanel();
+			} else if (newHelpCount === 0) {
+				closeHelpPanel();
+			}
+			helpCount = newHelpCount;
+		});
 		$(elem).on('input focus mousedown keydown', function(){
 			highlight(this);
 		});
 		$(elem).on('mouseout', function(){
-			$('#tt').remove();
+			$('#myr-tooltip').remove();
 		});//remove tooltip if mouse leaves box. Can't rely on mousemove.
 		
 		$(elem).on('mousemove input', function (e){
-			var b = false;
+			var over_element = false;
 			$.each($('.error, .match'), function(i, m){
 				//If Mouse is above the current element, go no further.
 				if (e.pageY < $(m).offset().top) return false; 
@@ -608,9 +619,9 @@ inject(function ($) {
 							gWidth  = $(g).width(),
 							gHeight = $(g).height();
 						if (e.pageX >= gOffset.left && e.pageX <= (gOffset.left + gWidth) && e.pageY > gOffset.top && e.pageY < (gOffset.top + gHeight)) {
-							$('#tt').is('p') || $("body").append("<p id='tt'>"+ $(g).parent().data('msg') +"</p>");
-							var t = $('#tt');
-							t.css({
+							$('#myr-tooltip').is('p') || $("body").append("<p id='myr-tooltip'>"+ $(g).parent().data('msg') +"</p>");
+							var tooltip = $('#myr-tooltip');
+							tooltip.css({
 									top:'0px',
 									left:(e.pageX + 20) + "px",
 									position:'absolute',
@@ -622,20 +633,60 @@ inject(function ($) {
 									'z-index':'2',
 									})
 							 .fadeIn("fast");
-							if (t.height() + e.pageY > $(document).height()) {//if the tooltip runs below the page.
-								t.css('top', ($(document).height() - t.height()) + (e.pageY - gOffset.top) - 20 + 'px');
+							if (tooltip.height() + e.pageY > $(document).height()) {//if the tooltip runs below the page.
+								tooltip.css('top', ($(document).height() - tooltip.height()) + (e.pageY - gOffset.top) - 20 + 'px');
 							}else{
-								t.css({top:(e.pageY - 10) + "px"});
+								tooltip.css({top:(e.pageY - 10) + "px"});
 							}
-							b = true;
+							over_element = true;
 							return false;
 						}
 					});
 				}
-				if (b) return false;
+				//return false escape each loop
+				if (over_element) return false;
 			});
-			!b && $("#tt").remove();
+			!over_element && $("#myr-tooltip").remove();
 		});
+	}
+	function checkForHelp(elem){
+		if (/\[h\]|\[help\]/.test($(elem).val())) {
+			showHelpPanel();
+		} else {
+			closeHelpPanel();
+		}
+	}
+	function showHelpPanel(){
+		if ($('#reference-help-panel').length === 0) {
+			$panel = $('<div id="reference-help-panel">').css({
+				position: "fixed",
+				display: "block",
+				top: 0,
+				right: -500,
+				height: "100%",
+				width: 500,
+				"text-align": "left",
+				"overflow-y": "auto",
+				"background-color": "rgba(234, 234, 234, 0.84)",
+			}).appendTo('body');
+			
+			$close = $('<a id="referencer-panel-close" style="position:absolute;right:10px;top:10px;">Close</a>');
+			$close.appendTo($panel);
+			$close.click(closeHelpPanel);
+			
+			$.getJSON("https://api.stackexchange.com/2.2/answers/1765?site=meta.judaism&filter=!SWJ_BpAceOT6L*E)hy", function(data){
+				console.log('loaded json');
+				$body = $('<div id="reference-help-text" style="margin:20px">').append(data.items[0].body);
+				$panel.append($body);
+				$panel.animate({right:0});
+			});
+		} else {
+			$panel.animate({right:0});
+		}
+	}
+	
+	function closeHelpPanel(){
+		$('#reference-help-panel').animate({right:-500});
 	}
 	
 	$(document).on('focus', '[name="comment"]:not(.ref-hijacked)', function(){
@@ -681,14 +732,14 @@ inject(function ($) {
 			clonedPane.html(previewPane.clone(false).html());
 		});
 		$(this).on('input mousedown', function(){// if you use focus, you will have conflicts with SE's lists and image insertions.
-			var oldText = this.value, //save the old text
-				start = this.selectionStart, //save the old cursor location
+			var oldText = this.value, // save the old text
+				start = this.selectionStart, // save the old cursor location
 				end = this.selectionEnd;
-			repl(this, '', true); //replace the text in the textarea, ignoring errors
-			StackExchange.MarkdownEditor.refreshAllPreviews(); //refresh the hidden preview
-			clonedPane.html(previewPane.clone(false).html()); //update the visible preview from the hidden one
-			this.value = oldText; //and undo the textarea's text
-			this.setSelectionRange(start, end); //and its cursor
+			repl(this, '', true); // replace the text in the textarea, ignoring errors
+			StackExchange.MarkdownEditor.refreshAllPreviews(); // refresh the hidden preview
+			clonedPane.html(previewPane.clone(false).html()); // update the visible preview from the hidden one
+			this.value = oldText; // and undo the textarea's text
+			this.setSelectionRange(start, end); // and its cursor
 			highlight(this);
 		});
 		var t = this;
@@ -696,7 +747,7 @@ inject(function ($) {
 		function submit(e){
 			var type = /\/questions\/ask/.test(window.location.pathname) && t.id == 'wmd-input' ? 'question' : 'answer';
 			if (!repl(t, type)){
-				e.stopImmediatePropagation();//prevent SE's bindings.
+				e.stopImmediatePropagation();// prevent SE's handlers.
 				return false;
 			}
 		}
