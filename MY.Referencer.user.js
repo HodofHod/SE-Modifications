@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      4.0.1
+// @version      4.0.2
 // ==/UserScript==
 
 
@@ -874,7 +874,9 @@ inject(function ($) {
 			StackExchange.MarkdownEditor.refreshAllPreviews();
 			clonedPane.html(previewPane.clone(false).html());
 		});
-		$(this).on('input mousedown', function(){// if you use focus, you will have conflicts with SE's lists and image insertions.
+		// if you use focus, you will have conflicts with SE's lists and image insertions.
+		// mousedown causes problems in newer FF versions.
+		$(this).on('input mouseup', function(){
 			var oldText = this.value, // save the old text
 				start = this.selectionStart, // save the old cursor location
 				end = this.selectionEnd;
