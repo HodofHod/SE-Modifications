@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      4.0.2
+// @version      4.0.3
 // ==/UserScript==
 
 
