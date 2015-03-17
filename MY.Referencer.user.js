@@ -705,7 +705,7 @@ inject(function ($) {
 	}
 	
 	function tHijack(elem){
-		var pre = $('<pre>'+elem.value+'</pre>');
+		var pre = $('<pre>'+escape(elem.value)+'</pre>');
 		pre.css({
 			color:'transparent',
 			border:'none',
