@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      4.0.3
+// @version      4.0.4
 // ==/UserScript==
 
 
@@ -729,7 +729,8 @@ inject(function ($) {
 		elem.id == 'input' && pre.css('padding','2px 3px');//different padding for chat
 		
 		$(elem).on('input focus mousemove scroll',function(){
-			pre.width($(elem).width()).height($(elem).height());//for resizing.
+			var scrollBarWidth = $(elem).innerWidth() - $(elem)[0].scrollWidth;
+			pre.width($(elem).width() - scrollBarWidth).height($(elem).height());//for resizing.
 			pre.scrollTop($(elem).scrollTop());//for scrolling.
 		});
 		var helpCount = 0;
