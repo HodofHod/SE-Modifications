@@ -287,7 +287,13 @@ inject(function ($) {
 						url += (flags.indexOf('r') !== -1) ? '&v=' + vrs : '#v=' + vrs;//rashi is _also_ specified?
 					}
 					return url; //Then we're ready to rummmmmmbbblleee.....
-				};
+				},
+                sefariaT = function (book, chpt, vrs, map) {
+                    var url = null;
+                    url = 'http://www.sefaria.org/' + book + "." + chpt;
+                    if (vrs) { url += '.' + vrs; } //if verse is specified in the reference
+                    return url;
+                };
 
 			return {
 				regex : /^([12]?[a-zA-Z'".*_ ]{2,}?\.?[12]?)[;.,\s:]+(\d{1,3})(?:[;.,\s:\-]+(\d{1,3})(?:-(\d{1,3}))?)?$/i,
@@ -296,19 +302,20 @@ inject(function ($) {
 					//Keys are book names (duh) first value is chapter 1's id for chabad.org. 2nd value is number of chapters
 					//Third value is Mechon Mamre's book id
 					var map = {
-						'Bereishit': [8165, 50, '01'], 'Shemot': [9862, 40, '02'],'Vayikra': [9902, 27, '03'],
-						'Bamidbar': [9929, 36, '04'],'Devarim': [9965, 34, '05'],'Yehoshua': [15785, 24, '06'],
-						'Shoftim': [15809, 21, '07'],'Shmuel I': [15830, 31, '08a'],'Shmuel II': [15861, 24, '08b'],
-						'Melachim I': [15885, 22, '09a'],'Melachim II': [15907, 25, '09b'],'Yeshayahu': [15932, 66, '10'],
-						'Yirmiyahu': [15998, 52, '11'],'Yechezkel': [16099, 48, '12'],'Hoshea': [16155, 14, '13'],
-						'Yoel': [16169, 4, '14'],'Amos': [16173, 9, '15'],'Ovadiah': [16182, 1, '16'],
-						'Yonah': [16183, 4, '17'],'Michah': [16187, 7, '18'],'Nachum': [16194, 3, '19'],
-						'Chavakuk': [16197, 3, '20'],'Tzefaniah': [16200, 3, '21'],'Chaggai': [16203, 2, '22'],
-						'Zechariah': [16205, 14, '23'],'Malachi': [16219, 3, '24'],'Divrei Hayamim I': [16521, 29, '25a'],
-						'Divrei Hayamim II': [16550, 36, '25b'],'Tehillim': [16222, 150, '26'],'Iyov': [16403, 42, '27'],
-						'Mishlei': [16372, 31, '28'],'Rus': [16453, 4, '29'],'Shir HaShirim': [16445, 8, '30'],
-						'Kohelet': [16462, 12, '31'],'Eichah': [16457, 5, '32'],'Esther': [16474, 10, '33'],
-						'Daniel': [16484, 12, '34'],'Ezra': [16498, 10, '35a'],'Nechemiah': [16508, 13, '35b']
+                        'Bereishit': [8165, 50, '01', 'Genesis'], 'Shemot': [9862, 40, '02', 'Exodus'],'Vayikra': [9902, 27, '03', 'Leviticus'],
+                        'Bamidbar': [9929, 36, '04', 'Numbers'],'Devarim': [9965, 34, '05', 'Deuteronomy'],'Yehoshua': [15785, 24, '06', 'Joshua'],
+                        'Shoftim': [15809, 21, '07', 'Judges'],'Shmuel I': [15830, 31, '08a', 'I_Samuel'],'Shmuel II': [15861, 24, '08b', 'II_Samuel'],
+                        'Melachim I': [15885, 22, '09a', 'I_Kings'],'Melachim II': [15907, 25, '09b','II_Kings'],'Yeshayahu': [15932, 66, '10', 'Isaiah'],
+                        'Yirmiyahu': [15998, 52, '11', 'Jeremiah'],'Yechezkel': [16099, 48, '12', 'Ezekiel'],'Hoshea': [16155, 14, '13', 'Hosea'],
+                        'Yoel': [16169, 4, '14', 'Joel'],'Amos': [16173, 9, '15', 'Amos'],'Ovadiah': [16182, 1, '16', 'Obadiah'],
+                        'Yonah': [16183, 4, '17', 'Jonah'],'Michah': [16187, 7, '18', 'Micah'],'Nachum': [16194, 3, '19', 'Nahum'],
+                        'Chavakuk': [16197, 3, '20', 'Habakkuk'],'Tzefaniah': [16200, 3, '21', 'Zephaniah'],'Chaggai': [16203, 2, '22', 'Haggai'],
+                        'Zechariah': [16205, 14, '23', 'Zechariah'],'Malachi': [16219, 3, '24', 'Malachi'],
+                        'Divrei Hayamim I': [16521, 29, '25a', 'I_Chronicles'],'Divrei Hayamim II': [16550, 36, '25b', 'II_Chronicles'],
+                        'Tehillim': [16222, 150, '26', 'Psalms'],'Iyov': [16403, 42, '27', 'Job'],'Mishlei': [16372, 31, '28', 'Proverbs'],
+                        'Rus': [16453, 4, '29', 'Ruth'],'Shir HaShirim': [16445, 8, '30', 'Song_of_Songs'],'Kohelet': [16462, 12, '31', 'Ecclesiastes'],
+                        'Eichah': [16457, 5, '32', 'Lamentations'],'Esther': [16474, 10, '33', 'Esther'],
+                        'Daniel': [16484, 12, '34', 'Daniel'],'Ezra': [16498, 10, '35a', 'Ezra'],'Nechemiah': [16508, 13, '35b', 'Nehemiah']
 					},
 						chpt = match[2],
 						vrs = match[3] || '',
@@ -322,9 +329,15 @@ inject(function ($) {
 					if (chpt > map[book][1]) { //Stop trying to sneak fake chapters in, aright?
 						return [false,'"' + chpt + '" is not a valid chapter for ' + book + '. \n\nThere are only ' + map[book][1] + ' chapters in ' + book + '\n\nPlease try again.'];
 					}
-					return (flags.indexOf('m') !== -1) //Mechon Mamre flag is set?
-						? mechonMamreT(book, chpt, vrs, map)
-						: chabadT(book, chpt, vrs, flags, map); //Default to Chabad.org
+                    //Mechon Mamre flag is set?
+                    if (flags.indexOf('m') !== -1){
+                        return  mechonMamreT(book, chpt, vrs, map);
+                    //Efshar Sefaria?
+                    }else if ( flags.indexOf('s') !== -1){
+                        return sefariaT(book, chpt, vrs, map);
+                    }else{
+                        return chabadT(book, chpt, vrs, flags, map); //Default to Chabad.org
+                    }
 				},
 				//nameOverrides: {"Esther" : "Ester" },
 				spellings: [
