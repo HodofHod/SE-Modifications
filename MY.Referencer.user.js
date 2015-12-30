@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      4.1.0
+// @version      4.1.1
 // ==/UserScript==
 
 
@@ -289,8 +289,7 @@ inject(function ($) {
 					return url; //Then we're ready to rummmmmmbbblleee.....
 				},
                 sefariaT = function (book, chpt, vrs, map) {
-                    var url = null;
-                    url = 'http://www.sefaria.org/' + book + "." + chpt;
+                    var url = 'http://www.sefaria.org/' + map[book][3] + "." + chpt;
                     if (vrs) { url += '.' + vrs; } //if verse is specified in the reference
                     return url;
                 };
