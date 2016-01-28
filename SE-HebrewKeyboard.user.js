@@ -10,7 +10,7 @@
 // @match         http://chat.stackexchange.com/rooms/*
 // @author        HodofHod
 // @namespace     HodofHod
-// @version       0.4.2
+// @version       0.4.3
 // ==/UserScript==
 
 
@@ -83,7 +83,10 @@ inject(function HBKeyboard() {
 				left: '10px',
 				border: 'dotted 1px',
 				cursor: 'pointer',
-				'font-size': '150%'
+				'font-size': '150%',
+				background: 'inherit',
+				color: '#000',
+				padding: '.3em'
 			}).appendTo($('body'));
 		}
 		var wh = $(window).height(),
@@ -127,7 +130,7 @@ inject(function HBKeyboard() {
         kb.children('button:lt(9)').wrapAll('<div class="third kbrow">');
         kb.children('button:lt(14)').wrapAll('<div class="fourth kbrow">');
         kb.children('.first.kbrow').prepend('<button type="button" class="hbkey" data-t="&rlm;">&amp;rlm;</button>');
-        kb.prepend('<div style="position:relative; height:20px"><button type="button" id="setbutton" data-t="">Settings</button><button type="button" id="closebutton" data-t="">x</button></div>');
+        kb.prepend('<div style="position:relative; height:20px;margin-bottom: 10px;"><button type="button" id="setbutton" data-t="">Settings</button><button type="button" id="closebutton" data-t="">x</button></div>');
         kb.prepend('<span style="position:absolute; top:0; right:0; color:transparent">בס"ד</span>');
         $('<div class="kbsettings" style="text-align:left;"><div><input type="checkbox" id="keylayout">Use standard layout</div><div><input type="checkbox" id="rlm">Insert &amp;rlm; as text (posts only)</div></div>').appendTo(kb).hide();
 
@@ -163,10 +166,14 @@ inject(function HBKeyboard() {
             width: '26px',
             border: 'none',
             height: '25px',
+            padding: 0,
+            color: "#000",
+            'text-shadow': "none",
             'font-family': 'FrankRuehl, New Peninim MT, Arial, sans-serif',
             'font-size': '20px',
             'vertical-align': 'top',
             'box-shadow': '1px 1px 2px 1px gray',
+            'background':'inherit',//Mac Chrome
             'background-color':'inherit',//Mac Chrome
         });
         $('.fourth.kbrow .hbkey').css({
@@ -205,6 +212,8 @@ inject(function HBKeyboard() {
                 background: 'transparent',
                 position: 'absolute',
                 top: 0,
+                color: "#000",
+                'text-shadow': 'none',
                 'font-size': '10px',
                 'font-family': 'FrankRuehl, New Peninim MT, Arial, sans-serif',
         }).off();
