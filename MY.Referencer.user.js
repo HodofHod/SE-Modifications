@@ -858,7 +858,7 @@ inject(function ($) {
 				e.stopImmediatePropagation(); //prevent submit
 				return false; //prevent page reload
 			}
-		}});
+		});
 	});
 	
 	$(document).on('focus', '#input:not(.ref-hijacked)', function(){
@@ -869,7 +869,7 @@ inject(function ($) {
 				e.stopImmediatePropagation();
 				return false;
 			}
-		}});
+		});
 		$('#sayit-button').on('mousedown', function(){
 			repl($('#input')[0], 'chat message') && $(this).trigger('click');
 		});
