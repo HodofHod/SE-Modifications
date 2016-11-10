@@ -18,7 +18,7 @@
 // @exclude      http://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      4.1.1
+// @version      4.2
 // ==/UserScript==
 
 
@@ -848,7 +848,7 @@ inject(function ($) {
 	$(document).on('focus', '[name="comment"]:not(.ref-hijacked)', function(){
 		$(this).addClass('ref-hijacked');//add a class.
 		tHijack(this);
-		$(this).parents('form').data('events').submit.splice(0, 0, {handler:function(e){
+		$(this).parents('form').bindFirst("submit", function(e){
 			if (!repl(this[0], 'comment')) {
 				e.stopImmediatePropagation(); //prevent submit
 				return false; //prevent page reload
@@ -864,7 +864,7 @@ inject(function ($) {
 	$(document).on('focus', '#input:not(.ref-hijacked)', function(){
 		$(this).addClass('ref-hijacked');//add a class.
 		tHijack(this);
-		$('#input').data('events').keydown.splice(0, 0, {handler:function(e){
+		$('#input').bindFirst("keydown", function(e){
 			if(!e.shiftKey && e.which == 13 && !repl(this, 'chat message')){
 				e.stopImmediatePropagation();
 				return false;
@@ -901,7 +901,7 @@ inject(function ($) {
 			highlight(this);
 		});
 		var t = this;
-		$(this).parents('form').data('events').submit.splice(0, 0, {handler : submit});
+		$(this).parents('form').bindFirst("submit", submit);
 		function submit(e){
 			var type = /\/questions\/ask/.test(window.location.pathname) && t.id == 'wmd-input' ? 'question' : 'answer';
 			if (!repl(t, type)){
@@ -911,3 +911,19 @@ inject(function ($) {
 		}
 	});
 });
+
+$.fn.bindFirst = function(name, fn) {
+    // bind as you normally would
+    // don't want to miss out on any jQuery magic
+    this.on(name, fn);
+
+    // Thanks to a comment by @Martin, adding support for
+    // namespaced events too.
+    this.each(function() {
+        var handlers = $._data(this, 'events')[name.split('.')[0]];
+        // take out the handler we just inserted from the end
+        var handler = handlers.pop();
+        // move it at the beginning
+        handlers.splice(0, 0, handler);
+    });
+};
