@@ -1,24 +1,24 @@
 // ==UserScript==
 // @name         Mi Yodeya Referencer
 // @description  Links Tanach, Talmud, and Mishna Torah references to online resources.
-// @match        http://stackoverflow.com/*
-// @match        http://meta.stackoverflow.com/*
-// @match        http://superuser.com/*
-// @match        http://meta.superuser.com/*
-// @match        http://serverfault.com/*
-// @match        http://meta.serverfault.com/*
-// @match        http://askubuntu.com/*
-// @match        http://meta.askubuntu.com/*
-// @match        http://answers.onstartups.com/*
-// @match        http://meta.answers.onstartups.com/*
-// @match        http://stackapps.com/*
-// @match        http://*.stackexchange.com/*
-// @exclude      http://api.*.stackexchange.com/*
-// @exclude      http://data.stackexchange.com/*
-// @exclude      http://*/reputation
+// @match        *://stackoverflow.com/*
+// @match        *://meta.stackoverflow.com/*
+// @match        *://superuser.com/*
+// @match        *://meta.superuser.com/*
+// @match        *://serverfault.com/*
+// @match        *://meta.serverfault.com/*
+// @match        *://askubuntu.com/*
+// @match        *://meta.askubuntu.com/*
+// @match        *://answers.onstartups.com/*
+// @match        *://meta.answers.onstartups.com/*
+// @match        *://stackapps.com/*
+// @match        *://*.stackexchange.com/*
+// @exclude      *://api.*.stackexchange.com/*
+// @exclude      *://data.stackexchange.com/*
+// @exclude      *://*/reputation
 // @author       HodofHod
 // @namespace    HodofHod
-// @version      4.2
+// @version      4.2.1
 // ==/UserScript==
 
 
