@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         Chat Mods
 // @description  Modifications and bug fixes for StackExchange's chat rooms
-// @match        http://chat.meta.stackoverflow.com/*
-// @match        http://chat.stackexchange.com/*
-// @match        http://chat.stackoverflow.com/*
-// @match        http://chat.askubuntu.com/*
+// @match        *://chat.meta.stackoverflow.com/*
+// @match        *://chat.stackexchange.com/*
+// @match        *://chat.stackoverflow.com/*
+// @match        *://chat.askubuntu.com/*
 // @author       @HodofHod
-// @version      1.3
+// @version      1.4
 // ==/UserScript==
 
 function inject(f) {
