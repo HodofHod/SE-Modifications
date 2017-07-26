@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Chat Mods
 // @description  Modifications and bug fixes for StackExchange's chat rooms
-// @match        *://chat.meta.stackoverflow.com/*
+// @match        *://chat.meta.stackexchange.com/*
 // @match        *://chat.stackexchange.com/*
 // @match        *://chat.stackoverflow.com/*
 // @match        *://chat.askubuntu.com/*
